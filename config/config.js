@@ -3,7 +3,8 @@ export default {
     // 显式配置 routes 则禁掉「约定式路由」
     routes: [{
         path: '/',
-        component: '../layout', // 相对于 page 目录的路径
+        component: '../layouts/BasicLayout', // 相对于 page 目录的路径
+        /*
         routes: [
             { path: '/', component: './HelloWorld' },
             { path: 'helloworld', component: './HelloWorld' },
@@ -16,7 +17,8 @@ export default {
                   { path: '/dashboard/workplace', component: 'Dashboard/Workplace' }
                 ]
             },
-        ]
+        ],
+        */
     }],
 
     /*
