@@ -8,27 +8,29 @@ import WidgetPicker from '../components/editor/WidgetPicker';
 
 const { Header, Sider, Content } = Layout;
 
+const bgStyle = { backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' };
+
 export default class EditorLayout extends Component {
   render() {
     return (
       <Layout style={{ height: '100vh' }}>
-        <Header style={{ backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' }}>
+        <Header style={bgStyle}>
           <ControPanel />
         </Header>
         <Layout style={{ height: '100%' }}>
-          <Sider style={{ backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' }}>
+          <Sider style={bgStyle}>
             <ModelBrowser />
           </Sider>
           <Layout>
             <Layout>
-              <Content style={{ backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' }}>
+              <Content style={bgStyle}>
                 <EditorCanvas />
               </Content>
-              <Layout style={{ backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' }}>
+              <Layout style={bgStyle}>
                 <QueryEditor />
               </Layout>
             </Layout>
-            <Sider style={{ backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' }}>
+            <Sider style={bgStyle}>
               <WidgetPicker />
             </Sider>
           </Layout>
