@@ -1,0 +1,52 @@
+
+.qeNaviBar {
+  height: 42px;
+  line-height: 42px;
+  width: 100%;
+  display: flex;
+
+  .tabContainer {
+    flex: 1;
+    overflow: hidden;
+
+    .override {
+      :global(.ant-tabs-tab) {
+        min-width: 60px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    /* 水平居中 */
+    justify-content: center;
+    /* 垂直居中 */
+    align-items: center;
+
+    /* new query button */
+    button {
+      margin: 0 10px;
+    }
+
+    /* search bar */
+    input {
+      margin: 0 10px;
+    }
+  }
+}
+
+.qeHeader {
+  height: 42px;
+  width: 100%;
+  background-color: blue;
+}
+
+.qeBody {
+  overflow: auto;
+  height: calc(100%-84px);
+  width: 100%;
+  background-color: brown;
+}

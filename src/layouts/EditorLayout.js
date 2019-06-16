@@ -5,32 +5,31 @@ import ModelBrowser from '../components/editor/ModelBrowser';
 import EditorCanvas from '../components/editor/EditorCanvas';
 import QueryEditor from '../components/editor/QueryEditor';
 import WidgetPicker from '../components/editor/WidgetPicker';
+import myStyles from './EditorLayout.css';
 
 const { Header, Sider, Content } = Layout;
-
-const bgStyle = { backgroundColor: 'rgba(255, 255, 255, .2)', border: 'solid black 1px' };
 
 export default class EditorLayout extends Component {
   render() {
     return (
       <Layout style={{ height: '100vh' }}>
-        <Header style={bgStyle}>
+        <Header className={myStyles.defaultBg}>
           <ControPanel />
         </Header>
         <Layout style={{ height: '100%' }}>
-          <Sider style={bgStyle}>
+          <Sider className={myStyles.defaultBg}>
             <ModelBrowser />
           </Sider>
           <Layout>
             <Layout>
-              <Content style={bgStyle}>
+              <Content className={myStyles.defaultBg}>
                 <EditorCanvas />
               </Content>
-              <Layout style={bgStyle}>
+              <Layout className={myStyles.defaultBg}>
                 <QueryEditor />
               </Layout>
             </Layout>
-            <Sider style={bgStyle}>
+            <Sider className={myStyles.overflowAuto + ' ' + myStyles.defaultBg}>
               <WidgetPicker />
             </Sider>
           </Layout>

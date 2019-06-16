@@ -1,0 +1,9 @@
+
+.overflowAuto {
+  overflow: auto;
+}
+
+.defaultBg {
+  background-color: rgba(255, 255, 255, .2);
+  border: solid black 1px;
+}
