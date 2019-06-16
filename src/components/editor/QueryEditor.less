@@ -1,9 +1,12 @@
+.queryEditor {
+  height: 100%;
+}
 
 .qeNaviBar {
   height: 42px;
   line-height: 42px;
-  width: 100%;
   display: flex;
+  border-bottom: 1px solid gainsboro;
 
   .tabContainer {
     flex: 1;
@@ -40,13 +43,33 @@
 
 .qeHeader {
   height: 42px;
-  width: 100%;
-  background-color: blue;
+  line-height: 42px;
+  display: flex;
+  border-bottom: 1px solid gainsboro;
+
+  .left {
+    flex: 1;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    
+    label {
+      margin-left: 15px;
+    }
+  }
+  
+  .right {
+    button  {
+      margin: 0 10px;
+    }
+  }
 }
 
 .qeBody {
   overflow: auto;
-  height: calc(100%-84px);
-  width: 100%;
+  /* WARNING(ruitao.xu): SPACE IS REQUIRED */
+  height: calc(100% - (42px + 42px));
+  padding: 20px 5px;
+
   background-color: brown;
 }
