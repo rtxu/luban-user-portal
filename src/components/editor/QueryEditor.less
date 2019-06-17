@@ -9,7 +9,7 @@
   border-bottom: 1px solid gainsboro;
 
   .tabContainer {
-    flex: 1;
+    flex: 1 1;
     overflow: hidden;
 
     .override {
@@ -23,6 +23,7 @@
   }
 
   .actions {
+    flex: 0 0 auto;
     display: flex;
     /* 水平居中 */
     justify-content: center;
@@ -48,17 +49,20 @@
   border-bottom: 1px solid gainsboro;
 
   .left {
-    flex: 1;
+    flex: 1 1;
     display: flex;
     justify-content: left;
     align-items: center;
     
     label {
+      /* 文字不换行 */
+      white-space: nowrap;
       margin-left: 15px;
     }
   }
   
   .right {
+    flex: 0 0 auto;
     button  {
       margin: 0 10px;
     }
