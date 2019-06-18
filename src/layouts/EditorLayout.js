@@ -17,7 +17,7 @@ export default class EditorLayout extends Component {
           <ControPanel />
         </Header>
         <Layout style={{ height: '100%' }}>
-          <Sider className={myStyles.defaultBg}>
+          <Sider className={myStyles.defaultBg} style={{display: 'none'}}>
             <ModelBrowser />
           </Sider>
           <Layout>
@@ -25,7 +25,7 @@ export default class EditorLayout extends Component {
               <Content className={myStyles.defaultBg}>
                 <EditorCanvas />
               </Content>
-              <Layout className={myStyles.defaultBg}>
+              <Layout className={myStyles.defaultBg} style={{display: 'none'}}>
                 <QueryEditor />
               </Layout>
             </Layout>
