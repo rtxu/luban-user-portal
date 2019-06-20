@@ -22,20 +22,20 @@ class Grid extends Component {
     const offsetUnit = width / (columnCnt - 1);
     const offsetToCenter = dotWidth / 2;
     let offset = -offsetToCenter;
-    let myStyles = [];
+    let columns = [];
     for (let i = 0; i < columnCnt; i++) {
       const style = {
         height: height,
         transform: `translate3d(${offset}px, 0px, 0px)`,
       }
       offset += offsetUnit;
-      myStyles.push(style);
+      columns.push(
+        <div className={styles.column} style={style} key={i}></div>
+      );
     }
     return (
-      <div class={styles.grid}>
-        {[...Array(13).keys()].map((i) => (
-          <div class={styles.column} style={myStyles[i]}></div>
-        ))}
+      <div className={styles.grid}>
+        {columns}
       </div>
     )
   }

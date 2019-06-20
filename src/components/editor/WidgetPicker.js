@@ -64,31 +64,30 @@ export default class WidgetPicker extends Component {
     return (
       <div>
         {
-          widgetGroups.map((group) => {
-            return (
-              <div>
-                <p className={myStyles.widgetGroupHeader}>{group.header}</p>
-                {
-                  group.widgets.map((widget) => {
-                    return (
-                      <Card 
-                        size='small'
-                        hoverable
-                        bordered
-                        draggable
-                        className={myStyles.widgetCard}
-                      >
-                        <Meta 
-                          title={widget.title}
-                          description={widget.description}
-                        />
-                      </Card>
-                    )
-                  })
-                }
-              </div>
-            )
-          })
+          widgetGroups.map((group, index) => (
+            <div key={index}>
+              <p className={myStyles.widgetGroupHeader}>{group.header}</p>
+              {
+                group.widgets.map((widget, index) => {
+                  return (
+                    <Card 
+                      key={index}
+                      size='small'
+                      hoverable
+                      bordered
+                      draggable
+                      className={myStyles.widgetCard}
+                    >
+                      <Meta 
+                        title={widget.title}
+                        description={widget.description}
+                      />
+                    </Card>
+                  )
+                })
+              }
+            </div>
+          ))
         }
       </div>
     )
