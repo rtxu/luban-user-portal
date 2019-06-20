@@ -51,7 +51,9 @@ export default class EditorCanvas extends Component {
 
   // take advantage of arrow function to bind this automatically
   toggleGrid = () => {
-    this.setState({dragging: !this.state.dragging});
+    this.setState(state => ({
+      dragging: !state.dragging
+    }));
   }
 
   render() {
