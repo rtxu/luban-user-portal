@@ -48,15 +48,16 @@ export default class QueryEditor extends Component {
         </div>
         <div className={myStyles.qeHeader}>
           <div className={myStyles.left}>
-            <label>数据源：</label>
-            <Select defaultValue="lucy" style={{ width: 300 }} >
-              <Option value="jack">Jack</Option>
-              <Option value="lucy">Lucy</Option>
-              <Option value="disabled" disabled>
-                Disabled
-              </Option>
-              <Option value="Yiminghe">yiminghe</Option>
-            </Select>
+            <label>数据源：
+              <Select defaultValue="lucy" style={{ width: 300 }} >
+                <Option value="jack">Jack</Option>
+                <Option value="lucy">Lucy</Option>
+                <Option value="disabled" disabled>
+                  Disabled
+                </Option>
+                <Option value="Yiminghe">yiminghe</Option>
+              </Select>
+            </label>
           </div>
           <div className={myStyles.right}>
               <Button type='danger'>删除</Button>
