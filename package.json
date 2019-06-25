@@ -14,5 +14,9 @@
   "devDependencies": {
     "umi": "^2.7.0",
     "umi-plugin-react": "^1.8.0"
+  },
+  "dependencies": {
+    "react-dnd": "^8.0.2",
+    "react-dnd-html5-backend": "^8.0.2"
   }
 }
