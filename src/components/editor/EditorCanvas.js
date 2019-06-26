@@ -13,23 +13,27 @@ const GRID = {
   heightUnit: 40,
 }
 
-function getCanvasInfo() {
+function refreshGRID(canvas) {
+  GRID.widthUnit = canvas.offsetWidth/ (GRID.columnCnt - 1);
+}
+
+function getCanvasInfoByDOM() {
   const canvas = document.getElementById(canvasId);
   if (!canvas) {
     return [false];
   }
+  refreshGRID(canvas);
 
-  const widthUnit = canvas.offsetWidth/ (GRID.columnCnt - 1);
-  return [true, canvas.offsetHeight, canvas.offsetWidth, GRID.heightUnit, widthUnit]
+  return [true, canvas.offsetHeight, canvas.offsetWidth]
 }
 
 function Grid({}) {
-  const [exist, canvasHeight, , heightUnit, offsetUnit] = getCanvasInfo();
+  const [exist, canvasHeight ] = getCanvasInfoByDOM();
   if (!exist) {
     return null;
   }
 
-  const height = canvasHeight + 2 * heightUnit;
+  const height = canvasHeight + 2 * GRID.heightUnit;
   const dotWidth = 2;
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
@@ -39,7 +43,7 @@ function Grid({}) {
       height: height,
       transform: `translate3d(${leftOffset}px, 0px, 0px)`,
     }
-    leftOffset += offsetUnit;
+    leftOffset += GRID.widthUnit;
     columns.push(
       <div className={styles.column} style={style} key={i}></div>
     );
@@ -61,7 +65,7 @@ function reducer(widgets, action) {
   switch (action.type) {
     case ACTION_TYPE.ADD:
       let maxInstanceId = 0;
-      for (const widget in widgets) {
+      for (let widget of widgets) {
         if (widget.type === action.item.type) {
           if (widget.instanceId > maxInstanceId) {
             maxInstanceId = widget.instanceId;
@@ -69,10 +73,11 @@ function reducer(widgets, action) {
         }
       }
       maxInstanceId++;
-      return widgets.concat([{
+      const newWidget = {
         ...action.item,
         instanceId: maxInstanceId,
-      }]);
+      };
+      return [...widgets, newWidget];
 
     default:
       throw new Error(`unexpected action type: ${action.type}`);
@@ -80,21 +85,41 @@ function reducer(widgets, action) {
 }
 
 function WidgetOnCanvas({ gridTop, gridLeft, gridHeight, gridWidth }) {
-  const [exist, , , heightUnit, widthUnit] = getCanvasInfo();
+  const [ exist ] = getCanvasInfoByDOM();
   if (!exist) {
     return null;
   }
 
   const style = {
-    top: gridTop * heightUnit,
-    left: gridLeft * widthUnit,
-    height: gridHeight * heightUnit,
-    width: gridWidth * widthUnit,
+    top: gridTop * GRID.heightUnit,
+    left: gridLeft * GRID.widthUnit,
+    height: gridHeight * GRID.heightUnit,
+    width: gridWidth * GRID.widthUnit,
   }
   return (
     <div className={styles.widget} style={style} >
     </div>
   )
+}
+
+function getCanvasOriginOffsetByDOM() {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) {
+    return [false];
+  }
+  refreshGRID(canvas);
+
+  const rect = canvas.getBoundingClientRect();
+  return [ true, rect.x, rect.y ]
+}
+
+function calcDropOriginPos(monitor) {
+  // both offsets are relative to viewport
+  const { x: dropOriginX, y: dropOriginY } = monitor.getClientOffset();
+  const [, canvasOriginX, canvasOriginY ] = getCanvasOriginOffsetByDOM();
+  const [ x, y ] = [ dropOriginX - canvasOriginX, dropOriginY - canvasOriginY ];
+
+  return [ Math.floor(x / GRID.widthUnit), Math.floor(y / GRID.heightUnit) ];
 }
 
 function EditorCanvas({}) {
@@ -105,9 +130,7 @@ function EditorCanvas({}) {
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
     drop: (item, monitor) => {
-      // TODO(ruitao.xu): position when drop
-      const [ gridTop, gridLeft ] = [1, 0]
-
+      const [ gridLeft, gridTop ] = calcDropOriginPos(monitor);
       const newItem = {
         ...item,
         gridTop,
