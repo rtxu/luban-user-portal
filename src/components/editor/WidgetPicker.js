@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card } from 'antd';
 import myStyles from './WidgetPicker.css';
 import DndItemTypes from './DndItemTypes';
 import { useDrag } from 'react-dnd';
+import { getEmptyImage } from "react-dnd-html5-backend";
 
 const { Meta } = Card;
 
@@ -103,13 +104,17 @@ const widgetGroups = [
   },
 ];
 
-function DraggableWidget({title, description, dragItem}) {
+function WidgetCard({title, description, dragItem}) {
   const [{isDragging}, drag, preview] = useDrag({
     item: dragItem,
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
   })
+
+  useEffect(() => {
+    preview(getEmptyImage());
+  }, [])
   return (
     <div ref={drag} >
       <Card
@@ -137,7 +142,7 @@ function WidgetPicker({}) {
             {
               group.widgets.map((widget, index) => {
                 return (
-                  <DraggableWidget {...widget} key={index} />
+                  <WidgetCard {...widget} key={index} />
                 )
               })
             }

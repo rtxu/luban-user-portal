@@ -84,20 +84,22 @@ function reducer(widgets, action) {
   }
 }
 
-function WidgetOnCanvas({ gridTop, gridLeft, gridHeight, gridWidth }) {
+function WidgetBox({ gridTop, gridLeft, gridHeight, gridWidth , bgColor }) {
   const [ exist ] = getCanvasInfoByDOM();
   if (!exist) {
     return null;
   }
 
+  console.log(gridLeft, gridTop, gridHeight, gridWidth, bgColor);
   const style = {
     top: gridTop * GRID.heightUnit,
     left: gridLeft * GRID.widthUnit,
     height: gridHeight * GRID.heightUnit,
     width: gridWidth * GRID.widthUnit,
+    backgroundColor: bgColor,
   }
   return (
-    <div className={styles.widget} style={style} >
+    <div className={styles.widgetBox} style={style} >
     </div>
   )
 }
@@ -113,9 +115,8 @@ function getCanvasOriginOffsetByDOM() {
   return [ true, rect.x, rect.y ]
 }
 
-function calcDropOriginPos(monitor) {
+function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }) {
   // both offsets are relative to viewport
-  const { x: dropOriginX, y: dropOriginY } = monitor.getClientOffset();
   const [, canvasOriginX, canvasOriginY ] = getCanvasOriginOffsetByDOM();
   const [ x, y ] = [ dropOriginX - canvasOriginX, dropOriginY - canvasOriginY ];
 
@@ -126,11 +127,13 @@ function EditorCanvas({}) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
   const [ widgets, dispatch ] = useReducer(reducer, initialWidgets);
+  const [ hoverWidget, setHoverWidget ] = useState(null);
+  const [ hoverTimer, setHoverTimer ] = useState(null);
 
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
     drop: (item, monitor) => {
-      const [ gridLeft, gridTop ] = calcDropOriginPos(monitor);
+      const [ gridLeft, gridTop ] = calcDropOriginPos(monitor.getClientOffset());
       const newItem = {
         ...item,
         gridTop,
@@ -143,8 +146,38 @@ function EditorCanvas({}) {
 
       return undefined
     },
+    // FIXME(ruitao.xu): performance issue
+    //  hover is too expensive, too many unneccesary renders are triggered
+    //  maybe I should give customized drag layer a try
+    //  CustomizedDragLayer example in react-dnd official site shows that no re-render when mouse stopped
+    //  SEE IT: https://codesandbox.io/s/react-dnd-example-6-qnhd0
+    // hover is called very frequently, so use a timer to throttle
+    hover: (item, monitor) => {
+      if (hoverTimer === null) {
+        const timer = setTimeout(() => {
+          const [gridLeft, gridTop] = calcDropOriginPos(monitor.getClientOffset());
+          if (hoverWidget && gridLeft == hoverWidget.gridLeft && gridTop == hoverWidget.gridTop) {
+          } else {
+            console.log('in hover: ', gridLeft, gridTop);
+            const newItem = {
+              ...item,
+              gridTop,
+              gridLeft,
+            }
+            setHoverWidget(newItem);
+          }
+          setHoverTimer(null);
+        }, 10);
+        setHoverTimer(timer);
+      }
+    },
     collect: monitor => ({
       isOver: monitor.isOver(),
+      // clientOffset failed to keep updating when isOver was true
+      /*
+      clientOffset: monitor.getClientOffset(),
+      currentDragItem: monitor.getItem(),
+      */
     }),
   })
 
@@ -155,6 +188,17 @@ function EditorCanvas({}) {
   useEffect(() => {
     setMounted(true);
   })
+
+  useEffect(() => {
+    if (isOver) {
+    } else {
+      setHoverWidget(null);
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        setHoverTimer(null);
+      }
+    }
+  }, [isOver, hoverTimer])
 
   const toggleGrid = () => {
     setDragging(!dragging);
@@ -170,10 +214,11 @@ function EditorCanvas({}) {
     <div className={styles.root}>
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName}>
-          { dragging && <Grid /> }
+          { mounted && dragging && <Grid /> }
           <Button onClick={toggleGrid}>Toggle Grid</Button>
+          { mounted && hoverWidget && <WidgetBox {...hoverWidget} bgColor={'rgba(63, 191, 63, 0.1)'} /> }
           { mounted && widgets.map(widget => (
-            <WidgetOnCanvas key={widget.type+widget.instanceId} {...widget} />
+            <WidgetBox key={widget.type+widget.instanceId} {...widget} bgColor={'blueviolet'} />
           )) }
         </div>
       </div>
