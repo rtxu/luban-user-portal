@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, PureComponent } from 'react';
 import {
   Button
 } from 'antd';
@@ -84,24 +84,33 @@ function reducer(widgets, action) {
   }
 }
 
-function WidgetBox({ gridTop, gridLeft, gridHeight, gridWidth , bgColor }) {
-  const [ exist ] = getCanvasInfoByDOM();
-  if (!exist) {
-    return null;
-  }
+class WidgetBox extends PureComponent {
+  render() {
+    const [ exist ] = getCanvasInfoByDOM();
+    if (!exist) {
+      return null;
+    }
 
-  console.log(gridLeft, gridTop, gridHeight, gridWidth, bgColor);
-  const style = {
-    top: gridTop * GRID.heightUnit,
-    left: gridLeft * GRID.widthUnit,
-    height: gridHeight * GRID.heightUnit,
-    width: gridWidth * GRID.widthUnit,
-    backgroundColor: bgColor,
+    const { gridTop, gridLeft, gridHeight, gridWidth , bgColor } = this.props
+    console.log(gridLeft, gridTop, gridHeight, gridWidth, bgColor);
+    const top = gridTop * GRID.heightUnit;
+    const left = gridLeft * GRID.widthUnit;
+    const style = {
+      /*
+      // try to optimize performance, use transform instead of top/left, no obvious effect
+      top: gridTop * GRID.heightUnit,
+      left: gridLeft * GRID.widthUnit,
+      */
+      transform: `translate(${left}px, ${top}px)`,
+      height: gridHeight * GRID.heightUnit,
+      width: gridWidth * GRID.widthUnit,
+      backgroundColor: bgColor,
+    }
+    return (
+      <div className={styles.widgetBox} style={style} >
+      </div>
+    )
   }
-  return (
-    <div className={styles.widgetBox} style={style} >
-    </div>
-  )
 }
 
 function getCanvasOriginOffsetByDOM() {
@@ -147,10 +156,15 @@ function EditorCanvas({}) {
       return undefined
     },
     // FIXME(ruitao.xu): performance issue
-    //  hover is too expensive, too many unneccesary renders are triggered
-    //  maybe I should give customized drag layer a try
-    //  CustomizedDragLayer example in react-dnd official site shows that no re-render when mouse stopped
+    //  hover is too expensive: too many unneccesary re-render when mouse hover still
+    // solution#1: (not tried yet)
+    //  CustomizedDragLayer example in react-dnd official site shows that 
+    //  no re-render when mouse hover still
     //  SEE IT: https://codesandbox.io/s/react-dnd-example-6-qnhd0
+    // solution#2: 
+    //  unneccesary re-render comes from WidgetBox mainly,
+    //  so re-impl WidgetBox as PureComponent
+    //  optimization effect is obvious
     // hover is called very frequently, so use a timer to throttle
     hover: (item, monitor) => {
       if (hoverTimer === null) {
@@ -187,7 +201,7 @@ function EditorCanvas({}) {
 
   useEffect(() => {
     setMounted(true);
-  })
+  }, [])
 
   useEffect(() => {
     if (isOver) {
@@ -215,11 +229,11 @@ function EditorCanvas({}) {
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName}>
           { mounted && dragging && <Grid /> }
-          <Button onClick={toggleGrid}>Toggle Grid</Button>
           { mounted && hoverWidget && <WidgetBox {...hoverWidget} bgColor={'rgba(63, 191, 63, 0.1)'} /> }
           { mounted && widgets.map(widget => (
             <WidgetBox key={widget.type+widget.instanceId} {...widget} bgColor={'blueviolet'} />
           )) }
+          <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>
       </div>
     </div>
