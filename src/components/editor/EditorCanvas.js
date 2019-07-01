@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, PureComponent } from 'react';
+import React, { useState, useLayoutEffect, useReducer, PureComponent } from 'react';
 import {
   Button
 } from 'antd';
@@ -91,8 +91,8 @@ class WidgetBox extends PureComponent {
       return null;
     }
 
-    const { gridTop, gridLeft, gridHeight, gridWidth , bgColor } = this.props
-    console.log(gridLeft, gridTop, gridHeight, gridWidth, bgColor);
+    const { gridTop, gridLeft, gridHeight, gridWidth, className=styles.widgetBox } = this.props
+    console.log(gridLeft, gridTop, gridHeight, gridWidth, className);
     const top = gridTop * GRID.heightUnit;
     const left = gridLeft * GRID.widthUnit;
     const style = {
@@ -104,10 +104,9 @@ class WidgetBox extends PureComponent {
       transform: `translate(${left}px, ${top}px)`,
       height: gridHeight * GRID.heightUnit,
       width: gridWidth * GRID.widthUnit,
-      backgroundColor: bgColor,
     }
     return (
-      <div className={styles.widgetBox} style={style} >
+      <div className={className} style={style} >
       </div>
     )
   }
@@ -132,6 +131,18 @@ function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }) {
   return [ Math.floor(x / GRID.widthUnit), Math.floor(y / GRID.heightUnit) ];
 }
 
+function overlap(newWidget, widgets) {
+  for (let widget of widgets) {
+    // L: left, R: right, T: top, D: down
+    const [L1, R1, L2, R2] = [newWidget.gridLeft, newWidget.gridLeft + newWidget.gridWidth, widget.gridLeft, widget.gridLeft + widget.gridWidth];
+    const [T1, D1, T2, D2] = [newWidget.gridTop, newWidget.gridTop + newWidget.gridHeight, widget.gridTop, widget.gridTop + widget.gridHeight];
+    if (Math.max(L1, L2) < Math.min(R1, R2) && Math.max(T1, T2) < Math.min(D1, D2)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function EditorCanvas({}) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
@@ -141,7 +152,7 @@ function EditorCanvas({}) {
 
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
-    drop: (item, monitor) => {
+    drop(item, monitor) {
       const [ gridLeft, gridTop ] = calcDropOriginPos(monitor.getClientOffset());
       const newItem = {
         ...item,
@@ -155,6 +166,15 @@ function EditorCanvas({}) {
 
       return undefined
     },
+    canDrop(item, monitor) {
+      const [gridLeft, gridTop] = calcDropOriginPos(monitor.getClientOffset());
+      const newItem = {
+        ...item,
+        gridTop,
+        gridLeft,
+      }
+      return !overlap(newItem, widgets);
+    },
     // FIXME(ruitao.xu): performance issue
     //  hover is too expensive: too many unneccesary re-render when mouse hover still
     // solution#1: (not tried yet)
@@ -166,18 +186,27 @@ function EditorCanvas({}) {
     //  so re-impl WidgetBox as PureComponent
     //  optimization effect is obvious
     // hover is called very frequently, so use a timer to throttle
-    hover: (item, monitor) => {
+    hover(item, monitor) {
       if (hoverTimer === null) {
         const timer = setTimeout(() => {
           const [gridLeft, gridTop] = calcDropOriginPos(monitor.getClientOffset());
-          if (hoverWidget && gridLeft == hoverWidget.gridLeft && gridTop == hoverWidget.gridTop) {
+          const newItem = {
+            ...item,
+            gridTop,
+            gridLeft,
+          }
+          if (monitor.canDrop()) {
+            newItem.className = styles.hoverWidgetBox;
           } else {
-            console.log('in hover: ', gridLeft, gridTop);
-            const newItem = {
-              ...item,
-              gridTop,
-              gridLeft,
-            }
+            newItem.className = styles.hoverWidgetBoxCanNotPlace;
+          }
+          if (hoverWidget && 
+            hoverWidget.gridLeft === newItem.gridLeft && 
+            hoverWidget.gridTop === newItem.gridTop &&
+            hoverWidget.className === newItem.className
+            ) {
+          } else {
+            console.log('in hover: ', newItem.gridLeft, newItem.gridTop, newItem.className);
             setHoverWidget(newItem);
           }
           setHoverTimer(null);
@@ -195,15 +224,15 @@ function EditorCanvas({}) {
     }),
   })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setDragging(isOver);
   }, [isOver])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMounted(true);
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOver) {
     } else {
       setHoverWidget(null);
@@ -229,9 +258,9 @@ function EditorCanvas({}) {
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName}>
           { mounted && dragging && <Grid /> }
-          { mounted && hoverWidget && <WidgetBox {...hoverWidget} bgColor={'rgba(63, 191, 63, 0.1)'} /> }
+          { mounted && hoverWidget && <WidgetBox {...hoverWidget} /> }
           { mounted && widgets.map(widget => (
-            <WidgetBox key={widget.type+widget.instanceId} {...widget} bgColor={'blueviolet'} />
+            <WidgetBox key={widget.type+widget.instanceId} {...widget} />
           )) }
           <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>
