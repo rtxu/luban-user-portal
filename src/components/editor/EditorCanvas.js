@@ -14,7 +14,7 @@ const GRID = {
 }
 
 function refreshGRID(canvas) {
-  GRID.widthUnit = canvas.offsetWidth/ (GRID.columnCnt - 1);
+  GRID.widthUnit = canvas.offsetWidth / (GRID.columnCnt - 1);
 }
 
 function getCanvasInfoByDOM() {
@@ -53,35 +53,6 @@ function Grid({}) {
       {columns}
     </div>
   )
-}
-
-const initialWidgets = [];
-
-const ACTION_TYPE = {
-  ADD: 'add',
-}
-
-function reducer(widgets, action) {
-  switch (action.type) {
-    case ACTION_TYPE.ADD:
-      let maxInstanceId = 0;
-      for (let widget of widgets) {
-        if (widget.type === action.item.type) {
-          if (widget.instanceId > maxInstanceId) {
-            maxInstanceId = widget.instanceId;
-          }
-        }
-      }
-      maxInstanceId++;
-      const newWidget = {
-        ...action.item,
-        instanceId: maxInstanceId,
-      };
-      return [...widgets, newWidget];
-
-    default:
-      throw new Error(`unexpected action type: ${action.type}`);
-  }
 }
 
 class WidgetBox extends PureComponent {
@@ -143,22 +114,57 @@ function overlap(newWidget, widgets) {
   return false;
 }
 
+const ACTION_TYPE = {
+  ADD: 'add',
+}
+function useWidgetsReducer() {
+  const initialWidgets = [];
+  function reducer(widgets, action) {
+    switch (action.type) {
+      case ACTION_TYPE.ADD:
+        let maxInstanceId = 0;
+        for (let widget of widgets) {
+          if (widget.type === action.item.type) {
+            if (widget.instanceId > maxInstanceId) {
+              maxInstanceId = widget.instanceId;
+            }
+          }
+        }
+        maxInstanceId++;
+        const newWidget = {
+          ...action.item,
+          instanceId: maxInstanceId,
+        };
+        return [...widgets, newWidget];
+
+      default:
+        throw new Error(`unexpected action type: ${action.type}`);
+    }
+  }
+
+  return useReducer(reducer, initialWidgets);
+}
+
 function EditorCanvas({}) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
-  const [ widgets, dispatch ] = useReducer(reducer, initialWidgets);
+  const [ widgets, dispatch ] = useWidgetsReducer();
   const [ hoverWidget, setHoverWidget ] = useState(null);
   const [ hoverTimer, setHoverTimer ] = useState(null);
+
+  function calcNewWidget(item, monitor) {
+    const [ gridLeft, gridTop ] = calcDropOriginPos(monitor.getClientOffset());
+    return {
+      ...item,
+      gridTop,
+      gridLeft,
+    }
+  }
 
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
     drop(item, monitor) {
-      const [ gridLeft, gridTop ] = calcDropOriginPos(monitor.getClientOffset());
-      const newItem = {
-        ...item,
-        gridTop,
-        gridLeft,
-      }
+      const newItem = calcNewWidget(item, monitor);
       dispatch({ 
         type: ACTION_TYPE.ADD,
         item: newItem,
@@ -167,12 +173,7 @@ function EditorCanvas({}) {
       return undefined
     },
     canDrop(item, monitor) {
-      const [gridLeft, gridTop] = calcDropOriginPos(monitor.getClientOffset());
-      const newItem = {
-        ...item,
-        gridTop,
-        gridLeft,
-      }
+      const newItem = calcNewWidget(item, monitor);
       return !overlap(newItem, widgets);
     },
     // FIXME(ruitao.xu): performance issue
@@ -188,13 +189,8 @@ function EditorCanvas({}) {
     // hover is called very frequently, so use a timer to throttle
     hover(item, monitor) {
       if (hoverTimer === null) {
-        const timer = setTimeout(() => {
-          const [gridLeft, gridTop] = calcDropOriginPos(monitor.getClientOffset());
-          const newItem = {
-            ...item,
-            gridTop,
-            gridLeft,
-          }
+        const timer = setInterval(() => {
+          const newItem = calcNewWidget(item, monitor);
           if (monitor.canDrop()) {
             newItem.className = styles.hoverWidgetBox;
           } else {
@@ -209,7 +205,6 @@ function EditorCanvas({}) {
             console.log('in hover: ', newItem.gridLeft, newItem.gridTop, newItem.className);
             setHoverWidget(newItem);
           }
-          setHoverTimer(null);
         }, 10);
         setHoverTimer(timer);
       }
@@ -237,7 +232,7 @@ function EditorCanvas({}) {
     } else {
       setHoverWidget(null);
       if (hoverTimer) {
-        clearTimeout(hoverTimer);
+        clearInterval(hoverTimer);
         setHoverTimer(null);
       }
     }
