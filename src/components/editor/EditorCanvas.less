@@ -16,19 +16,22 @@
 
       .widgetBox {
         position: absolute;
-        background-color: blueviolet;
+        will-change: transform;
+        transition-property: height,width,transform;
+        transition-duration: .1s;
+        padding: 5.5px 6px;
+        background-color: rgba(100, 196, 68, 0.6);
       }
 
       .hoverWidgetBox {
-        position: absolute;
+        .widgetBox();
         background-color: rgba(63, 191, 63, 0.2);
         z-index: 10;
       }
 
       .hoverWidgetBoxCanNotPlace {
-        position: absolute;
+        .hoverWidgetBox();
         background-color: rgba(255, 0, 0, 0.2);
-        z-index: 10;
       }
 
       .grid {

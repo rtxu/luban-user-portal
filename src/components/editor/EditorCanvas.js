@@ -5,6 +5,7 @@ import {
 import styles from './EditorCanvas.less';
 import { useDrop } from 'react-dnd'
 import DndItemTypes from './DndItemTypes';
+import PropTypes from 'prop-types';
 
 const canvasId = 'canvas';
 
@@ -55,31 +56,62 @@ function Grid({}) {
   )
 }
 
-class WidgetBox extends PureComponent {
-  render() {
-    const [ exist ] = getCanvasInfoByDOM();
-    if (!exist) {
-      return null;
-    }
+function WidgetBox({ gridTop, gridLeft, gridHeight, gridWidth, className, isDragging, instanceId }) {
+  const [ exist ] = getCanvasInfoByDOM();
+  if (!exist) {
+    return null;
+  }
 
-    const { gridTop, gridLeft, gridHeight, gridWidth, className=styles.widgetBox } = this.props
-    console.log(gridLeft, gridTop, gridHeight, gridWidth, className);
-    const top = gridTop * GRID.heightUnit;
-    const left = gridLeft * GRID.widthUnit;
-    const style = {
-      /*
-      // try to optimize performance, use transform instead of top/left, no obvious effect
-      top: gridTop * GRID.heightUnit,
-      left: gridLeft * GRID.widthUnit,
-      */
-      transform: `translate(${left}px, ${top}px)`,
-      height: gridHeight * GRID.heightUnit,
-      width: gridWidth * GRID.widthUnit,
-    }
-    return (
-      <div className={className} style={style} >
-      </div>
-    )
+  console.log(gridLeft, gridTop, gridHeight, gridWidth, className, instanceId);
+  const top = gridTop * GRID.heightUnit;
+  const left = gridLeft * GRID.widthUnit;
+  const style = {
+    /*
+    // try to optimize performance, use transform instead of top/left, no obvious effect
+    top: gridTop * GRID.heightUnit,
+    left: gridLeft * GRID.widthUnit,
+    */
+    transform: `translate(${left}px, ${top}px)`,
+    height: gridHeight * GRID.heightUnit,
+    width: gridWidth * GRID.widthUnit,
+  }
+  return (
+    <div className={className} style={style} >
+      {/* the widget */}
+      { !isDragging && 
+        <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
+      }
+    </div>
+  )
+}
+
+WidgetBox.propTypes = {
+  type: PropTypes.string.isRequired,       // widget type
+  // instanceId is created when the item is dragged from WidgetPicker 
+  // and dropped on the canvas at the first time
+  instanceId: PropTypes.number,            // widget instance id of the same type
+  gridLeft: PropTypes.number.isRequired,
+  gridTop: PropTypes.number.isRequired,
+  gridWidth: PropTypes.number.isRequired,
+  gridHeight: PropTypes.number.isRequired,
+  className: PropTypes.string,
+  isDragging: PropTypes.bool,
+};
+
+WidgetBox.defaultProps = {
+  className: styles.widgetBox,
+  isDragging: false,
+  instanceId: 0,
+};
+
+/*
+wrap function components as pure components 
+1. only function components can use hooks, e.g: useDrag
+2. but function components trigger too many unnecessary re-render
+*/
+class WidgetBox_PC extends PureComponent {
+  render() {
+    return <WidgetBox {...this.props} />
   }
 }
 
@@ -189,22 +221,30 @@ function EditorCanvas({}) {
     // hover is called very frequently, so use a timer to throttle
     hover(item, monitor) {
       if (hoverTimer === null) {
-        const timer = setInterval(() => {
+        const timer = setTimeout(() => {
           const newItem = calcNewWidget(item, monitor);
-          if (monitor.canDrop()) {
-            newItem.className = styles.hoverWidgetBox;
-          } else {
-            newItem.className = styles.hoverWidgetBoxCanNotPlace;
-          }
           if (hoverWidget && 
             hoverWidget.gridLeft === newItem.gridLeft && 
-            hoverWidget.gridTop === newItem.gridTop &&
-            hoverWidget.className === newItem.className
+            hoverWidget.gridTop === newItem.gridTop
             ) {
           } else {
-            console.log('in hover: ', newItem.gridLeft, newItem.gridTop, newItem.className);
+            /*
+            if (hoverWidget) {
+              console.log('in hover(), original: ', hoverWidget.gridLeft, hoverWidget.gridTop, hoverWidget.className);
+            } else {
+              console.log('hoverWidget: ', hoverWidget)
+            }
+            */
+            if (monitor.canDrop()) {
+              newItem.className = styles.hoverWidgetBox;
+            } else {
+              newItem.className = styles.hoverWidgetBoxCanNotPlace;
+            }
+            newItem.isDragging = true;
+            console.log('in hover(), new: ', newItem.gridLeft, newItem.gridTop, newItem.className);
             setHoverWidget(newItem);
           }
+          setHoverTimer(null);
         }, 10);
         setHoverTimer(timer);
       }
@@ -232,7 +272,7 @@ function EditorCanvas({}) {
     } else {
       setHoverWidget(null);
       if (hoverTimer) {
-        clearInterval(hoverTimer);
+        clearTimeout(hoverTimer);
         setHoverTimer(null);
       }
     }
@@ -253,9 +293,9 @@ function EditorCanvas({}) {
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName}>
           { mounted && dragging && <Grid /> }
-          { mounted && hoverWidget && <WidgetBox {...hoverWidget} /> }
+          { mounted && hoverWidget && <WidgetBox_PC {...hoverWidget} /> }
           { mounted && widgets.map(widget => (
-            <WidgetBox key={widget.type+widget.instanceId} {...widget} />
+            <WidgetBox_PC key={widget.type+widget.instanceId} {...widget} />
           )) }
           <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>
