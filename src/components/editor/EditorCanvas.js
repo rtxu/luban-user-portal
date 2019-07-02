@@ -1,14 +1,18 @@
-import React, { useState, useLayoutEffect, useReducer, PureComponent } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useReducer } from 'react';
 import {
   Button
 } from 'antd';
 import styles from './EditorCanvas.less';
-import { useDrop } from 'react-dnd'
+import { useDrag, useDrop } from 'react-dnd'
 import DndItemTypes from './DndItemTypes';
 import PropTypes from 'prop-types';
+import { getEmptyImage } from "react-dnd-html5-backend";
 
 const canvasId = 'canvas';
 
+// TODO(ruitao.xu): 
+// 1. extract canvas height/width as props
+// 2. subscribe window.resize event
 const GRID = {
   columnCnt: 13,
   heightUnit: 40,
@@ -56,11 +60,23 @@ function Grid({}) {
   )
 }
 
-function WidgetBox({ gridTop, gridLeft, gridHeight, gridWidth, className, isDragging, instanceId }) {
+const WidgetBox = React.memo((props) => {
   const [ exist ] = getCanvasInfoByDOM();
   if (!exist) {
     return null;
   }
+
+  const { gridTop, gridLeft, gridHeight, gridWidth, className, isHover, instanceId } = props;
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: props,
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  })
+
+  useEffect(() => {
+    preview(getEmptyImage());
+  }, [])
 
   console.log(gridLeft, gridTop, gridHeight, gridWidth, className, instanceId);
   const top = gridTop * GRID.heightUnit;
@@ -75,15 +91,18 @@ function WidgetBox({ gridTop, gridLeft, gridHeight, gridWidth, className, isDrag
     height: gridHeight * GRID.heightUnit,
     width: gridWidth * GRID.widthUnit,
   }
+  if (isDragging) {
+    style.display = 'none';
+  }
   return (
-    <div className={className} style={style} >
+    <div ref={drag} className={className} style={style} >
       {/* the widget */}
-      { !isDragging && 
+      { !isHover && 
         <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
       }
     </div>
   )
-}
+});
 
 WidgetBox.propTypes = {
   type: PropTypes.string.isRequired,       // widget type
@@ -95,25 +114,14 @@ WidgetBox.propTypes = {
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
   className: PropTypes.string,
-  isDragging: PropTypes.bool,
+  isHover: PropTypes.bool,
 };
 
 WidgetBox.defaultProps = {
   className: styles.widgetBox,
-  isDragging: false,
+  isHover: false,
   instanceId: 0,
 };
-
-/*
-wrap function components as pure components 
-1. only function components can use hooks, e.g: useDrag
-2. but function components trigger too many unnecessary re-render
-*/
-class WidgetBox_PC extends PureComponent {
-  render() {
-    return <WidgetBox {...this.props} />
-  }
-}
 
 function getCanvasOriginOffsetByDOM() {
   const canvas = document.getElementById(canvasId);
@@ -135,7 +143,12 @@ function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }) {
 }
 
 function overlap(newWidget, widgets) {
-  for (let widget of widgets) {
+  for (let widgetId of Object.keys(widgets)) {
+    if ('instanceId' in newWidget && newWidget.type + newWidget.instanceId === widgetId) {
+      continue;
+    }
+
+    const widget = widgets[widgetId];
     // L: left, R: right, T: top, D: down
     const [L1, R1, L2, R2] = [newWidget.gridLeft, newWidget.gridLeft + newWidget.gridWidth, widget.gridLeft, widget.gridLeft + widget.gridWidth];
     const [T1, D1, T2, D2] = [newWidget.gridTop, newWidget.gridTop + newWidget.gridHeight, widget.gridTop, widget.gridTop + widget.gridHeight];
@@ -147,27 +160,35 @@ function overlap(newWidget, widgets) {
 }
 
 const ACTION_TYPE = {
-  ADD: 'add',
+  ADD_OR_UPDATE: 'addOrUpdate',
 }
 function useWidgetsReducer() {
-  const initialWidgets = [];
+  const initialWidgets = {};
   function reducer(widgets, action) {
     switch (action.type) {
-      case ACTION_TYPE.ADD:
-        let maxInstanceId = 0;
-        for (let widget of widgets) {
-          if (widget.type === action.item.type) {
-            if (widget.instanceId > maxInstanceId) {
-              maxInstanceId = widget.instanceId;
+      case ACTION_TYPE.ADD_OR_UPDATE:
+        const newWidget = { ...action.item }
+        if ('instanceId' in action.item) {
+          // update
+
+        } else {
+          // add
+          let maxInstanceId = 0;
+          for (let widgetId of Object.keys(widgets)) {
+            const widget = widgets[widgetId];
+            if (widget.type === action.item.type) {
+              if (widget.instanceId > maxInstanceId) {
+                maxInstanceId = widget.instanceId;
+              }
             }
           }
+          maxInstanceId++;
+          newWidget.instanceId = maxInstanceId;
         }
-        maxInstanceId++;
-        const newWidget = {
-          ...action.item,
-          instanceId: maxInstanceId,
+        return {
+          ...widgets, 
+          [newWidget.type+newWidget.instanceId]: newWidget,
         };
-        return [...widgets, newWidget];
 
       default:
         throw new Error(`unexpected action type: ${action.type}`);
@@ -197,8 +218,9 @@ function EditorCanvas({}) {
     accept: Object.values(DndItemTypes),
     drop(item, monitor) {
       const newItem = calcNewWidget(item, monitor);
+      console.log('dropItem:', newItem);
       dispatch({ 
-        type: ACTION_TYPE.ADD,
+        type: ACTION_TYPE.ADD_OR_UPDATE,
         item: newItem,
       })
 
@@ -213,11 +235,11 @@ function EditorCanvas({}) {
     // solution#1: (not tried yet)
     //  CustomizedDragLayer example in react-dnd official site shows that 
     //  no re-render when mouse hover still
-    //  SEE IT: https://codesandbox.io/s/react-dnd-example-6-qnhd0
-    // solution#2: 
+    //  ref: https://codesandbox.io/s/react-dnd-example-6-qnhd0
+    // solution#2: optimization effect is obvious
     //  unneccesary re-render comes from WidgetBox mainly,
-    //  so re-impl WidgetBox as PureComponent
-    //  optimization effect is obvious
+    //  so re-impl WidgetBox wrapped by React.memo() 
+    //  ref: https://reactjs.org/docs/hooks-faq.html#how-do-i-implement-shouldcomponentupdate
     // hover is called very frequently, so use a timer to throttle
     hover(item, monitor) {
       if (hoverTimer === null) {
@@ -240,7 +262,7 @@ function EditorCanvas({}) {
             } else {
               newItem.className = styles.hoverWidgetBoxCanNotPlace;
             }
-            newItem.isDragging = true;
+            newItem.isHover = true;
             console.log('in hover(), new: ', newItem.gridLeft, newItem.gridTop, newItem.className);
             setHoverWidget(newItem);
           }
@@ -293,9 +315,9 @@ function EditorCanvas({}) {
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName}>
           { mounted && dragging && <Grid /> }
-          { mounted && hoverWidget && <WidgetBox_PC {...hoverWidget} /> }
-          { mounted && widgets.map(widget => (
-            <WidgetBox_PC key={widget.type+widget.instanceId} {...widget} />
+          { mounted && hoverWidget && <WidgetBox {...hoverWidget} /> }
+          { mounted && Object.keys(widgets).map(widgetId => (
+            <WidgetBox key={widgetId} {...widgets[widgetId]} />
           )) }
           <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>
