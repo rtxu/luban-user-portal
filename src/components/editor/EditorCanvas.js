@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useLayoutEffect, useReducer } from 'react';
 import {
   Button,
-  Icon,
 } from 'antd';
 import styles from './EditorCanvas.less';
 import { useDrag, useDrop } from 'react-dnd'
-import DndItemTypes from './DndItemTypes';
+import DndItemTypes, {isResizeHandle} from './DndItemTypes';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from "react-dnd-html5-backend";
 import throttle from 'lodash.throttle';
@@ -48,8 +47,59 @@ const Grid = ({ canvasHeight }) => {
   )
 }
 
+const HoverWidgetBox = React.memo((props) => {
+  const { gridTop, gridLeft, gridHeight, gridWidth, className } = props;
+  const top = gridTop * GRID.rowHeight;
+  const left = gridLeft * GRID.columnWidth;
+  const style = {
+    transform: `translate(${left}px, ${top}px)`,
+    height: gridHeight * GRID.rowHeight,
+    width: gridWidth * GRID.columnWidth,
+  }
+  return (
+    <div className={className} style={style} >
+    </div>
+  )
+});
+
+HoverWidgetBox.propTypes = {
+  gridLeft: PropTypes.number.isRequired,
+  gridTop: PropTypes.number.isRequired,
+  gridWidth: PropTypes.number.isRequired,
+  gridHeight: PropTypes.number.isRequired,
+  className: PropTypes.string.isRequired,
+};
+
+const rhType2StyleMap = {
+  [DndItemTypes.RH_LEFT_TOP]: styles.resizeLeftTop,
+  [DndItemTypes.RH_RIGHT_TOP]: styles.resizeRightTop,
+  [DndItemTypes.RH_RIGHT_BOTTOM]: styles.resizeRightBottom,
+  [DndItemTypes.RH_LEFT_BOTTOM]: styles.resizeLeftBottom,
+}
+
+const ResizeHandle = React.memo(({type, position, widget}) => {
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: {type: type, widget: widget},
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  })
+
+  useEffect(() => {
+    preview(getEmptyImage());
+  }, [])
+
+  return (
+    <div ref={drag} className={styles.resizeHandle} style={ position }>
+      <div className={rhType2StyleMap[type]}>
+        <div className={styles.resizeIcon} />
+      </div>
+    </div>
+  )
+});
+
 const WidgetBox = React.memo((props) => {
-  const { gridTop, gridLeft, gridHeight, gridWidth, className, isHover, instanceId } = props;
+  const { gridTop, gridLeft, gridHeight, gridWidth, isHover, id } = props;
   const [{ isDragging }, drag, preview] = useDrag({
     item: props,
     collect: monitor => ({
@@ -61,7 +111,7 @@ const WidgetBox = React.memo((props) => {
     preview(getEmptyImage());
   }, [])
 
-  console.log(gridLeft, gridTop, gridHeight, gridWidth, className, instanceId);
+  console.log('WigetBox', gridLeft, gridTop, gridHeight, gridWidth, id );
   const top = gridTop * GRID.rowHeight;
   const left = gridLeft * GRID.columnWidth;
   const style = {
@@ -77,49 +127,43 @@ const WidgetBox = React.memo((props) => {
   const resizeHandlePadding = 2;
   const [boxHPadding, boxVPadding] = [6, 5.5];
   const resizeHandlePositions = {
-    'leftTop': {
+    [DndItemTypes.RH_LEFT_TOP] : {
       transform: `translate(${0-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
     },
-    'rightTop': {
+    [DndItemTypes.RH_RIGHT_TOP] : {
       transform: `translate(${style.width-boxHPadding-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
     },
-    'rightBottom': {
+    [DndItemTypes.RH_RIGHT_BOTTOM]: {
       transform: `translate(${style.width-boxHPadding-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
     },
-    'leftBottom': {
+    [DndItemTypes.RH_LEFT_BOTTOM]: {
       transform: `translate(${0-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
     },
   }
-  if (isDragging) {
+  if (isDragging || isHover) {
     style.display = 'none';
   }
   return (
-    <div ref={drag} className={className} style={style} >
+    <div ref={drag} className={styles.widgetBox} style={style} >
       {/* the widget */}
-      { !isHover && 
-        <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
-      }
+      <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
 
-      <div className={styles.resizeHandle} style={ resizeHandlePositions.leftTop }>
-        <div className={styles.resizeLeftTop}>
-          <div className={styles.resizeIcon} />
-        </div>
-      </div>
-      <div className={styles.resizeHandle} style={ resizeHandlePositions.rightTop }>
-        <div className={styles.resizeRightTop}>
-          <div className={styles.resizeIcon} />
-        </div>
-      </div>
-      <div className={styles.resizeHandle} style={ resizeHandlePositions.rightBottom }>
-        <div className={styles.resizeRightBottom}>
-          <div className={styles.resizeIcon} />
-        </div>
-      </div>
-      <div className={styles.resizeHandle} style={ resizeHandlePositions.leftBottom }>
-        <div className={styles.resizeLeftBottom}>
-          <div className={styles.resizeIcon} />
-        </div>
-      </div>
+      <ResizeHandle 
+        widget={ props }
+        type={DndItemTypes.RH_LEFT_TOP} 
+        position={resizeHandlePositions[DndItemTypes.RH_LEFT_TOP]} />
+      <ResizeHandle 
+        widget={ props }
+        type={DndItemTypes.RH_RIGHT_TOP} 
+        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_TOP]} />
+      <ResizeHandle 
+        widget={ props }
+        type={DndItemTypes.RH_RIGHT_BOTTOM} 
+        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_BOTTOM]} />
+      <ResizeHandle 
+        widget={ props }
+        type={DndItemTypes.RH_LEFT_BOTTOM} 
+        position={resizeHandlePositions[DndItemTypes.RH_LEFT_BOTTOM]} />
 
     </div>
   )
@@ -127,21 +171,17 @@ const WidgetBox = React.memo((props) => {
 
 WidgetBox.propTypes = {
   type: PropTypes.string.isRequired,       // widget type
-  // instanceId is created when the item is dragged from WidgetPicker 
-  // and dropped on the canvas at the first time
-  instanceId: PropTypes.number,            // widget instance id of the same type
+  instanceId: PropTypes.number.isRequired, // widget instance id of the same type
+  id: PropTypes.string.isRequired,         // type+instanceId
   gridLeft: PropTypes.number.isRequired,
   gridTop: PropTypes.number.isRequired,
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
-  className: PropTypes.string,
   isHover: PropTypes.bool,
 };
 
 WidgetBox.defaultProps = {
-  className: styles.widgetBox,
   isHover: false,
-  instanceId: 0,
 };
 
 function getCanvasOriginOffsetByDOM() {
@@ -164,7 +204,7 @@ function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }) {
 
 function overlap(newWidget, widgets) {
   for (let widgetId of Object.keys(widgets)) {
-    if ('instanceId' in newWidget && newWidget.type + newWidget.instanceId === widgetId) {
+    if ('id' in newWidget && newWidget.id === widgetId) {
       continue;
     }
 
@@ -181,6 +221,8 @@ function overlap(newWidget, widgets) {
 
 const ACTION_TYPE = {
   ADD_OR_UPDATE: 'addOrUpdate',
+  SET_HOVER: 'setHover',
+  CLEAR_HOVER: 'clearHover',
 }
 function useWidgetsReducer() {
   const initialWidgets = {};
@@ -188,7 +230,7 @@ function useWidgetsReducer() {
     switch (action.type) {
       case ACTION_TYPE.ADD_OR_UPDATE:
         const newWidget = { ...action.item }
-        if ('instanceId' in action.item) {
+        if ('id' in action.item) {
           // update
 
         } else {
@@ -204,10 +246,28 @@ function useWidgetsReducer() {
           }
           maxInstanceId++;
           newWidget.instanceId = maxInstanceId;
+          newWidget.id = newWidget.type + newWidget.instanceId;
         }
         return {
           ...widgets, 
-          [newWidget.type+newWidget.instanceId]: newWidget,
+          [newWidget.id]: newWidget,
+        };
+
+      case ACTION_TYPE.SET_HOVER:
+        return {
+          ...widgets,
+          [action.widgetId]: {
+            ...widgets[action.widgetId],
+            isHover: true,
+          },
+        };
+      case ACTION_TYPE.CLEAR_HOVER:
+        return {
+          ...widgets,
+          [action.widgetId]: {
+            ...widgets[action.widgetId],
+            isHover: false,
+          },
         };
 
       default:
@@ -218,17 +278,84 @@ function useWidgetsReducer() {
   return useReducer(reducer, initialWidgets);
 }
 
+function checkBoundary(widget) {
+  const result = {
+    ...widget
+  }
+  // rule#1: top [0, +oo)
+  if (result.gridTop < 0) {
+    result.gridTop = 0;
+  }
+  // rule#2: left [0, 13)
+  if (result.gridLeft < 0) {
+    result.gridLeft = 0;
+  }
+  if (result.gridLeft > 12) {
+    result.gridLeft = 12;
+  }
+  // rule#3: min-height = 1
+  result.gridHeight = Math.max(1, result.gridHeight);
+  // rule#4: min-width = 1
+  result.gridWidth = Math.max(1, result.gridWidth);
+  // rule#5: right=left+width, (1, 13]
+  // TODO(ruitao.xu): doesnot work, width will auto increment as dragging obj moving
+  if (result.gridLeft + result.gridWidth > 13) {
+    result.gridLeft = 13 - result.gridWidth;
+  }
+
+  return result;
+}
+
 function calcNewWidget(item, monitor) {
-  const offset = monitor.getClientOffset();
-  if (offset) {
-    const [ gridLeft, gridTop ] = calcDropOriginPos(offset);
-    return {
-      ...item,
-      gridTop,
-      gridLeft,
+  if (isResizeHandle(item.type)) {
+    const delta = monitor.getDifferenceFromInitialOffset();
+    const newItem = {
+      ...item.widget,
+    }
+    if (delta) {
+      const deltaGridX = Math.ceil(delta.x / GRID.columnWidth - 0.5);
+      const deltaGridY = Math.ceil(delta.y / GRID.rowHeight - 0.5);
+      switch(item.type) {
+        case DndItemTypes.RH_LEFT_TOP:
+          newItem.gridLeft += deltaGridX;
+          newItem.gridWidth -= deltaGridX;
+          newItem.gridTop += deltaGridY;
+          newItem.gridHeight -= deltaGridY;
+          break;
+        case DndItemTypes.RH_RIGHT_TOP:
+          newItem.gridWidth += deltaGridX;
+          newItem.gridTop += deltaGridY;
+          newItem.gridHeight -= deltaGridY;
+          break;
+
+        case DndItemTypes.RH_RIGHT_BOTTOM:
+          newItem.gridWidth += deltaGridX;
+          newItem.gridHeight += deltaGridY;
+          break;
+        case DndItemTypes.RH_LEFT_BOTTOM:
+          newItem.gridLeft += deltaGridX;
+          newItem.gridWidth += -deltaGridX;
+          newItem.gridHeight += deltaGridY;
+          break;
+      }
+      return checkBoundary(newItem);
+
+    } else {
+      return null;
     }
   } else {
-    return null;
+    const offset = monitor.getClientOffset();
+    if (offset) {
+      const [ gridLeft, gridTop ] = calcDropOriginPos(offset);
+      const newItem = {
+        ...item,
+        gridTop,
+        gridLeft,
+      }
+      return checkBoundary(newItem);
+    } else {
+      return null;
+    }
   }
 }
 
@@ -240,7 +367,9 @@ const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidge
   } else {
     if (hoverWidget &&
       hoverWidget.gridLeft === newItem.gridLeft &&
-      hoverWidget.gridTop === newItem.gridTop
+      hoverWidget.gridTop === newItem.gridTop &&
+      hoverWidget.gridHeight === newItem.gridHeight &&
+      hoverWidget.gridWidth === newItem.gridWidth
     ) {
     } else {
       if (monitor.canDrop()) {
@@ -248,7 +377,6 @@ const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidge
       } else {
         newItem.className = styles.hoverWidgetBoxCanNotPlace;
       }
-      newItem.isHover = true;
       console.log('in hover(), new: ', newItem.gridLeft, newItem.gridTop, newItem.className);
       setHoverWidget(newItem);
     }
@@ -261,6 +389,26 @@ function EditorCanvas({}) {
   const [ widgets, dispatch ] = useWidgetsReducer();
   const [ hoverWidget, setHoverWidget ] = useState(null);
   const [ canvasHeight, setCanvasHeight ] = useState(450);
+
+  const setHover = (widget) => {
+    setHoverWidget(widget);
+    if (widget && 'id' in widget) {
+      dispatch({
+        type: ACTION_TYPE.SET_HOVER,
+        widgetId: widget.id,
+      });
+    }
+  }
+  const clearHover = () => {
+    handleHoverThrottled.cancel();
+    if (hoverWidget && 'id' in hoverWidget) {
+    dispatch({
+      type: ACTION_TYPE.CLEAR_HOVER,
+      widgetId: hoverWidget.id,
+    });
+    }
+    setHoverWidget(null);
+  }
 
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
@@ -292,7 +440,7 @@ function EditorCanvas({}) {
     // hover is called very frequently, so throttle it
     // ref: https://reactjs.org/docs/faq-functions.html#how-can-i-prevent-a-function-from-being-called-too-quickly-or-too-many-times-in-a-row
     hover(item, monitor) {
-      handleHoverThrottled(item, monitor, hoverWidget, setHoverWidget);
+      handleHoverThrottled(item, monitor, hoverWidget, setHover);
     },
     collect: monitor => ({
       isOver: monitor.isOver(),
@@ -315,8 +463,7 @@ function EditorCanvas({}) {
   useLayoutEffect(() => {
     if (isOver) {
     } else {
-      setHoverWidget(null);
-      handleHoverThrottled.cancel();
+      clearHover();
     }
   }, [isOver])
 
@@ -343,7 +490,7 @@ function EditorCanvas({}) {
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
           { mounted && dragging && <Grid canvasHeight={canvasHeight} /> }
-          { mounted && hoverWidget && <WidgetBox {...hoverWidget} /> }
+          { mounted && hoverWidget && <HoverWidgetBox {...hoverWidget} /> }
           { mounted && Object.keys(widgets).map(widgetId => (
             <WidgetBox key={widgetId} {...widgets[widgetId]} />
           )) }
