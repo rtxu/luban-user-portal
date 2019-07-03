@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useReducer } from 'react';
 import {
-  Button
+  Button,
+  Icon,
 } from 'antd';
 import styles from './EditorCanvas.less';
 import { useDrag, useDrop } from 'react-dnd'
@@ -73,6 +74,22 @@ const WidgetBox = React.memo((props) => {
     height: gridHeight * GRID.rowHeight,
     width: gridWidth * GRID.columnWidth,
   }
+  const resizeHandlePadding = 2;
+  const [boxHPadding, boxVPadding] = [6, 5.5];
+  const resizeHandlePositions = {
+    'leftTop': {
+      transform: `translate(${0-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
+    },
+    'rightTop': {
+      transform: `translate(${style.width-boxHPadding-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
+    },
+    'rightBottom': {
+      transform: `translate(${style.width-boxHPadding-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
+    },
+    'leftBottom': {
+      transform: `translate(${0-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
+    },
+  }
   if (isDragging) {
     style.display = 'none';
   }
@@ -82,6 +99,28 @@ const WidgetBox = React.memo((props) => {
       { !isHover && 
         <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
       }
+
+      <div className={styles.resizeHandle} style={ resizeHandlePositions.leftTop }>
+        <div className={styles.resizeLeftTop}>
+          <div className={styles.resizeIcon} />
+        </div>
+      </div>
+      <div className={styles.resizeHandle} style={ resizeHandlePositions.rightTop }>
+        <div className={styles.resizeRightTop}>
+          <div className={styles.resizeIcon} />
+        </div>
+      </div>
+      <div className={styles.resizeHandle} style={ resizeHandlePositions.rightBottom }>
+        <div className={styles.resizeRightBottom}>
+          <div className={styles.resizeIcon} />
+        </div>
+      </div>
+      <div className={styles.resizeHandle} style={ resizeHandlePositions.leftBottom }>
+        <div className={styles.resizeLeftBottom}>
+          <div className={styles.resizeIcon} />
+        </div>
+      </div>
+
     </div>
   )
 });
