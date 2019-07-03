@@ -7,6 +7,7 @@ import { useDrag, useDrop } from 'react-dnd'
 import DndItemTypes from './DndItemTypes';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from "react-dnd-html5-backend";
+import throttle from 'lodash.throttle';
 
 const canvasId = 'canvas';
 
@@ -198,21 +199,48 @@ function useWidgetsReducer() {
   return useReducer(reducer, initialWidgets);
 }
 
-function EditorCanvas({}) {
-  const [ dragging, setDragging ] = useState(false);
-  const [ mounted, setMounted ] = useState(false);
-  const [ widgets, dispatch ] = useWidgetsReducer();
-  const [ hoverWidget, setHoverWidget ] = useState(null);
-  const [ hoverTimer, setHoverTimer ] = useState(null);
-
-  function calcNewWidget(item, monitor) {
-    const [ gridLeft, gridTop ] = calcDropOriginPos(monitor.getClientOffset());
+function calcNewWidget(item, monitor) {
+  const offset = monitor.getClientOffset();
+  if (offset) {
+    const [ gridLeft, gridTop ] = calcDropOriginPos(offset);
     return {
       ...item,
       gridTop,
       gridLeft,
     }
+  } else {
+    return null;
   }
+}
+
+const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidget) => {
+  const newItem = calcNewWidget(item, monitor);
+  if (newItem === null) {
+    // handleHoverThrottled.cancel() might be called after drop()
+    // newItem will be null if it happens
+  } else {
+    if (hoverWidget &&
+      hoverWidget.gridLeft === newItem.gridLeft &&
+      hoverWidget.gridTop === newItem.gridTop
+    ) {
+    } else {
+      if (monitor.canDrop()) {
+        newItem.className = styles.hoverWidgetBox;
+      } else {
+        newItem.className = styles.hoverWidgetBoxCanNotPlace;
+      }
+      newItem.isHover = true;
+      console.log('in hover(), new: ', newItem.gridLeft, newItem.gridTop, newItem.className);
+      setHoverWidget(newItem);
+    }
+  }
+}, 16);
+
+function EditorCanvas({}) {
+  const [ dragging, setDragging ] = useState(false);
+  const [ mounted, setMounted ] = useState(false);
+  const [ widgets, dispatch ] = useWidgetsReducer();
+  const [ hoverWidget, setHoverWidget ] = useState(null);
 
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
@@ -240,36 +268,11 @@ function EditorCanvas({}) {
     //  unneccesary re-render comes from WidgetBox mainly,
     //  so re-impl WidgetBox wrapped by React.memo() 
     //  ref: https://reactjs.org/docs/hooks-faq.html#how-do-i-implement-shouldcomponentupdate
-    // hover is called very frequently, so use a timer to throttle
+
+    // hover is called very frequently, so throttle it
+    // ref: https://reactjs.org/docs/faq-functions.html#how-can-i-prevent-a-function-from-being-called-too-quickly-or-too-many-times-in-a-row
     hover(item, monitor) {
-      if (hoverTimer === null) {
-        const timer = setTimeout(() => {
-          const newItem = calcNewWidget(item, monitor);
-          if (hoverWidget && 
-            hoverWidget.gridLeft === newItem.gridLeft && 
-            hoverWidget.gridTop === newItem.gridTop
-            ) {
-          } else {
-            /*
-            if (hoverWidget) {
-              console.log('in hover(), original: ', hoverWidget.gridLeft, hoverWidget.gridTop, hoverWidget.className);
-            } else {
-              console.log('hoverWidget: ', hoverWidget)
-            }
-            */
-            if (monitor.canDrop()) {
-              newItem.className = styles.hoverWidgetBox;
-            } else {
-              newItem.className = styles.hoverWidgetBoxCanNotPlace;
-            }
-            newItem.isHover = true;
-            console.log('in hover(), new: ', newItem.gridLeft, newItem.gridTop, newItem.className);
-            setHoverWidget(newItem);
-          }
-          setHoverTimer(null);
-        }, 10);
-        setHoverTimer(timer);
-      }
+      handleHoverThrottled(item, monitor, hoverWidget, setHoverWidget);
     },
     collect: monitor => ({
       isOver: monitor.isOver(),
@@ -293,12 +296,9 @@ function EditorCanvas({}) {
     if (isOver) {
     } else {
       setHoverWidget(null);
-      if (hoverTimer) {
-        clearTimeout(hoverTimer);
-        setHoverTimer(null);
-      }
+      handleHoverThrottled.cancel();
     }
-  }, [isOver, hoverTimer])
+  }, [isOver])
 
   const toggleGrid = () => {
     setDragging(!dragging);
