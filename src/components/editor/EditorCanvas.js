@@ -11,35 +11,21 @@ import throttle from 'lodash.throttle';
 
 const canvasId = 'canvas';
 
-// TODO(ruitao.xu): 
-// 1. extract canvas height/width as props
-// 2. subscribe window.resize event
 const GRID = {
   columnCnt: 13,
-  heightUnit: 40,
+  rowHeight: 40,
 }
 
-function refreshGRID(canvas) {
-  GRID.widthUnit = canvas.offsetWidth / (GRID.columnCnt - 1);
-}
-
-function getCanvasInfoByDOM() {
+function updateGridColumnWidth() {
   const canvas = document.getElementById(canvasId);
-  if (!canvas) {
-    return [false];
+  if (canvas) {
+    GRID.columnWidth = canvas.offsetWidth / (GRID.columnCnt - 1);
+    // console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
   }
-  refreshGRID(canvas);
-
-  return [true, canvas.offsetHeight, canvas.offsetWidth]
 }
 
-function Grid({}) {
-  const [exist, canvasHeight ] = getCanvasInfoByDOM();
-  if (!exist) {
-    return null;
-  }
-
-  const height = canvasHeight + 2 * GRID.heightUnit;
+const Grid = ({ canvasHeight }) => {
+  const height = canvasHeight + 2 * GRID.rowHeight;
   const dotWidth = 2;
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
@@ -49,7 +35,7 @@ function Grid({}) {
       height: height,
       transform: `translate3d(${leftOffset}px, 0px, 0px)`,
     }
-    leftOffset += GRID.widthUnit;
+    leftOffset += GRID.columnWidth;
     columns.push(
       <div className={styles.column} style={style} key={i}></div>
     );
@@ -62,11 +48,6 @@ function Grid({}) {
 }
 
 const WidgetBox = React.memo((props) => {
-  const [ exist ] = getCanvasInfoByDOM();
-  if (!exist) {
-    return null;
-  }
-
   const { gridTop, gridLeft, gridHeight, gridWidth, className, isHover, instanceId } = props;
   const [{ isDragging }, drag, preview] = useDrag({
     item: props,
@@ -80,17 +61,17 @@ const WidgetBox = React.memo((props) => {
   }, [])
 
   console.log(gridLeft, gridTop, gridHeight, gridWidth, className, instanceId);
-  const top = gridTop * GRID.heightUnit;
-  const left = gridLeft * GRID.widthUnit;
+  const top = gridTop * GRID.rowHeight;
+  const left = gridLeft * GRID.columnWidth;
   const style = {
     /*
     // try to optimize performance, use transform instead of top/left, no obvious effect
-    top: gridTop * GRID.heightUnit,
-    left: gridLeft * GRID.widthUnit,
+    top: gridTop * GRID.rowHeight,
+    left: gridLeft * GRID.columnWidth,
     */
     transform: `translate(${left}px, ${top}px)`,
-    height: gridHeight * GRID.heightUnit,
-    width: gridWidth * GRID.widthUnit,
+    height: gridHeight * GRID.rowHeight,
+    width: gridWidth * GRID.columnWidth,
   }
   if (isDragging) {
     style.display = 'none';
@@ -129,7 +110,6 @@ function getCanvasOriginOffsetByDOM() {
   if (!canvas) {
     return [false];
   }
-  refreshGRID(canvas);
 
   const rect = canvas.getBoundingClientRect();
   return [ true, rect.x, rect.y ]
@@ -140,7 +120,7 @@ function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }) {
   const [, canvasOriginX, canvasOriginY ] = getCanvasOriginOffsetByDOM();
   const [ x, y ] = [ dropOriginX - canvasOriginX, dropOriginY - canvasOriginY ];
 
-  return [ Math.floor(x / GRID.widthUnit), Math.floor(y / GRID.heightUnit) ];
+  return [ Math.floor(x / GRID.columnWidth), Math.floor(y / GRID.rowHeight) ];
 }
 
 function overlap(newWidget, widgets) {
@@ -241,6 +221,7 @@ function EditorCanvas({}) {
   const [ mounted, setMounted ] = useState(false);
   const [ widgets, dispatch ] = useWidgetsReducer();
   const [ hoverWidget, setHoverWidget ] = useState(null);
+  const [ canvasHeight, setCanvasHeight ] = useState(450);
 
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
@@ -300,6 +281,14 @@ function EditorCanvas({}) {
     }
   }, [isOver])
 
+  useEffect(() => {
+    updateGridColumnWidth();
+    window.addEventListener('resize', updateGridColumnWidth);
+    return () => {
+      window.removeEventListener('resize');
+    }
+  }, [])
+
   const toggleGrid = () => {
     setDragging(!dragging);
   }
@@ -313,8 +302,8 @@ function EditorCanvas({}) {
   return (
     <div className={styles.root}>
       <div className={styles.container}>
-        <div id={canvasId} ref={drop} className={canvasClassName}>
-          { mounted && dragging && <Grid /> }
+        <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
+          { mounted && dragging && <Grid canvasHeight={canvasHeight} /> }
           { mounted && hoverWidget && <WidgetBox {...hoverWidget} /> }
           { mounted && Object.keys(widgets).map(widgetId => (
             <WidgetBox key={widgetId} {...widgets[widgetId]} />
