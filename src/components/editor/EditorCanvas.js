@@ -27,7 +27,6 @@ function updateCanvasColumnWidth(setter) {
   const canvas = document.getElementById(canvasId);
   if (canvas) {
     setter(canvas.offsetWidth / CANVAS.columnCnt);
-    // FIXME(ruitao.xu): why the first offsetWidth is wider than the actual when the first update?
     console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
   }
 }
@@ -445,8 +444,8 @@ function EditorCanvas({}) {
       const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
       return !overlap(newItem, widgets);
     },
-    // FIXME(ruitao.xu): performance issue
-    //  hover is too expensive: too many unneccesary re-render when mouse hover still
+    // Performance Issue: 
+    //  hover is too expensive: too many unneccesary re-render when mouse hover, even hover still
     // solution#1: (not tried yet)
     //  CustomizedDragLayer example in react-dnd official site shows that 
     //  no re-render when mouse hover still
@@ -488,10 +487,13 @@ function EditorCanvas({}) {
 
   useEffect(() => {
     const update = updateCanvasColumnWidth.bind(this, setCanvasColumnWidth);
-    update();
+    // FIXME(ruitao.xu):
+    // Bug: the first cavas offsetWidth is wider than the actual(always more 200px) when the first update
+    // solution(fixed, but I DONOT know why): add 500ms delay to the first update
+    setTimeout(update, 500);
     window.addEventListener('resize', update);
     return () => {
-      window.removeEventListener('resize');
+      window.removeEventListener('resize', update);
     }
   }, [])
 
