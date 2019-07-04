@@ -12,15 +12,15 @@ import throttle from 'lodash.throttle';
 const canvasId = 'canvas';
 
 const GRID = {
-  columnCnt: 13,
+  columnCnt: 12,
   rowHeight: 40,
 }
 
 function updateGridColumnWidth() {
   const canvas = document.getElementById(canvasId);
   if (canvas) {
-    GRID.columnWidth = canvas.offsetWidth / (GRID.columnCnt - 1);
-    // console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
+    GRID.columnWidth = canvas.offsetWidth / GRID.columnCnt;
+    console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
   }
 }
 
@@ -30,7 +30,7 @@ const Grid = ({ canvasHeight }) => {
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
   let columns = [];
-  for (let i = 0; i < GRID.columnCnt; i++) {
+  for (let i = 0; i < GRID.columnCnt+1; i++) {
     const style = {
       height: height,
       transform: `translate3d(${leftOffset}px, 0px, 0px)`,
@@ -286,21 +286,24 @@ function checkBoundary(widget) {
   if (result.gridTop < 0) {
     result.gridTop = 0;
   }
-  // rule#2: left [0, 13)
+  // rule#2: left [0, 12)
   if (result.gridLeft < 0) {
     result.gridLeft = 0;
   }
-  if (result.gridLeft > 12) {
-    result.gridLeft = 12;
+  if (result.gridLeft > GRID.columnCnt-1) {
+    result.gridLeft = GRID.columnCnt-1;
   }
   // rule#3: min-height = 1
   result.gridHeight = Math.max(1, result.gridHeight);
   // rule#4: min-width = 1
   result.gridWidth = Math.max(1, result.gridWidth);
-  // rule#5: right=left+width, (1, 13]
-  // TODO(ruitao.xu): doesnot work, width will auto increment as dragging obj moving
-  if (result.gridLeft + result.gridWidth > 13) {
-    result.gridLeft = 13 - result.gridWidth;
+  // rule#5: right=left+width, (1, 12]
+  const gridRight = result.gridLeft + result.gridWidth;
+  if (gridRight < 1) {
+    gridRight = 1;
+  }
+  if (gridRight > GRID.columnCnt) {
+    result.gridLeft = GRID.columnCnt - result.gridWidth;
   }
 
   return result;
