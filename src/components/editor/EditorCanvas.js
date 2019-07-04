@@ -11,31 +11,39 @@ import throttle from 'lodash.throttle';
 
 const canvasId = 'canvas';
 
-const GRID = {
+// TODO(ruitao.xu):
+// The following constants come from css. 
+// NOTICE: Change it as css changes.
+const CSS = {
+
+}
+
+const CANVAS = {
   columnCnt: 12,
   rowHeight: 40,
 }
 
-function updateGridColumnWidth() {
+function updateCanvasColumnWidth(setter) {
   const canvas = document.getElementById(canvasId);
   if (canvas) {
-    GRID.columnWidth = canvas.offsetWidth / GRID.columnCnt;
+    setter(canvas.offsetWidth / CANVAS.columnCnt);
+    // FIXME(ruitao.xu): why the first offsetWidth is wider than the actual when the first update?
     console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
   }
 }
 
-const Grid = ({ canvasHeight }) => {
-  const height = canvasHeight + 2 * GRID.rowHeight;
+const Grid = ({ canvasHeight, canvasColumnWidth }) => {
+  const height = canvasHeight + 2 * CANVAS.rowHeight;
   const dotWidth = 2;
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
   let columns = [];
-  for (let i = 0; i < GRID.columnCnt+1; i++) {
+  for (let i = 0; i < CANVAS.columnCnt+1; i++) {
     const style = {
       height: height,
       transform: `translate3d(${leftOffset}px, 0px, 0px)`,
     }
-    leftOffset += GRID.columnWidth;
+    leftOffset += canvasColumnWidth;
     columns.push(
       <div className={styles.column} style={style} key={i}></div>
     );
@@ -47,14 +55,19 @@ const Grid = ({ canvasHeight }) => {
   )
 }
 
+Grid.propTypes = {
+  canvasHeight: PropTypes.number.isRequired,
+  canvasColumnWidth: PropTypes.number.isRequired,
+};
+
 const HoverWidgetBox = React.memo((props) => {
-  const { gridTop, gridLeft, gridHeight, gridWidth, className } = props;
-  const top = gridTop * GRID.rowHeight;
-  const left = gridLeft * GRID.columnWidth;
+  const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, className } = props;
+  const top = gridTop * CANVAS.rowHeight;
+  const left = gridLeft * canvasColumnWidth;
   const style = {
     transform: `translate(${left}px, ${top}px)`,
-    height: gridHeight * GRID.rowHeight,
-    width: gridWidth * GRID.columnWidth,
+    height: gridHeight * CANVAS.rowHeight,
+    width: gridWidth * canvasColumnWidth,
   }
   return (
     <div className={className} style={style} >
@@ -68,6 +81,7 @@ HoverWidgetBox.propTypes = {
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
   className: PropTypes.string.isRequired,
+  canvasColumnWidth: PropTypes.number.isRequired,
 };
 
 const rhType2StyleMap = {
@@ -99,7 +113,7 @@ const ResizeHandle = React.memo(({type, position, widget}) => {
 });
 
 const WidgetBox = React.memo((props) => {
-  const { gridTop, gridLeft, gridHeight, gridWidth, isHover, id } = props;
+  const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, isHover, id } = props;
   const [{ isDragging }, drag, preview] = useDrag({
     item: props,
     collect: monitor => ({
@@ -112,17 +126,17 @@ const WidgetBox = React.memo((props) => {
   }, [])
 
   console.log('WigetBox', gridLeft, gridTop, gridHeight, gridWidth, id );
-  const top = gridTop * GRID.rowHeight;
-  const left = gridLeft * GRID.columnWidth;
+  const top = gridTop * CANVAS.rowHeight;
+  const left = gridLeft * canvasColumnWidth;
   const style = {
     /*
     // try to optimize performance, use transform instead of top/left, no obvious effect
-    top: gridTop * GRID.rowHeight,
-    left: gridLeft * GRID.columnWidth,
+    top: gridTop * CANVAS.rowHeight,
+    left: gridLeft * canvasColumnWidth,
     */
     transform: `translate(${left}px, ${top}px)`,
-    height: gridHeight * GRID.rowHeight,
-    width: gridWidth * GRID.columnWidth,
+    height: gridHeight * CANVAS.rowHeight,
+    width: gridWidth * canvasColumnWidth,
   }
   const resizeHandlePadding = 2;
   const [boxHPadding, boxVPadding] = [6, 5.5];
@@ -177,6 +191,7 @@ WidgetBox.propTypes = {
   gridTop: PropTypes.number.isRequired,
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
+  canvasColumnWidth: PropTypes.number.isRequired,
   isHover: PropTypes.bool,
 };
 
@@ -194,12 +209,12 @@ function getCanvasOriginOffsetByDOM() {
   return [ true, rect.x, rect.y ]
 }
 
-function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }) {
+function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }, canvasColumnWidth) {
   // both offsets are relative to viewport
   const [, canvasOriginX, canvasOriginY ] = getCanvasOriginOffsetByDOM();
   const [ x, y ] = [ dropOriginX - canvasOriginX, dropOriginY - canvasOriginY ];
 
-  return [ Math.floor(x / GRID.columnWidth), Math.floor(y / GRID.rowHeight) ];
+  return [ Math.floor(x / canvasColumnWidth), Math.floor(y / CANVAS.rowHeight) ];
 }
 
 function overlap(newWidget, widgets) {
@@ -290,8 +305,8 @@ function checkBoundary(widget) {
   if (result.gridLeft < 0) {
     result.gridLeft = 0;
   }
-  if (result.gridLeft > GRID.columnCnt-1) {
-    result.gridLeft = GRID.columnCnt-1;
+  if (result.gridLeft > CANVAS.columnCnt-1) {
+    result.gridLeft = CANVAS.columnCnt-1;
   }
   // rule#3: min-height = 1
   result.gridHeight = Math.max(1, result.gridHeight);
@@ -302,22 +317,22 @@ function checkBoundary(widget) {
   if (gridRight < 1) {
     gridRight = 1;
   }
-  if (gridRight > GRID.columnCnt) {
-    result.gridLeft = GRID.columnCnt - result.gridWidth;
+  if (gridRight > CANVAS.columnCnt) {
+    result.gridLeft = CANVAS.columnCnt - result.gridWidth;
   }
 
   return result;
 }
 
-function calcNewWidget(item, monitor) {
+function calcNewWidget(item, monitor, canvasColumnWidth) {
   if (isResizeHandle(item.type)) {
     const delta = monitor.getDifferenceFromInitialOffset();
     const newItem = {
       ...item.widget,
     }
     if (delta) {
-      const deltaGridX = Math.ceil(delta.x / GRID.columnWidth - 0.5);
-      const deltaGridY = Math.ceil(delta.y / GRID.rowHeight - 0.5);
+      const deltaGridX = Math.ceil(delta.x / canvasColumnWidth - 0.5);
+      const deltaGridY = Math.ceil(delta.y / CANVAS.rowHeight - 0.5);
       switch(item.type) {
         case DndItemTypes.RH_LEFT_TOP:
           newItem.gridLeft += deltaGridX;
@@ -349,7 +364,7 @@ function calcNewWidget(item, monitor) {
   } else {
     const offset = monitor.getClientOffset();
     if (offset) {
-      const [ gridLeft, gridTop ] = calcDropOriginPos(offset);
+      const [ gridLeft, gridTop ] = calcDropOriginPos(offset, canvasColumnWidth);
       const newItem = {
         ...item,
         gridTop,
@@ -362,8 +377,8 @@ function calcNewWidget(item, monitor) {
   }
 }
 
-const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidget) => {
-  const newItem = calcNewWidget(item, monitor);
+const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidget, canvasColumnWidth) => {
+  const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
   if (newItem === null) {
     // handleHoverThrottled.cancel() might be called after drop()
     // newItem will be null if it happens
@@ -392,6 +407,7 @@ function EditorCanvas({}) {
   const [ widgets, dispatch ] = useWidgetsReducer();
   const [ hoverWidget, setHoverWidget ] = useState(null);
   const [ canvasHeight, setCanvasHeight ] = useState(450);
+  const [ canvasColumnWidth, setCanvasColumnWidth ] = useState(0);
 
   const setHover = (widget) => {
     setHoverWidget(widget);
@@ -416,7 +432,7 @@ function EditorCanvas({}) {
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
     drop(item, monitor) {
-      const newItem = calcNewWidget(item, monitor);
+      const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
       console.log('dropItem:', newItem);
       dispatch({ 
         type: ACTION_TYPE.ADD_OR_UPDATE,
@@ -426,7 +442,7 @@ function EditorCanvas({}) {
       return undefined
     },
     canDrop(item, monitor) {
-      const newItem = calcNewWidget(item, monitor);
+      const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
       return !overlap(newItem, widgets);
     },
     // FIXME(ruitao.xu): performance issue
@@ -443,7 +459,7 @@ function EditorCanvas({}) {
     // hover is called very frequently, so throttle it
     // ref: https://reactjs.org/docs/faq-functions.html#how-can-i-prevent-a-function-from-being-called-too-quickly-or-too-many-times-in-a-row
     hover(item, monitor) {
-      handleHoverThrottled(item, monitor, hoverWidget, setHover);
+      handleHoverThrottled(item, monitor, hoverWidget, setHover, canvasColumnWidth);
     },
     collect: monitor => ({
       isOver: monitor.isOver(),
@@ -460,19 +476,20 @@ function EditorCanvas({}) {
   }, [isOver])
 
   useLayoutEffect(() => {
-    setMounted(true);
-  }, [])
-
-  useLayoutEffect(() => {
     if (isOver) {
     } else {
       clearHover();
     }
   }, [isOver])
 
+  useLayoutEffect(() => {
+    setMounted(true);
+  }, [])
+
   useEffect(() => {
-    updateGridColumnWidth();
-    window.addEventListener('resize', updateGridColumnWidth);
+    const update = updateCanvasColumnWidth.bind(this, setCanvasColumnWidth);
+    update();
+    window.addEventListener('resize', update);
     return () => {
       window.removeEventListener('resize');
     }
@@ -492,10 +509,10 @@ function EditorCanvas({}) {
     <div className={styles.root}>
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
-          { mounted && dragging && <Grid canvasHeight={canvasHeight} /> }
-          { mounted && hoverWidget && <HoverWidgetBox {...hoverWidget} /> }
+          { mounted && dragging && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
+          { mounted && hoverWidget && <HoverWidgetBox {...hoverWidget} canvasColumnWidth={canvasColumnWidth} /> }
           { mounted && Object.keys(widgets).map(widgetId => (
-            <WidgetBox key={widgetId} {...widgets[widgetId]} />
+            <WidgetBox key={widgetId} {...widgets[widgetId]} canvasColumnWidth={canvasColumnWidth} />
           )) }
           <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>
