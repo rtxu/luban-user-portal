@@ -395,6 +395,21 @@ const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidge
   }
 }, 16);
 
+function updateCanvasHeight(hoverWidget, widgets, setter) {
+  const newHeightOptions = [ CANVAS.minHeight - 2 * CANVAS.rowHeight];
+  if (hoverWidget) {
+    newHeightOptions.push((hoverWidget.gridTop + hoverWidget.gridHeight) * CANVAS.rowHeight);
+  }
+  if (widgets) {
+    for (let widgetId of Object.keys(widgets)) {
+      const w = widgets[widgetId];
+      newHeightOptions.push((w.gridTop + w.gridHeight) * CANVAS.rowHeight);
+    }
+  }
+  const newHeight = Math.max(...newHeightOptions) + 2 * CANVAS.rowHeight;
+  setter(newHeight);
+}
+
 function EditorCanvas({}) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
@@ -479,6 +494,10 @@ function EditorCanvas({}) {
   useLayoutEffect(() => {
     setMounted(true);
   }, [])
+
+  useLayoutEffect(() => {
+    updateCanvasHeight(hoverWidget, widgets, setCanvasHeight);
+  }, [hoverWidget, widgets])
 
   useEffect(() => {
     const updateCanvasColumnWidth = () => {
