@@ -245,8 +245,8 @@ function useWidgetsReducer() {
   function reducer(widgets, action) {
     switch (action.type) {
       case ACTION_TYPE.ADD_OR_UPDATE:
-        const newWidget = { ...action.item }
-        if ('id' in action.item) {
+        const newWidget = { ...action.widget }
+        if ('id' in action.widget ) {
           // update
 
         } else {
@@ -254,7 +254,7 @@ function useWidgetsReducer() {
           let maxInstanceId = 0;
           for (let widgetId of Object.keys(widgets)) {
             const widget = widgets[widgetId];
-            if (widget.type === action.item.type) {
+            if (widget.type === action.widget.type) {
               if (widget.instanceId > maxInstanceId) {
                 maxInstanceId = widget.instanceId;
               }
@@ -328,7 +328,7 @@ function checkBoundary(widget) {
 function calcNewWidget(item, monitor, canvasColumnWidth) {
   if (isResizeHandle(item.type)) {
     const delta = monitor.getDifferenceFromInitialOffset();
-    const newItem = {
+    const newWidget = {
       ...item.widget,
     }
     if (delta) {
@@ -336,28 +336,28 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
       const deltaGridY = Math.ceil(delta.y / CANVAS.rowHeight - 0.5);
       switch(item.type) {
         case DndItemTypes.RH_LEFT_TOP:
-          newItem.gridLeft += deltaGridX;
-          newItem.gridWidth -= deltaGridX;
-          newItem.gridTop += deltaGridY;
-          newItem.gridHeight -= deltaGridY;
+          newWidget.gridLeft += deltaGridX;
+          newWidget.gridWidth -= deltaGridX;
+          newWidget.gridTop += deltaGridY;
+          newWidget.gridHeight -= deltaGridY;
           break;
         case DndItemTypes.RH_RIGHT_TOP:
-          newItem.gridWidth += deltaGridX;
-          newItem.gridTop += deltaGridY;
-          newItem.gridHeight -= deltaGridY;
+          newWidget.gridWidth += deltaGridX;
+          newWidget.gridTop += deltaGridY;
+          newWidget.gridHeight -= deltaGridY;
           break;
 
         case DndItemTypes.RH_RIGHT_BOTTOM:
-          newItem.gridWidth += deltaGridX;
-          newItem.gridHeight += deltaGridY;
+          newWidget.gridWidth += deltaGridX;
+          newWidget.gridHeight += deltaGridY;
           break;
         case DndItemTypes.RH_LEFT_BOTTOM:
-          newItem.gridLeft += deltaGridX;
-          newItem.gridWidth += -deltaGridX;
-          newItem.gridHeight += deltaGridY;
+          newWidget.gridLeft += deltaGridX;
+          newWidget.gridWidth += -deltaGridX;
+          newWidget.gridHeight += deltaGridY;
           break;
       }
-      return checkBoundary(newItem);
+      return checkBoundary(newWidget);
 
     } else {
       return null;
@@ -366,12 +366,12 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
     const offset = monitor.getClientOffset();
     if (offset) {
       const [ gridLeft, gridTop ] = calcDropOriginPos(offset, canvasColumnWidth);
-      const newItem = {
+      const newWidget = {
         ...item,
         gridTop,
         gridLeft,
       }
-      return checkBoundary(newItem);
+      return checkBoundary(newWidget);
     } else {
       return null;
     }
@@ -379,25 +379,25 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
 }
 
 const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidget, canvasColumnWidth) => {
-  const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
-  if (newItem === null) {
+  const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
+  if (newWidget === null) {
     // handleHoverThrottled.cancel() might be called after drop()
-    // newItem will be null if it happens
+    // newWidget will be null if it happens
   } else {
     if (hoverWidget &&
-      hoverWidget.gridLeft === newItem.gridLeft &&
-      hoverWidget.gridTop === newItem.gridTop &&
-      hoverWidget.gridHeight === newItem.gridHeight &&
-      hoverWidget.gridWidth === newItem.gridWidth
+      hoverWidget.gridLeft === newWidget.gridLeft &&
+      hoverWidget.gridTop === newWidget.gridTop &&
+      hoverWidget.gridHeight === newWidget.gridHeight &&
+      hoverWidget.gridWidth === newWidget.gridWidth
     ) {
     } else {
       if (monitor.canDrop()) {
-        newItem.className = styles.hoverWidgetBox;
+        newWidget.className = styles.hoverWidgetBox;
       } else {
-        newItem.className = styles.hoverWidgetBoxCanNotPlace;
+        newWidget.className = styles.hoverWidgetBoxCanNotPlace;
       }
-      console.log('in hover(), new: ', newItem.gridLeft, newItem.gridTop, newItem.className);
-      setHoverWidget(newItem);
+      console.log('in hover(), new: ', newWidget.gridLeft, newWidget.gridTop, newWidget.className);
+      setHoverWidget(newWidget);
     }
   }
 }, 16);
@@ -433,18 +433,18 @@ function EditorCanvas({}) {
   const [{isOver}, drop] = useDrop({
     accept: Object.values(DndItemTypes),
     drop(item, monitor) {
-      const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
-      console.log('dropItem:', newItem);
+      const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
+      console.log('dropItem:', newWidget);
       dispatch({ 
         type: ACTION_TYPE.ADD_OR_UPDATE,
-        item: newItem,
+        widget: newWidget,
       })
 
       return undefined
     },
     canDrop(item, monitor) {
-      const newItem = calcNewWidget(item, monitor, canvasColumnWidth);
-      return !overlap(newItem, widgets);
+      const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
+      return !overlap(newWidget, widgets);
     },
     // Performance Issue: 
     //  hover is too expensive: too many unneccesary re-render when mouse hover, even hover still
