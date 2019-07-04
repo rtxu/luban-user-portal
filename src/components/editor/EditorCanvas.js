@@ -11,11 +11,14 @@ import throttle from 'lodash.throttle';
 
 const canvasId = 'canvas';
 
-// TODO(ruitao.xu):
 // The following constants come from css. 
-// NOTICE: Change it as css changes.
+// BE CAREFUL: Change it as css changes.
 const CSS = {
+  resizeHandlePadding: 2,
+  widgetBoxHPadding: 6,
+  widgetBoxVPadding: 5.5,
 
+  dotWidth: 2,
 }
 
 const CANVAS = {
@@ -33,7 +36,7 @@ function updateCanvasColumnWidth(setter) {
 
 const Grid = ({ canvasHeight, canvasColumnWidth }) => {
   const height = canvasHeight + 2 * CANVAS.rowHeight;
-  const dotWidth = 2;
+  const { dotWidth } = CSS;
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
   let columns = [];
@@ -137,8 +140,7 @@ const WidgetBox = React.memo((props) => {
     height: gridHeight * CANVAS.rowHeight,
     width: gridWidth * canvasColumnWidth,
   }
-  const resizeHandlePadding = 2;
-  const [boxHPadding, boxVPadding] = [6, 5.5];
+  const { resizeHandlePadding, widgetBoxHPadding: boxHPadding, widgetBoxVPadding: boxVPadding } = CSS;
   const resizeHandlePositions = {
     [DndItemTypes.RH_LEFT_TOP] : {
       transform: `translate(${0-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,

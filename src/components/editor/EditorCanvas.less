@@ -1,4 +1,12 @@
-@widgetBoxPadding: 6px;
+
+// DANGER ZONE: the following varaibles are referenced by js
+// [--
+@widgetBoxHPadding: 6px;
+@widgetBoxVPadding: 5.5px;
+@resizeHandlePadding: 2px;
+
+@dotWidth: 2px;
+// --]
 
 .root {
   padding: 15px;
@@ -19,7 +27,7 @@
         will-change: transform;
         transition-property: height,width,transform;
         transition-duration: .1s;
-        padding: 5.5px @widgetBoxPadding;
+        padding: @widgetBoxVPadding @widgetBoxHPadding;
         background-color: rgba(100, 196, 68, 0.6);
 
         &:hover > .resizeHandle {
@@ -33,7 +41,7 @@
           z-index: 100;
           height: 20px;
           width: 20px;
-          padding: 2px;
+          padding: @resizeHandlePadding;
           opacity: 0;
 
           & .resizeLeftTop {
@@ -62,8 +70,8 @@
           }
 
           .resizeIcon {
-            height: @widgetBoxPadding;
-            width: @widgetBoxPadding;
+            height: @widgetBoxHPadding;
+            width: @widgetBoxHPadding;
             background: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/Pg08IS0tIEdlbmVyYXRvcjogQWRvYmUgRmlyZXdvcmtzIENTNiwgRXhwb3J0IFNWRyBFeHRlbnNpb24gYnkgQWFyb24gQmVhbGwgKGh0dHA6Ly9maXJld29ya3MuYWJlYWxsLmNvbSkgLiBWZXJzaW9uOiAwLjYuMSAgLS0+DTwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DTxzdmcgaWQ9IlVudGl0bGVkLVBhZ2UlMjAxIiB2aWV3Qm94PSIwIDAgNiA2IiBzdHlsZT0iYmFja2dyb3VuZC1jb2xvcjojZmZmZmZmMDAiIHZlcnNpb249IjEuMSINCXhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbDpzcGFjZT0icHJlc2VydmUiDQl4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjZweCIgaGVpZ2h0PSI2cHgiDT4NCTxnIG9wYWNpdHk9IjAuMzAyIj4NCQk8cGF0aCBkPSJNIDYgNiBMIDAgNiBMIDAgNC4yIEwgNCA0LjIgTCA0LjIgNC4yIEwgNC4yIDAgTCA2IDAgTCA2IDYgTCA2IDYgWiIgZmlsbD0iIzAwMDAwMCIvPg0JPC9nPg08L3N2Zz4=");
             background-repeat: no-repeat;
             background-origin: content-box;
@@ -87,7 +95,7 @@
         .column {
           position: absolute;
           top: -1px;
-          width: 2px;
+          width: @dotWidth;
           // TODO(ruitao.xu): figure out the meaning of the following background-*
           background-image: repeating-linear-gradient(
             0deg,
