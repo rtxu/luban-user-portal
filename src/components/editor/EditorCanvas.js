@@ -24,14 +24,7 @@ const CSS = {
 const CANVAS = {
   columnCnt: 12,
   rowHeight: 40,
-}
-
-function updateCanvasColumnWidth(setter) {
-  const canvas = document.getElementById(canvasId);
-  if (canvas) {
-    setter(canvas.offsetWidth / CANVAS.columnCnt);
-    console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
-  }
+  minHeight: 450,
 }
 
 const Grid = ({ canvasHeight, canvasColumnWidth }) => {
@@ -407,7 +400,7 @@ function EditorCanvas({}) {
   const [ mounted, setMounted ] = useState(false);
   const [ widgets, dispatch ] = useWidgetsReducer();
   const [ hoverWidget, setHoverWidget ] = useState(null);
-  const [ canvasHeight, setCanvasHeight ] = useState(450);
+  const [ canvasHeight, setCanvasHeight ] = useState(CANVAS.minHeight);
   const [ canvasColumnWidth, setCanvasColumnWidth ] = useState(0);
 
   const setHover = (widget) => {
@@ -422,10 +415,10 @@ function EditorCanvas({}) {
   const clearHover = () => {
     handleHoverThrottled.cancel();
     if (hoverWidget && 'id' in hoverWidget) {
-    dispatch({
-      type: ACTION_TYPE.CLEAR_HOVER,
-      widgetId: hoverWidget.id,
-    });
+      dispatch({
+        type: ACTION_TYPE.CLEAR_HOVER,
+        widgetId: hoverWidget.id,
+      });
     }
     setHoverWidget(null);
   }
@@ -488,14 +481,24 @@ function EditorCanvas({}) {
   }, [])
 
   useEffect(() => {
-    const update = updateCanvasColumnWidth.bind(this, setCanvasColumnWidth);
+    const updateCanvasColumnWidth = () => {
+      const canvas = document.getElementById(canvasId);
+      if (canvas) {
+        setCanvasColumnWidth(canvas.offsetWidth / CANVAS.columnCnt);
+        console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
+      }
+    }
     // FIXME(ruitao.xu):
     // Bug: the first cavas offsetWidth is wider than the actual(always more 200px) when the first update
-    // solution(fixed, but I DONOT know why): add 500ms delay to the first update
-    setTimeout(update, 500);
-    window.addEventListener('resize', update);
+    // solution#1: DONOT work, more 200px still
+    //  method: callback ref (ref)[https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node]
+    // 
+    // solution#2(current): workaround, but I DONOT know why
+    //  method: add 500ms delay to the first update
+    setTimeout(updateCanvasColumnWidth , 500);
+    window.addEventListener('resize', updateCanvasColumnWidth);
     return () => {
-      window.removeEventListener('resize', update);
+      window.removeEventListener('resize', updateCanvasColumnWidth);
     }
   }, [])
 
