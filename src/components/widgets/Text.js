@@ -1,6 +1,10 @@
 import PropTypes from 'prop-types';
 import styles from './Text.less';
-import { Input, Switch } from "antd";
+import { 
+  Input, 
+  Collapse,
+} from "antd";
+import Config from './Config';
 
 function Text({ value, isScrollWhenOverflow, isExpandWhenHover }) {
   const classNames = [styles.widgetText]
@@ -38,12 +42,12 @@ function reducer(prevState, action) {
     case ACTION_TYPE.SET_IS_SCROLL_WHEN_OVERFLOW:
       return {
         ...prevState,
-        isScrollWhenOverflow: action.payloud,
+        isScrollWhenOverflow: action.payload,
       }
     case ACTION_TYPE.SET_IS_EXPAND_WHEN_HOVER:
       return {
         ...prevState,
-        isExpandWhenHover: action.payloud,
+        isExpandWhenHover: action.payload,
       }
     default:
       throw new Error(`in TextWidget reducer(): unexpected action type: ${action.type}`);
@@ -54,24 +58,40 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
   function onIsScrollChange(checked) {
     dispatch({
       type: ACTION_TYPE.SET_IS_SCROLL_WHEN_OVERFLOW,
-      payloud: checked,
+      payload: checked,
     });
   }
   function onIsExpandChange(checked) {
     dispatch({
       type: ACTION_TYPE.SET_IS_EXPAND_WHEN_HOVER,
-      payloud: checked,
+      payload: checked,
     });
   }
+
+  const { Panel } = Collapse;
+
   return (
-    <>
-      <label>文本</label>
-      <Input placeholder={value}></Input>
-      <Switch onChange={onIsScrollChange} />
-      <p>当文本内容溢出时，是否显示滚动条</p>
-      <Switch onChange={onIsExpandChange} />
-      <p>当鼠标悬停文本上方时，是否显示全文</p>
-    </>
+    <Collapse
+      defaultActiveKey={['1', '2']}
+      expandIconPosition='right'
+    >
+      <Panel header='内容' key='1' >
+        <label>文本</label>
+        <Input placeholder={value}></Input>
+      </Panel>
+      <Panel header='显示选项' key='2' >
+        <Config.Switch 
+          checked={isScrollWhenOverflow} 
+          onChange={onIsScrollChange}
+          description='当文本内容溢出时，是否显示滚动条' 
+        />
+        <Config.Switch 
+          checked={isExpandWhenHover} 
+          onChange={onIsExpandChange}
+          description='当鼠标悬停文本上方时，是否显示全文'
+        />
+      </Panel>
+    </Collapse>
   );
 }
 

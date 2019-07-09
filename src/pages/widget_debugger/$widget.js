@@ -13,6 +13,18 @@ function useTextWidget() {
   <Text.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
 }
 
+function useWidgetFactory(type) {
+  const textWidget = useTextWidget();
+
+  switch(type) {
+    case Widget.Type.TEXT:
+      return textWidget;
+
+    default:
+      throw new Error(`unexpected widget type: ${type}`);
+  }
+}
+
 function WidgetDebugger({}) {
   const [height, setHeight] = useState(360);
   const [width, setWidth] = useState(360);
@@ -30,7 +42,7 @@ function WidgetDebugger({}) {
     width: width,
   }
 
-  const [widget, widgetProps, widgetConfigPanel] = useTextWidget();
+  const [widget, widgetProps, widgetConfigPanel] = useWidgetFactory(Widget.Type.TEXT);
 
   return (
     <Layout>
