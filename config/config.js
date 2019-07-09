@@ -2,29 +2,9 @@ export default {
     // 「配置式路由」
     // 显式配置 routes 则禁掉「约定式路由」
     routes: [
-        {
-            path: '/',
-            component: '../layouts/BasicLayout', // 相对于 page 目录的路径
-            /*
-            routes: [
-                { path: '/', component: './HelloWorld' },
-                { path: 'helloworld', component: './HelloWorld' },
-                { path: 'puzzlecards', component: './PuzzleCards' },
-                {
-                    path: '/dashboard',
-                    routes: [
-                    { path: '/dashboard/analysis', component: 'Dashboard/Analysis' },
-                    { path: '/dashboard/monitor', component: 'Dashboard/Monitor' },
-                    { path: '/dashboard/workplace', component: 'Dashboard/Workplace' }
-                    ]
-                },
-            ],
-            */
-        },
-        {
-            path: '/editor',
-            component: '../layouts/EditorLayout', // 相对于 page 目录的路径
-        },
+        // component: 相对于 page 目录的路径
+        { path: '/', component: '../layouts/BasicLayout' },
+        { path: '/editor/:app', component: './editor/$app.js' },
     ],
 
     /*

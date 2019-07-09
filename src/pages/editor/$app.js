@@ -1,13 +1,13 @@
 import React from 'react';
 import { Layout} from 'antd';
-import ControPanel from '../components/editor/ControlPanel';
-import ModelBrowser from '../components/editor/ModelBrowser';
-import EditorCanvas from '../components/editor/EditorCanvas';
-import QueryEditor from '../components/editor/QueryEditor';
-import WidgetPicker from '../components/editor/WidgetPicker';
+import ControPanel from '../../components/editor/ControlPanel';
+import ModelBrowser from '../../components/editor/ModelBrowser';
+import EditorCanvas from '../../components/editor/EditorCanvas';
+import QueryEditor from '../../components/editor/QueryEditor';
+import WidgetPicker from '../../components/editor/WidgetPicker';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import myStyles from './EditorLayout.css';
+import myStyles from './index.css';
 
 const { Header, Sider, Content } = Layout;
 
@@ -22,7 +22,7 @@ function SubLayout({}) {
           <QueryEditor />
         </Layout>
       </Layout>
-      <Sider className={[myStyles.overflowAuto, myStyles.defaultBg].join(' ')}>
+      <Sider className={[myStyles.overflowAuto, myStyles.defaultBg].join(' ')} width={300} >
         <WidgetPicker />
       </Sider>
     </Layout>
