@@ -1,9 +1,8 @@
+import Widget from '../Widget';
 
 const _ = {
   // widget
-  TEXT: 'text',
-  TABLE: 'table',
-  BUTTON: 'button',
+  ...Widget.Type,
 
   // resize handle
   RH_LEFT_TOP: 'resize.left_top',

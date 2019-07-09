@@ -5,6 +5,7 @@ export default {
         // component: 相对于 page 目录的路径
         { path: '/', component: '../layouts/BasicLayout' },
         { path: '/editor/:app', component: './editor/$app.js' },
+        { path: '/widget_debugger/:wdget', component: './widget_debugger/$widget.js' },
     ],
 
     /*
