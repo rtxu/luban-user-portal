@@ -49,6 +49,11 @@ function reducer(prevState, action) {
         ...prevState,
         isExpandWhenHover: action.payload,
       }
+    case ACTION_TYPE.SET_VALUE:
+      return {
+        ...prevState,
+        value: action.payload,
+      }
     default:
       throw new Error(`in TextWidget reducer(): unexpected action type: ${action.type}`);
   }
@@ -67,6 +72,13 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
       payload: checked,
     });
   }
+  // better to debounce
+  function onTextChange(e) {
+    dispatch({
+      type: ACTION_TYPE.SET_VALUE,
+      payload: e.target.value,
+    });
+  }
 
   const { Panel } = Collapse;
 
@@ -76,8 +88,11 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
       expandIconPosition='right'
     >
       <Panel header='内容' key='1' >
-        <label>文本</label>
-        <Input placeholder={value}></Input>
+        <Config.Input
+          label='文本'
+          inputDefaultValue={value}
+          onChange={onTextChange}
+        />
       </Panel>
       <Panel header='显示选项' key='2' >
         <Config.Switch 
