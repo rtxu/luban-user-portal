@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import styles from './Text.less';
 import { 
-  Input, 
   Collapse,
 } from "antd";
 import Config from './Config';
@@ -10,9 +9,10 @@ function Text({ value, isScrollWhenOverflow, isExpandWhenHover }) {
   const classNames = [styles.widgetText]
   if (isScrollWhenOverflow) {
     classNames.push(styles.scroll);
-  } else if (isExpandWhenHover) {
-    classNames.push(styles.scrollWithHoverExpand);
-  }
+    if (isExpandWhenHover) {
+      classNames.push(styles.hover);
+    }
+  } 
   return (
     <div className={classNames.join(' ')}>
       <p>{value}</p>
@@ -36,6 +36,7 @@ const initialState = Text.defaultProps;
 const ACTION_TYPE = {
   SET_IS_SCROLL_WHEN_OVERFLOW: 'setIsScrollWhenOverflow',
   SET_IS_EXPAND_WHEN_HOVER: 'setIsExpandWhenHover',
+  SET_VALUE: 'setValue',
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -102,6 +103,7 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
         />
         <Config.Switch 
           checked={isExpandWhenHover} 
+          disabled={!isScrollWhenOverflow}
           onChange={onIsExpandChange}
           description='当鼠标悬停文本上方时，是否显示全文'
         />

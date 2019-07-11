@@ -1,16 +1,16 @@
 
 .widgetText {
-  display: flex;
   height: 100%;
+  width: 100%;
+  display: flex;
   align-items: center; // vertically
+}
 
-  & .scroll, & .scrollWithHoverExpand {
-    overflow: auto;
-    align-items: flex-start;
-  }
+.scroll {
+  overflow: auto;
+  align-items: flex-start;
+}
 
-  & .scrollWithHoverExpand:hover {
-    overflow: visible;
-  }
-
+.hover:hover {
+  overflow: visible;
 }

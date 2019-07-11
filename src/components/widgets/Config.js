@@ -10,19 +10,24 @@ import {
 // layout]
 
 // [component
-function Switch({checked, onChange, description}) {
+function Switch({disabled, checked, onChange, description}) {
   return (
     <div className={styles.switch}>
-      <AntSwitch defaultChecked={checked} onChange={onChange} />
+      <AntSwitch disabled={disabled} checked={checked} onChange={onChange} />
       <span>{description}</span>
     </div>
   );
 }
 
 Switch.propTypes = {
+  disabled: PropTypes.bool,
   checked: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   description: PropTypes.string.isRequired,
+};
+
+Switch.defaultProps = {
+  disabled: false,
 };
 
 function Input({
