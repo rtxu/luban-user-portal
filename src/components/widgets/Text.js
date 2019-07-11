@@ -89,10 +89,9 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
       expandIconPosition='right'
     >
       <Panel header='内容' key='1' >
-        <Config.Input
-          label='文本'
-          inputDefaultValue={value}
-          onChange={onTextChange}
+        <Config.LabelInput
+          label={{ value:'文本' }}
+          input={{ value: value, onChange: onTextChange, }}
         />
       </Panel>
       <Panel header='显示选项' key='2' >

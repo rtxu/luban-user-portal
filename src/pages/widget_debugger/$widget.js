@@ -2,6 +2,7 @@ import { useState, useReducer } from 'react';
 import { Layout } from 'antd';
 import styles from './index.less'
 import Text from '../../components/widgets/Text';
+import TextInput from '../../components/widgets/TextInput';
 import Widget from '../../components/Widget';
 
 const { Sider, Content } = Layout;
@@ -13,12 +14,22 @@ function useTextWidget() {
   <Text.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
 }
 
+function useTextInputWidget() {
+  const [widgetProps, widgetDispatch] = useReducer(TextInput.reducer, TextInput.initialState);
+  return ([<TextInput {...widgetProps} />, 
+    widgetProps, 
+  <TextInput.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
+}
+
 function useWidgetFactory(type) {
   const textWidget = useTextWidget();
+  const textInputWidget = useTextInputWidget();
 
   switch(type) {
     case Widget.Type.TEXT:
       return textWidget;
+    case Widget.Type.TEXTINPUT:
+      return textInputWidget;
 
     default:
       throw new Error(`unexpected widget type: ${type}`);
@@ -42,7 +53,7 @@ function WidgetDebugger({}) {
     width: width,
   }
 
-  const [widget, widgetProps, widgetConfigPanel] = useWidgetFactory(Widget.Type.TEXT);
+  const [widget, widgetProps, widgetConfigPanel] = useWidgetFactory(Widget.Type.TEXTINPUT);
 
   return (
     <Layout>

@@ -4,6 +4,7 @@ import {
   Switch as AntSwitch,
   Input as AntInput,
   Tooltip,
+  Select,
 } from "antd";
 
 // [layout
@@ -30,53 +31,82 @@ Switch.defaultProps = {
   disabled: false,
 };
 
-function Input({
-  label, 
-  labelTooltip, 
-  inputType, 
-  inputPlaceHolder, 
-  inputDefaultValue,
-  onChange,
-  onPressEnter,
-}) {
-  const labelNode = labelTooltip ? (
-    <Tooltip title={labelTooltip}>
-      <label>{label}</label>
+function Label({value, tooltip}) {
+  const labelNode = tooltip ? (
+    <Tooltip title={tooltip}>
+      <label>{value}</label>
     </Tooltip>
   ) : (
-      <label>{label}</label>
+      <label>{value}</label>
   );
+
+  return labelNode;
+}
+
+Label.propTypes = {
+  value: PropTypes.string.isRequired,
+  tooltip: PropTypes.string,
+}
+
+function LabelInput({
+  label, 
+  input, 
+}) {
   return (
     <>
-      {labelNode}
+      <Label {...label} />
       <AntInput 
-        type={inputType}
-        placeholder={inputPlaceHolder} 
-        defaultValue={inputDefaultValue} 
-        onChange={onChange}
-        onPressEnter={onPressEnter}
+        type={input.type}
+        placeholder={input.placeHolder} 
+        value={input.value} 
+        defaultValue={input.defaultValue} 
+        onChange={input.onChange}
+        onPressEnter={input.onPressEnter}
       />
     </>
   );
 }
 
-Input.propTypes = {
-  label: PropTypes.string.isRequired,
-  labelTooltip: PropTypes.string,
-  inputType: PropTypes.string,
-  inputPlaceHolder: PropTypes.string,
-  inputDefaultValue: PropTypes.string,
-  onChange: PropTypes.func,
-  onPressEnter: PropTypes.func,
+LabelInput.propTypes = {
+  label: PropTypes.shape(Label.propTypes).isRequired,
+  input: PropTypes.shape({
+    type: PropTypes.string,
+    value: PropTypes.string,
+    placeholder: PropTypes.string,
+    defaultValue: PropTypes.string,
+    onChange: PropTypes.func,
+    onPressEnter: PropTypes.func,
+  }),
 };
 
-Input.defaultProps = {
-  inputType: 'text',
+function LabelSelect({
+  label, 
+  select, 
+}) {
+  return (
+    <>
+      <Label {...label} />
+      <Select style={{display: 'block'}} defaultValue={select.defaultValue}>
+        { select.options.map((option) => {
+          <Option value={option} key={option}>{option}</Option>
+        }) }
+      </Select>
+    </>
+  );
+}
+
+LabelSelect.propTypes = {
+  label: PropTypes.shape(Label.propTypes).isRequired,
+  select: PropTypes.shape({
+    defaultValue: PropTypes.string,
+    options: PropTypes.arrayOf(PropTypes.string).isRequired,
+  }),
 };
 // component]
 
 const _ = {};
 _.Switch = Switch;
-_.Input = Input;
+_.LabelInput = LabelInput;
+_.LabelSelect = LabelSelect;
 
 export default _;
