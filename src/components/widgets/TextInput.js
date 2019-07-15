@@ -6,40 +6,112 @@ import {
 } from "antd";
 import Config from './Config';
 
-function TextInput({ label, placeholder }) {
-  const classNames = [styles.widgetTextInput]
+// TODO(ruitao.xu): support different display mode
+// [done] one-line mode: <label> <input>
+// two-line mode: <label>\n <input>
+// multi-line mode: <label>\n <textarea>
+function TextInput({ label, labelMaxWidth, input }) {
+  const labelStyle = {
+    maxWidth: labelMaxWidth,
+  }
   return (
-    <div className={classNames.join(' ')}>
-      <label>{label}</label>
-      <Input placeholder={placeholder} />
+    <div className={styles.widgetTextInput}>
+      { label && <label style={labelStyle}>{label}</label> }
+      <Input 
+        type={input.type}
+        placeholder={input.placeholder} 
+        value={input.value} 
+      />
     </div>
   );
 }
 
 TextInput.propTypes = {
-  label: PropTypes.string.isRequired,
-  placeholder: PropTypes.string,
+  label: PropTypes.string,
+  labelMaxWidth: PropTypes.number,
+  input: PropTypes.shape({
+    type: PropTypes.string,
+    value: PropTypes.string,
+    placeholder: PropTypes.string,
+    // defaultValue: PropTypes.string,
+    // onChange: PropTypes.func,
+    // onPressEnter: PropTypes.func,
+  }),
 };
 
 TextInput.defaultProps = {
-  label: '这里有个输入框',
+  label: '字段名',
+  labelMaxWidth: 150,
+  input: {
+    type: 'text',
+  }
 };
 
 const initialState = TextInput.defaultProps;
 const ACTION_TYPE = {
+  SET_LABEL: 'setLabel',
+  SET_LABEL_MAX_WIDTH: 'setLabelMaxWidth',
+  SET_INPUT_VALUE: 'setInputValue',
+  SET_INPUT_PLACEHOLDER: 'setInputPlaceholder',
 }
 function reducer(prevState, action) {
   switch (action.type) {
+    case ACTION_TYPE.SET_LABEL:
+      return {
+        ...prevState,
+        label: action.payload,
+      }
+    case ACTION_TYPE.SET_LABEL_MAX_WIDTH:
+      return {
+        ...prevState,
+        labelMaxWidth: action.payload,
+      }
+    case ACTION_TYPE.SET_INPUT_VALUE:
+      return {
+        ...prevState,
+        input: {
+          ...prevState.input,
+          value: action.payload,
+        }
+      }
+    case ACTION_TYPE.SET_INPUT_PLACEHOLDER:
+      return {
+        ...prevState,
+        input: {
+          ...prevState.input,
+          placeholder: action.payload,
+        }
+      }
+    
     default:
       throw new Error(`in TextInputWidget reducer(): unexpected action type: ${action.type}`);
   }
 }
 
-function ConfigPanel({ label, defaultValue }) {
-  // TODO(ruitao.xu):
+function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
   function onLabelChange(e) {
+    dispatch({
+      type: ACTION_TYPE.SET_LABEL,
+      payload: e.target.value,
+    });
   }
-  function onDefaultValueChange(e) {
+  function onLabelMaxWidthChange(e) {
+    dispatch({
+      type: ACTION_TYPE.SET_LABEL_MAX_WIDTH,
+      payload: e.target.value,
+    });
+  }
+  function onInputValueChange(e) {
+    dispatch({
+      type: ACTION_TYPE.SET_INPUT_VALUE,
+      payload: e.target.value,
+    });
+  }
+  function onInputPlaceholderChange(e) {
+    dispatch({
+      type: ACTION_TYPE.SET_INPUT_PLACEHOLDER,
+      payload: e.target.value,
+    });
   }
 
 
@@ -74,34 +146,37 @@ function ConfigPanel({ label, defaultValue }) {
           }}
         />
         <Config.LabelInput
-          label={{ value: '默认值' }}
+          label={{ value: '初始值' }}
           input={{
-            value: defaultValue,
-            onChange: onDefaultValueChange,
+            value: input.value,
+            onChange: onInputValueChange,
           }}
         />
       </Panel>
       <Panel header='显示选项' key='2' >
-        {/*
-        <Config.Switch 
-          checked={isScrollWhenOverflow} 
-          onChange={onIsScrollChange}
-          description='当文本内容溢出时，是否显示滚动条' 
+        <Config.LabelInput
+          label={{ value: '占位文本' }}
+          input={{
+            value: input.placeholder,
+            onChange: onInputPlaceholderChange,
+          }}
         />
-        <Config.Switch 
-          checked={isExpandWhenHover} 
-          disabled={!isScrollWhenOverflow}
-          onChange={onIsExpandChange}
-          description='当鼠标悬停文本上方时，是否显示全文'
+        <Config.LabelInput
+          label={{ value: '字段名最大宽度' }}
+          input={{
+            type: 'number',
+            value: labelMaxWidth,
+            placeholder: '默认值 150',
+            onChange: onLabelMaxWidthChange,
+          }}
         />
-        */}
       </Panel>
     </Collapse>
   );
 }
 
 ConfigPanel.propTypes = {
-  ...TextInput.PropTypes,
+  ...TextInput.propTypes,
   dispatch: PropTypes.func.isRequired,
 }
 TextInput.ConfigPanel = ConfigPanel;

@@ -36,7 +36,7 @@ function useWidgetFactory(type) {
   }
 }
 
-function WidgetDebugger({}) {
+function WidgetDebugger({ match }) {
   const [height, setHeight] = useState(360);
   const [width, setWidth] = useState(360);
 
@@ -53,7 +53,7 @@ function WidgetDebugger({}) {
     width: width,
   }
 
-  const [widget, widgetProps, widgetConfigPanel] = useWidgetFactory(Widget.Type.TEXTINPUT);
+  const [widget, widgetProps, widgetConfigPanel] = useWidgetFactory(match.params.widget);
 
   return (
     <Layout>

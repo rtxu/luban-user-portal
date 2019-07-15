@@ -53,17 +53,17 @@ function LabelInput({
   input, 
 }) {
   return (
-    <>
+    <div className={styles.labelEntry}>
       <Label {...label} />
       <AntInput 
         type={input.type}
-        placeholder={input.placeHolder} 
+        placeholder={input.placeholder} 
         value={input.value} 
         defaultValue={input.defaultValue} 
         onChange={input.onChange}
         onPressEnter={input.onPressEnter}
       />
-    </>
+    </div>
   );
 }
 
@@ -84,14 +84,14 @@ function LabelSelect({
   select, 
 }) {
   return (
-    <>
+    <div className={styles.labelEntry}>
       <Label {...label} />
       <Select style={{display: 'block'}} defaultValue={select.defaultValue}>
         { select.options.map((option) => {
           <Option value={option} key={option}>{option}</Option>
         }) }
       </Select>
-    </>
+    </div>
   );
 }
 
