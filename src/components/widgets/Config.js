@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './Config.less';
 import { 
@@ -12,8 +13,9 @@ import {
 
 // [component
 function Switch({disabled, checked, onChange, description}) {
+  const classNames = [styles.labelEntry, styles.switch];
   return (
-    <div className={styles.switch}>
+    <div className={classNames.join(' ')}>
       <AntSwitch disabled={disabled} checked={checked} onChange={onChange} />
       <span>{description}</span>
     </div>
@@ -85,21 +87,26 @@ function LabelSelect({
 }) {
   return (
     <div className={styles.labelEntry}>
-      <Label {...label} />
-      <Select style={{display: 'block'}} defaultValue={select.defaultValue}>
-        { select.options.map((option) => {
-          <Option value={option} key={option}>{option}</Option>
-        }) }
+      {label && <Label {...label} />}
+      <Select 
+        style={{display: 'block'}} 
+        defaultValue={select.defaultValue}
+        onChange={select.onChange}
+      >
+        { select.options.map((option, index) => (
+          <Select.Option value={option} key={index}>{option}</Select.Option>
+        )) }
       </Select>
     </div>
   );
 }
 
 LabelSelect.propTypes = {
-  label: PropTypes.shape(Label.propTypes).isRequired,
+  label: PropTypes.shape(Label.propTypes),
   select: PropTypes.shape({
     defaultValue: PropTypes.string,
     options: PropTypes.arrayOf(PropTypes.string).isRequired,
+    onChange: PropTypes.func.isRequired,
   }),
 };
 // component]

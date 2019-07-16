@@ -1,3 +1,4 @@
+import { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import styles from './TextInput.less';
 import { 
@@ -53,6 +54,7 @@ const ACTION_TYPE = {
   SET_LABEL_MAX_WIDTH: 'setLabelMaxWidth',
   SET_INPUT_VALUE: 'setInputValue',
   SET_INPUT_PLACEHOLDER: 'setInputPlaceholder',
+  SET_INPUT_TYPE: 'setInputType',
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -82,6 +84,14 @@ function reducer(prevState, action) {
           placeholder: action.payload,
         }
       }
+    case ACTION_TYPE.SET_INPUT_TYPE:
+      return {
+        ...prevState,
+        input: {
+          ...prevState.input,
+          type: action.payload,
+        }
+      }
     
     default:
       throw new Error(`in TextInputWidget reducer(): unexpected action type: ${action.type}`);
@@ -98,7 +108,7 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
   function onLabelMaxWidthChange(e) {
     dispatch({
       type: ACTION_TYPE.SET_LABEL_MAX_WIDTH,
-      payload: e.target.value,
+      payload: Number(e.target.value),
     });
   }
   function onInputValueChange(e) {
@@ -111,6 +121,12 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
     dispatch({
       type: ACTION_TYPE.SET_INPUT_PLACEHOLDER,
       payload: e.target.value,
+    });
+  }
+  function onInputTypeChange(newInputType) {
+    dispatch({
+      type: ACTION_TYPE.SET_INPUT_TYPE,
+      payload: newInputType,
     });
   }
 
@@ -143,6 +159,7 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
           select={{
             defaultValue: 'text',
             options: inputTypes,
+            onChange: onInputTypeChange,
           }}
         />
         <Config.LabelInput
@@ -165,7 +182,7 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
           label={{ value: '字段名最大宽度' }}
           input={{
             type: 'number',
-            value: labelMaxWidth,
+            value: String(labelMaxWidth),
             placeholder: '默认值 150',
             onChange: onLabelMaxWidthChange,
           }}
@@ -182,5 +199,12 @@ ConfigPanel.propTypes = {
 TextInput.ConfigPanel = ConfigPanel;
 TextInput.initialState = initialState;
 TextInput.reducer = reducer;
+
+TextInput.use = () => {
+  const [widgetProps, widgetDispatch] = useReducer(TextInput.reducer, TextInput.initialState);
+  return ([<TextInput {...widgetProps} />, 
+    widgetProps, 
+  <TextInput.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
+}
 
 export default TextInput;

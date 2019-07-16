@@ -3,33 +3,23 @@ import { Layout } from 'antd';
 import styles from './index.less'
 import Text from '../../components/widgets/Text';
 import TextInput from '../../components/widgets/TextInput';
+import Button from '../../components/widgets/Button';
 import Widget from '../../components/Widget';
 
 const { Sider, Content } = Layout;
 
-function useTextWidget() {
-  const [widgetProps, widgetDispatch] = useReducer(Text.reducer, Text.initialState);
-  return ([<Text {...widgetProps} />, 
-    widgetProps, 
-  <Text.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
-}
-
-function useTextInputWidget() {
-  const [widgetProps, widgetDispatch] = useReducer(TextInput.reducer, TextInput.initialState);
-  return ([<TextInput {...widgetProps} />, 
-    widgetProps, 
-  <TextInput.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
-}
-
 function useWidgetFactory(type) {
-  const textWidget = useTextWidget();
-  const textInputWidget = useTextInputWidget();
+  const textWidget = Text.use();
+  const textInputWidget = TextInput.use();
+  const buttonWidget = Button.use();
 
   switch(type) {
     case Widget.Type.TEXT:
       return textWidget;
     case Widget.Type.TEXTINPUT:
       return textInputWidget;
+    case Widget.Type.BUTTON:
+      return buttonWidget;
 
     default:
       throw new Error(`unexpected widget type: ${type}`);

@@ -1,3 +1,4 @@
+import { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Text.less';
 import { 
@@ -118,5 +119,12 @@ ConfigPanel.propTypes = {
 Text.ConfigPanel = ConfigPanel;
 Text.initialState = initialState;
 Text.reducer = reducer;
+
+Text.use = () => {
+  const [widgetProps, widgetDispatch] = useReducer(Text.reducer, Text.initialState);
+  return ([<Text {...widgetProps} />, 
+    widgetProps, 
+  <Text.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
+}
 
 export default Text;
