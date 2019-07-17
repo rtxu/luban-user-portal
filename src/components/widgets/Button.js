@@ -7,46 +7,182 @@ import {
 } from "antd";
 import Config from './Config';
 
-function Button({ text, color }) {
+const BUTTON_ACTION_OPTION_MAP = {
+  TriggerAnAction: '触发 Action',    // doing
+  OpenAnyWebPage: '打开任意网页',     // done
+  // TODO(ruitao.xu): lower priority
+  // OpenAnotherLocalPage: '打开本站其他页面',
+}
+
+const actionOptions = Object.values(BUTTON_ACTION_OPTION_MAP);
+const defaultAction = BUTTON_ACTION_OPTION_MAP.TriggerAnAction;
+
+function Button({ text, color, actionType, actionOpenAnyWebPage }) {
   const style = {
     backgroundColor: color,
     borderColor: color,
   }
+
+  const props = {}
+  switch (actionType) {
+    case BUTTON_ACTION_OPTION_MAP.TriggerAnAction:
+      // throw new Error(`not yet implemented action type: ${actionType}`);
+      break;
+    case BUTTON_ACTION_OPTION_MAP.OpenAnyWebPage:
+      props.onClick = () => {
+        if (actionOpenAnyWebPage.isOpenInNewTab) {
+          window.open(actionOpenAnyWebPage.href);
+        } else {
+          window.location.href = actionOpenAnyWebPage.href;
+        }
+      }
+      break;
+
+    default:
+      throw new Error(`when buildButtonProps: unexpected action type: ${actionType}`);
+  }
   
   return (
-    <div className={styles.widgetButton}>
-      <AntButton type='primary' style={style}>
+    <div className={styles.widgetButton} >
+      <AntButton type='primary' style={style} {...props} >
         {text}
       </AntButton>
     </div>
   );
 }
 
+function TriggerAnActionConfigPanel({}) {
+  // TODO(ruitao.xu): load already exist action
+  const options = ['新建 Action'];
+
+  // TODO(ruitao.xu): load action and redirect focus to ActionEditor
+  function onChange(value) {
+    console.log('in TriggerAnActionConfigPanel(), selected: ', value);
+  }
+
+  return (
+    <Config.LabelSelect
+      select={{
+        placeholder: '选择 Action',
+        options: options,
+        onChange: onChange,
+      }}
+    />
+  );
+}
+
+TriggerAnActionConfigPanel.propTypes = {
+}
+TriggerAnActionConfigPanel.defaultProps = {
+}
+
+function OpenAnotherLocalPageConfigPanel({ isOpenInNewTab }) {
+  // TODO(ruitao.xu): load already exist page
+  const options = ['placeholder #1', 'placeholder #2'];
+
+  // TODO(ruitao.xu): 
+  function onChange(value) {
+    console.log('in OpenAnotherLocalPageConfigPanel::onChange, selected: ', value);
+  }
+  function onIsOpenInNewTabChange(checked) {
+    console.log('in OpenAnotherLocalPageConfigPanel::onIsOpenInNewTabChange, checked: ', checked);
+  }
+
+  return (
+    <>
+      <Config.LabelSelect
+        label={{ value: '本站页面' }}
+        select={{
+          options: options,
+          onChange: onChange,
+        }}
+      />
+      <Config.Switch 
+        checked={isOpenInNewTab} 
+        onChange={onIsOpenInNewTabChange}
+        description='是否在新标签页打开' 
+      />
+    </>
+  );
+}
+
+OpenAnotherLocalPageConfigPanel.propTypes = {
+  isOpenInNewTab: PropTypes.bool,
+}
+OpenAnotherLocalPageConfigPanel.defaultProps = {
+  isOpenInNewTab: false,
+}
+
+function OpenAnyWebPageConfigPanel({ isOpenInNewTab, href, dispatch }) {
+  // TODO(ruitao.xu): 
+  function onHrefChange(e) {
+    const newHref = e.target.value;
+    console.log('in OpenAnyWebPageConfigPanel::onHrefChange, new: ', newHref);
+    dispatch({
+      type: ACTION_TYPE.OPEN_ANY_WEB_PAGE.SET_HREF,
+      payload: newHref,
+    });
+  }
+  function onIsOpenInNewTabChange(checked) {
+    console.log('in OpenAnyWebPageConfigPanel::onIsOpenInNewTabChange, checked: ', checked);
+    dispatch({
+      type: ACTION_TYPE.OPEN_ANY_WEB_PAGE.SET_IS_OPEN_IN_NEW_TAB,
+      payload: checked,
+    });
+  }
+
+  return (
+    <>
+      <Config.LabelInput
+        label={{ value: 'URL' }}
+        input={{
+          placeholder: 'https://example.com?param1=value1',
+          value: href,
+          onChange: onHrefChange,
+        }}
+      />
+      <Config.Switch 
+        checked={isOpenInNewTab} 
+        onChange={onIsOpenInNewTabChange}
+        description='是否在新标签页打开' 
+      />
+    </>
+  );
+}
+
+OpenAnyWebPageConfigPanel.propTypes = {
+  isOpenInNewTab: PropTypes.bool,
+  href: PropTypes.string,
+}
+OpenAnyWebPageConfigPanel.defaultProps = {
+  isOpenInNewTab: false,
+}
+
 Button.propTypes = {
   text: PropTypes.string.isRequired,
   color: PropTypes.string,
-  actionType: PropTypes.string,
-};
-
-const BUTTON_ACTION_OPTION_MAP = {
-  TriggerAnAction: '触发一个动作',
-  OpenAnotherLocalPage: '打开本站其他页面',
-  OpenAnyWebPage: '打开任意网页',
+  actionType: PropTypes.oneOf(actionOptions),
+  actionTriggerAnAction: PropTypes.shape(TriggerAnActionConfigPanel.propTypes),
+  actionOpenAnyWebPage: PropTypes.shape(OpenAnyWebPageConfigPanel.propTypes),
 }
-
-const actionOptions = Object.values(BUTTON_ACTION_OPTION_MAP);
-const defaultAction = BUTTON_ACTION_OPTION_MAP.TriggerAnAction;
 Button.defaultProps = {
   text: '提交',
   color: '#1EA9FB',
   actionType: defaultAction,
-};
+  actionTriggerAnAction: TriggerAnActionConfigPanel.defaultProps,
+  actionOpenAnyWebPage: OpenAnyWebPageConfigPanel.defaultProps,
+}
 
 const initialState = Button.defaultProps;
 const ACTION_TYPE = {
   SET_TEXT: 'setText',
   SET_COLOR: 'setColor',
   SET_ACTION_TYPE: 'setActionType',
+
+  OPEN_ANY_WEB_PAGE: {
+    SET_HREF: 'openAnyWebPage.setHref',
+    SET_IS_OPEN_IN_NEW_TAB: 'OpenAnyWebPage.setIsOpenInNewTab',
+  },
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -65,48 +201,30 @@ function reducer(prevState, action) {
         ...prevState,
         actionType: action.payload,
       }
+    case ACTION_TYPE.OPEN_ANY_WEB_PAGE.SET_HREF:
+      return {
+        ...prevState,
+        actionOpenAnyWebPage: {
+          ...prevState.actionOpenAnyWebPage,
+          href: action.payload,
+        },
+      }
+    case ACTION_TYPE.OPEN_ANY_WEB_PAGE.SET_IS_OPEN_IN_NEW_TAB:
+      return {
+        ...prevState,
+        actionOpenAnyWebPage: {
+          ...prevState.actionOpenAnyWebPage,
+          isOpenInNewTab: action.payload,
+        },
+      }
 
     default:
       throw new Error(`in ButtonWidget reducer(): unexpected action type: ${action.type}`);
   }
 }
 
-// TODO(ruitao.xu): begin
-function TriggerAnActionConfigPanel({ text, color, dispatch, actionType }) {
-  return (
-    <Config.LabelSelect
-      select={{
-        defaultValue: actionType,
-        options: actionOptions,
-      }}
-    />
-  );
-}
 
-function OpenAnotherLocalPageConfigPanel({ text, color, dispatch, actionType }) {
-  return (
-    <Config.LabelSelect
-      select={{
-        defaultValue: actionType,
-        options: actionOptions,
-      }}
-    />
-  );
-}
-
-function OpenAnyWebPageConfigPanel({ text, color, dispatch, actionType }) {
-  return (
-    <Config.LabelSelect
-      select={{
-        defaultValue: actionType,
-        options: actionOptions,
-      }}
-    />
-  );
-}
-// TODO(ruitao.xu): end
-
-function ConfigPanel({ text, color, dispatch, actionType }) {
+function ConfigPanel({ text, color, dispatch, actionType, actionOpenAnyWebPage }) {
   function onTextChange(e) {
     dispatch({
       type: ACTION_TYPE.SET_TEXT,
@@ -130,11 +248,11 @@ function ConfigPanel({ text, color, dispatch, actionType }) {
   function buildActionBodyConfigNode(actionType) {
     switch (actionType) {
       case BUTTON_ACTION_OPTION_MAP.TriggerAnAction:
-        return <TriggerAnActionConfigPanel />;
+        return <TriggerAnActionConfigPanel dispatch={dispatch} />;
       case BUTTON_ACTION_OPTION_MAP.OpenAnotherLocalPage:
-        return <OpenAnotherLocalPageConfigPanel />;
+        return <OpenAnotherLocalPageConfigPanel dispatch={dispatch} />;
       case BUTTON_ACTION_OPTION_MAP.OpenAnyWebPage:
-        return <OpenAnyWebPageConfigPanel />;
+        return <OpenAnyWebPageConfigPanel dispatch={dispatch} {...actionOpenAnyWebPage} />;
 
       default:
         throw new Error(`when buildActionBodyConfigNode(): unexpected action type: ${actionType}`);
@@ -164,9 +282,9 @@ function ConfigPanel({ text, color, dispatch, actionType }) {
           }}
         />
       </Panel>
-      <Panel header='动作' key='2' >
+      <Panel header='Action' key='2' >
         <Config.LabelSelect
-          label={{ value: '点击时触发(onClick)' }}
+          label={{ value: '点击时(onClick)' }}
           select={{
             defaultValue: actionType,
             options: actionOptions,

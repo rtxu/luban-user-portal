@@ -92,6 +92,7 @@ function LabelSelect({
         style={{display: 'block'}} 
         defaultValue={select.defaultValue}
         onChange={select.onChange}
+        placeholder={select.placeholder}
       >
         { select.options.map((option, index) => (
           <Select.Option value={option} key={index}>{option}</Select.Option>
@@ -107,6 +108,7 @@ LabelSelect.propTypes = {
     defaultValue: PropTypes.string,
     options: PropTypes.arrayOf(PropTypes.string).isRequired,
     onChange: PropTypes.func.isRequired,
+    placeholder: PropTypes.string,
   }),
 };
 // component]
