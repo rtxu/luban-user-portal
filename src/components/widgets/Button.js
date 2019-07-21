@@ -23,6 +23,9 @@ function Button({ text, color, actionType, actionOpenAnyWebPage }) {
     borderColor: color,
   }
 
+  // WARNING(ruitao.xu): never use `href` and `target` props
+  // If `href` is used, <AntButton> will rendered as <a> instread of <button>,
+  // which leads to unnecessary css issues
   const props = {}
   switch (actionType) {
     case BUTTON_ACTION_OPTION_MAP.TriggerAnAction:

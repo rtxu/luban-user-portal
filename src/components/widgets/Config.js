@@ -7,6 +7,7 @@ import {
   Tooltip,
   Select,
 } from "antd";
+import CmInput from './CmInput';
 
 // [layout
 // layout]
@@ -50,21 +51,12 @@ Label.propTypes = {
   tooltip: PropTypes.string,
 }
 
-function LabelInput({
-  label, 
-  input, 
-}) {
+function LabelInput({ label, input, }) {
   return (
     <div className={styles.labelEntry}>
       <Label {...label} />
-      <AntInput 
-        type={input.type}
-        placeholder={input.placeholder} 
-        value={input.value} 
-        defaultValue={input.defaultValue} 
-        onChange={input.onChange}
-        onPressEnter={input.onPressEnter}
-      />
+      {/* TODO(ruitao.xu): all config input is implmented by CodeMirror */}
+      <AntInput {...input} />
     </div>
   );
 }
@@ -81,10 +73,22 @@ LabelInput.propTypes = {
   }),
 };
 
-function LabelSelect({
-  label, 
-  select, 
-}) {
+function LabelCmInput({ label, input, }) {
+  return (
+    <div className={styles.labelEntry}>
+      <Label {...label} />
+      <CmInput {...input} />
+    </div>
+  );
+}
+
+LabelCmInput.propTypes = {
+  label: PropTypes.shape(Label.propTypes).isRequired,
+  input: PropTypes.shape(CmInput.propTypes),
+};
+
+
+function LabelSelect({ label, select, }) {
   return (
     <div className={styles.labelEntry}>
       {label && <Label {...label} />}
@@ -116,6 +120,7 @@ LabelSelect.propTypes = {
 const _ = {};
 _.Switch = Switch;
 _.LabelInput = LabelInput;
+_.LabelCmInput = LabelCmInput;
 _.LabelSelect = LabelSelect;
 
 export default _;

@@ -6,6 +6,7 @@ export default {
         { path: '/', component: '../layouts/BasicLayout' },
         { path: '/editor/:app', component: './editor/$app.js' },
         { path: '/widget_debugger/:widget', component: './widget_debugger/$widget.js' },
+        { path: '/cm_playground', component: './cm_playground.js' },
     ],
 
     /*

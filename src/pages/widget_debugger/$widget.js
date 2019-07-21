@@ -4,6 +4,7 @@ import styles from './index.less'
 import Text from '../../components/widgets/Text';
 import TextInput from '../../components/widgets/TextInput';
 import Button from '../../components/widgets/Button';
+import Table from '../../components/widgets/Table';
 import Widget from '../../components/Widget';
 
 const { Sider, Content } = Layout;
@@ -12,6 +13,7 @@ function useWidgetFactory(type) {
   const textWidget = Text.use();
   const textInputWidget = TextInput.use();
   const buttonWidget = Button.use();
+  const tableWidget = Table.use();
 
   switch(type) {
     case Widget.Type.TEXT:
@@ -20,6 +22,8 @@ function useWidgetFactory(type) {
       return textInputWidget;
     case Widget.Type.BUTTON:
       return buttonWidget;
+    case Widget.Type.TABLE:
+      return tableWidget;
 
     default:
       throw new Error(`unexpected widget type: ${type}`);

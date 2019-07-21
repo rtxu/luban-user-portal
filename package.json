@@ -16,7 +16,9 @@
     "umi-plugin-react": "^1.8.0"
   },
   "dependencies": {
+    "codemirror": "^5.48.2",
     "prop-types": "^15.7.2",
+    "react-codemirror2": "^6.0.0",
     "react-dnd": "^8.0.2",
     "react-dnd-html5-backend": "^8.0.2"
   }
