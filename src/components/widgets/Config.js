@@ -7,7 +7,7 @@ import {
   Tooltip,
   Select,
 } from "antd";
-import CmInput from './CmInput';
+import CmInput, { EvalResult } from './CmInput';
 
 // [layout
 // layout]
@@ -121,6 +121,7 @@ const _ = {};
 _.Switch = Switch;
 _.LabelInput = LabelInput;
 _.LabelCmInput = LabelCmInput;
+_.LabelCmInput.EvalResult = EvalResult;
 _.LabelSelect = LabelSelect;
 
 export default _;

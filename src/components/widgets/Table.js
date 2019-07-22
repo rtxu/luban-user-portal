@@ -34,8 +34,10 @@ function Table({ data, columns }) {
 }
 
 Table.propTypes = {
-  data: PropTypes.array.isRequired,
-  columns: PropTypes.array.isRequired,
+  rawInput: PropTypes.string,
+  rawInputEvalResult: PropTypes.shape(Config.LabelCmInput.EvalResult.propTypes),
+  data: PropTypes.array,
+  columns: PropTypes.array,
 };
 
 const demoData = [
@@ -50,25 +52,73 @@ const demoData = [
     address: '西湖区湖底公园1号',
   },
 ];
+const demoRawInput = JSON.stringify(demoData, null, 2);
 const demoColumns = genColumnsByFirstRow(demoData[0]);
 
 Table.defaultProps = {
+  rawInput: demoRawInput,
   data: demoData,
   columns: demoColumns,
 };
 
 const initialState = Table.defaultProps;
 const ACTION_TYPE = {
+  SET_RAW_INPUT: 'setRawInput',
 }
 function reducer(prevState, action) {
   switch (action.type) {
+    case ACTION_TYPE.SET_RAW_INPUT:
+      const evalResult = {
+        code: 0,
+        msg: 'ok',
+      }
+      let data = null;
+      try {
+        const obj = JSON.parse(action.payload);
+        if (Array.isArray(obj)) {
+          data = obj;
+        } else {
+          evalResult.code = 101;
+          evalResult.msg = `数据不合法。请输入一个 json array，其元素是 json object`;
+        }
+      } catch (e) {
+        evalResult.code = 102;
+        evalResult.msg = `数据不合法。请输入一个 json array，其元素是 json object`;
+      }
+      if (evalResult.code === 0) {
+        let newColumns = null;
+        if (data.length > 0) {
+          newColumns = genColumnsByFirstRow(data[0]);
+        }
+        return {
+          ...prevState,
+          rawInput: action.payload,
+          rawInputEvalResult: evalResult,
+          data: data,
+          columns: newColumns,
+        }
+      } else {
+        return {
+          ...prevState,
+          rawInput: action.payload,
+          rawInputEvalResult: evalResult,
+          data: null,
+          columns: null,
+        }
+      }
 
     default:
       throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
   }
 }
 
-function ConfigPanel({ data, columns, dispatch }) {
+function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
+  function onRawInputChange(newValue) {
+    dispatch({
+      type: ACTION_TYPE.SET_RAW_INPUT,
+      payload: newValue,
+    });
+  }
 
   const { Panel } = Collapse;
 
@@ -80,7 +130,11 @@ function ConfigPanel({ data, columns, dispatch }) {
       <Panel header='内容' key='1' >
         <Config.LabelCmInput 
           label={{ value: '数据', }}
-          input={{ value: JSON.stringify(data, null, 2), }}
+          input={{ 
+            value: rawInput, 
+            evalResult: rawInputEvalResult,
+            onChange: onRawInputChange,
+          }}
         />
       </Panel>
       <Panel header='显示选项' key='2' >
