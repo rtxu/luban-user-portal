@@ -119,6 +119,7 @@ LabelSelect.propTypes = {
 
 const _ = {};
 _.Switch = Switch;
+_.Label = Label;
 _.LabelInput = LabelInput;
 _.LabelCmInput = LabelCmInput;
 _.LabelCmInput.EvalResult = EvalResult;
