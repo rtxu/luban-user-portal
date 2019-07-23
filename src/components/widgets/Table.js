@@ -7,29 +7,60 @@ import {
   Table as AntTable,
 } from "antd";
 import Config from './Config';
+import produce from 'immer';
 
 // LATER(ruitao.xu): 单纯用 index 可能存在问题，比如两次 API 加载回来的数据第一行 key 都是 1，会导致 react 不更新数据
 function genRowKey(record, index) {
   return index;
 }
 
+function display(data, columns) {
+  const displayColumns = columns.filter(column => column.meta.visible).map(column => column.config);
+  const displayData = data.map(record => {
+    return displayColumns.reduce((newRecord, column) => {
+      newRecord[column.dataIndex] = record[column.dataIndex];
+      return newRecord;
+    }, {})
+  });
+  return [displayData, displayColumns];
+}
+
 function Table({ data, columns }) {
   const classNames = [styles.widgetTable]
+  const [displayData, displayColumns] = display(data, columns);
 
   return (
     <div className={classNames.join(' ')}>
-      <AntTable bordered rowKey={genRowKey} dataSource={data} columns={columns} />
+      <AntTable bordered rowKey={genRowKey} dataSource={displayData} columns={displayColumns} />
     </div>
   );
 }
 
-const Column = {
+const ColumnMeta = {
+  propTypes: {
+    visible: PropTypes.bool
+  },
+  defaultProps: {
+    visible: true,
+  },
+}
+
+// used by antd/Table
+const ColumnConfig = {
   propTypes: PropTypes.shape({
     title: PropTypes.string.isRequired,
     dataIndex: PropTypes.string.isRequired,
-    // colSpan = 0，则该列数据不显示
-    colSpan: PropTypes.number.isRequired,
   }),
+}
+
+const Column = {
+  propTypes: {
+    meta: PropTypes.shape(ColumnMeta.propTypes),
+    config: PropTypes.shape(ColumnConfig.propTypes),
+  },
+  defaultProps: {
+    meta: ColumnMeta.defaultProps,
+  }
 }
 
 Table.propTypes = {
@@ -43,9 +74,13 @@ function genColumnsByFirstRow(firstRow) {
   const columns = [];
   for (let key of Object.keys(firstRow)) {
     columns.push({
-      title: key,
-      dataIndex: key,
-      colSpan: 1,
+      meta: {
+        visible: true,
+      },
+      config: {
+        title: key,
+        dataIndex: key, 
+      }
     });
   }
   return columns;
@@ -65,17 +100,12 @@ const demoData = [
 ];
 const demoRawInput = JSON.stringify(demoData, null, 2);
 const demoColumns = genColumnsByFirstRow(demoData[0]);
-demoColumns[0].colSpan = 0;
-
-function deepCopyObjectArray(objArr) {
-  return objArr.map(entry => ({...entry}));
-}
 
 Table.defaultProps = {
   rawInput: demoRawInput,
   data: demoData,
   columns: demoColumns,
-  lastValidColumns: deepCopyObjectArray(demoColumns),
+  lastValidColumns: demoColumns,
 };
 
 /*
@@ -173,13 +203,10 @@ function reducer(prevState, action) {
       }
     case ACTION_TYPE.TOGGLE_COLUMN_VISIBILITY:
       const columnIndex = action.payload;
-      const newColumns = prevState.columns.map(entry => ({...entry}));
-      newColumns[columnIndex].colSpan = 1 - newColumns[columnIndex].colSpan;
-      return {
-        ...prevState,
-        columns: newColumns,
-        lastValidColumns: deepCopyObjectArray(newColumns),
-      }
+      return produce(prevState, draft => {
+        draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex].meta.visible;
+        draft.lastValidColumns = draft.columns;
+      })
 
     default:
       throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
@@ -231,15 +258,16 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
         >
           { 
             columns.map((column, index) => { 
+              const conf = column.config;
               return (
-              <Panel header={column.dataIndex} key={column.dataIndex} 
-                extra={(
-                  <ColumnVisibilityIcon 
-                    visible={column.colSpan > 0}
-                    onClick={(event) => onColumnVisibleChange(index, event)} 
-                />)}
-              >
-              </Panel>
+                <Panel header={conf.dataIndex} key={conf.dataIndex} 
+                  extra={(
+                    <ColumnVisibilityIcon 
+                      visible={column.meta.visible}
+                      onClick={(event) => onColumnVisibleChange(index, event)} 
+                  />)}
+                >
+                </Panel>
               );
             })
           }
