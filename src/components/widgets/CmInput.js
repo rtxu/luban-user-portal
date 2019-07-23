@@ -15,16 +15,23 @@ const options = {
   viewportMargin: Infinity,
 };
 
+// BUG(ruitao.xu): CodeMirror 的 cursor 每次编辑后自动跳到文本末尾，打断编辑动作
 function CmInput({ value, placeholder, onChange, evalResult }) {
   options.placeholder = placeholder;
-  let className = styles.cmEvalOk;
+  let classNames = [styles.cmEval];
   let alertNode = null;
   if (evalResult && evalResult.code !== 0) {
-    className = styles.cmEvalFail;
-    alertNode = <Alert closable message={evalResult.msg} type='error' />;
+    classNames.push(styles.cmEvalFail);
+    alertNode = (
+      <div className={styles.cmEvalMsg} >
+        <Alert closable message={evalResult.msg} type='error' />
+      </div>
+    );
+  } else {
+    classNames.push(styles.cmEvalOk);
   }
   return (
-    <div className={className} >
+    <div className={classNames.join(' ')} >
       <CodeMirror
         value={value}
         options={options}

@@ -1,24 +1,51 @@
-:global(.CodeMirror) {
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  height: auto; 
+@import '~antd/es/style/themes/default.less';
 
-  &:hover {
-    border-color: #40a9ff;
-  }
+@cmBorderWidth: 1px;
 
-  &:global(.CodeMirror-focused) {
-    border-color: #40a9ff;
-    outline: 0;
-    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-  }
-}
+.cmEval {
 
-.cmEvalOk{
-}
-
-.cmEvalFail{
   :global(.CodeMirror) {
-    border-color: red;
+    border: @cmBorderWidth solid #d9d9d9;
+    border-radius: 4px;
+    // editor height increases automatically as content increases, ref: https://codemirror.net/demo/resize.html
+    height: auto; 
+
+    &:hover {
+      border-color: #40a9ff;
+    }
+
+    &:global(.CodeMirror-focused) {
+      border-color: #40a9ff;
+      outline: 0;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+  }
+
+  .cmEvalMsg {
+    // HELPME(ruitao.xu): another solution, but not work
+    /*
+    .cmEval {
+      position: relative;
+      
+      .cmEvalResult {
+        position: absolute;
+        z-index: 1;
+      }
+    }
+    // 上述样式的结果是无需额外设置 margin-right，但是 cmEvalResult 的内容会被紧邻的 collapse-header 覆盖掉
+    */
+    position: absolute;
+    // HELPME(ruitao.xu): I donot know why `margin-right` is needed, but it works.
+    margin-right: calc(@cmBorderWidth + @collapse-content-padding);
+    z-index: 1;
+  }
+
+  &Ok {
+  }
+
+  &Fail {
+    :global(.CodeMirror) {
+      border-color: red;
+    }
   }
 }

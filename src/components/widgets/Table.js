@@ -248,6 +248,7 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
             value: rawInput, 
             evalResult: rawInputEvalResult,
             onChange: onRawInputChange,
+            // TODO(ruitao.xu): onFucus => set eval result, onBlur => clear eval result
           }}
         />
       </Panel>
