@@ -47,10 +47,10 @@ const ColumnMeta = {
 
 // used by antd/Table
 const ColumnConfig = {
-  propTypes: PropTypes.shape({
+  propTypes: {
     title: PropTypes.string.isRequired,
     dataIndex: PropTypes.string.isRequired,
-  }),
+  },
 }
 
 const Column = {
@@ -66,8 +66,9 @@ const Column = {
 Table.propTypes = {
   rawInput: PropTypes.string,
   rawInputEvalResult: PropTypes.shape(Config.LabelCmInput.EvalResult.propTypes),
-  data: PropTypes.array,
-  columns: PropTypes.arrayOf(Column.propTypes),
+  data: PropTypes.arrayOf(PropTypes.object),
+  columns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
+  lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
 };
 
 function genColumnsByFirstRow(firstRow) {
@@ -166,11 +167,11 @@ function reducer(prevState, action) {
         code: 0,
         msg: 'ok',
       }
-      let data = null;
+      let newData = [];
       try {
         const obj = JSON.parse(action.payload);
         if (Array.isArray(obj)) {
-          data = obj;
+          newData = obj;
         } else {
           evalResult.code = 101;
           evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
@@ -180,15 +181,15 @@ function reducer(prevState, action) {
         evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
       }
       if (evalResult.code === 0) {
-        let newColumns = null;
-        if (data.length > 0) {
-          newColumns = genColumnsByFirstRow(data[0]);
+        let newColumns = [];
+        if (newData.length > 0) {
+          newColumns = genColumnsByFirstRow(newData[0]);
         }
         return {
           ...prevState,
           rawInput: action.payload,
           rawInputEvalResult: evalResult,
-          data: data,
+          data: newData,
           columns: newColumns,
           lastValidColumns: mergeObjectArray(prevState.lastValidColumns, newColumns, 'dataIndex'),
         }
@@ -197,8 +198,8 @@ function reducer(prevState, action) {
           ...prevState,
           rawInput: action.payload,
           rawInputEvalResult: evalResult,
-          data: null,
-          columns: null,
+          data: [],
+          columns: [],
         }
       }
     case ACTION_TYPE.TOGGLE_COLUMN_VISIBILITY:
