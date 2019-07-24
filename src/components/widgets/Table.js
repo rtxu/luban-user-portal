@@ -158,6 +158,8 @@ const initialState = Table.defaultProps;
 const ACTION_TYPE = {
   SET_RAW_INPUT: 'setRawInput',
   TOGGLE_COLUMN_VISIBILITY: 'toggleColumnVisibility',
+  SHOW_EVAL_RESULT: 'showEvalResult',
+  HIDE_EVAL_RESULT: 'hideEvalResult',
 }
 function reducer(prevState, action) {
   const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
@@ -166,6 +168,7 @@ function reducer(prevState, action) {
       const evalResult = {
         code: 0,
         msg: 'ok',
+        visible: true,
       }
       let newData = [];
       try {
@@ -208,6 +211,20 @@ function reducer(prevState, action) {
         draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex].meta.visible;
         draft.lastValidColumns = draft.columns;
       })
+    case ACTION_TYPE.SHOW_EVAL_RESULT:
+      return produce(prevState, draft => {
+        if (draft.rawInputEvalResult) {
+          draft.rawInputEvalResult.visible = true;
+        }
+      })
+    case ACTION_TYPE.HIDE_EVAL_RESULT:
+      return {
+        ...prevState,
+        rawInputEvalResult: {
+          ...prevState.rawInputEvalResult,
+          visible: false,
+        },
+      }
 
     default:
       throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
@@ -220,10 +237,20 @@ function ColumnVisibilityIcon({visible, onClick}) {
 }
 
 function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
-  function onRawInputChange(newValue) {
+  function onRawInputChange(editor, data, newValue) {
     dispatch({
       type: ACTION_TYPE.SET_RAW_INPUT,
       payload: newValue,
+    });
+  }
+  function onShowEvalResult() {
+    dispatch({
+      type: ACTION_TYPE.SHOW_EVAL_RESULT,
+    });
+  }
+  function onHideEvalResult() {
+    dispatch({
+      type: ACTION_TYPE.HIDE_EVAL_RESULT,
     });
   }
   function onColumnVisibleChange(index, event) {
@@ -247,8 +274,10 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
           input={{ 
             value: rawInput, 
             evalResult: rawInputEvalResult,
-            onChange: onRawInputChange,
-            // TODO(ruitao.xu): onFucus => set eval result, onBlur => clear eval result
+            // ref: https://github.com/scniro/react-codemirror2
+            onBeforeChange: onRawInputChange,
+            onBlur: onHideEvalResult,
+            onCursor: onShowEvalResult,
           }}
         />
       </Panel>

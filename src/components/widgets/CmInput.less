@@ -2,24 +2,24 @@
 
 @cmBorderWidth: 1px;
 
-.cmEval {
+:global(.CodeMirror) {
+  border: @cmBorderWidth solid @normal-color;
+  border-radius: 4px;
+  // editor height increases automatically as content increases, ref: https://codemirror.net/demo/resize.html
+  height: auto; 
 
-  :global(.CodeMirror) {
-    border: @cmBorderWidth solid #d9d9d9;
-    border-radius: 4px;
-    // editor height increases automatically as content increases, ref: https://codemirror.net/demo/resize.html
-    height: auto; 
-
-    &:hover {
-      border-color: #40a9ff;
-    }
-
-    &:global(.CodeMirror-focused) {
-      border-color: #40a9ff;
-      outline: 0;
-      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-    }
+  &:global(.CodeMirror-focused) {
+    border-color: #40a9ff;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
   }
+
+  &:hover {
+    border-color: #40a9ff;
+  }
+}
+
+.cmEval {
 
   .cmEvalMsg {
     // HELPME(ruitao.xu): another solution, but not work
@@ -46,6 +46,11 @@
   &Fail {
     :global(.CodeMirror) {
       border-color: red;
+
+      &:global(.CodeMirror-focused) {
+        box-shadow: 0 0 0 2px rgba(228, 76, 76, 0.2);
+      }
+
     }
   }
 }

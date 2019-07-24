@@ -15,34 +15,32 @@ const options = {
   viewportMargin: Infinity,
 };
 
-function CmInput({ value, placeholder, onChange, evalResult }) {
+function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
   options.placeholder = placeholder;
   let classNames = [styles.cmEval];
   let alertNode = null;
   if (evalResult && evalResult.code !== 0) {
     classNames.push(styles.cmEvalFail);
-    alertNode = (
-      <div className={styles.cmEvalMsg} >
-        <Alert closable message={evalResult.msg} type='error' />
-      </div>
-    );
+    if (evalResult.visible) {
+      alertNode = (
+        <div className={styles.cmEvalMsg} >
+          <Alert closable message={evalResult.msg} type='error' />
+        </div>
+      );
+    }
   } else {
     classNames.push(styles.cmEvalOk);
   }
   return (
+    // WARNING(ruitao.xu): 
+    // 太坑了，经过测试，ControlledCodeMirror 的 onBeforeChange 是传统 <input> 组件的 onChange，
+    // 而 onChange 是 props.value 发生变化以后的 callback
+    // onChange={(editor, data, newValue) => { }}
     <div className={classNames.join(' ')} >
       <CodeMirror
         value={value}
         options={options}
-        onBeforeChange={(editor, data, newValue) => {
-          if (onChange) {
-            onChange(newValue);
-          }
-        }}
-        // WARNING(ruitao.xu): 
-        // 太坑了，经过测试，ControlledCodeMirror 的 onBeforeChange 是传统 <input> 组件的 onChange，
-        // 而 onChange 是 props.value 发生变化以后的 callback
-        // onChange={(editor, data, newValue) => { }}
+        { ...eventHandlers }
       />
       {alertNode}
     </div>
@@ -53,12 +51,12 @@ export const EvalResult = {};
 EvalResult.propTypes = {
   code: PropTypes.number.isRequired,
   msg: PropTypes.string.isRequired,
+  visible: PropTypes.bool.isRequired,
 }
 
 CmInput.propTypes = {
   value: PropTypes.string,
   placeholder: PropTypes.string,
-  onChange: PropTypes.func,
   evalResult: PropTypes.shape(EvalResult),
 }
 
