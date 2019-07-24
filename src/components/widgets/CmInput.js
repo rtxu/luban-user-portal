@@ -1,4 +1,4 @@
-import { UnControlled as CodeMirror } from 'react-codemirror2'
+import { Controlled as CodeMirror } from 'react-codemirror2'
 import PropTypes from 'prop-types';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/lib/codemirror.css';
@@ -15,7 +15,6 @@ const options = {
   viewportMargin: Infinity,
 };
 
-// BUG(ruitao.xu): CodeMirror 的 cursor 每次编辑后自动跳到文本末尾，打断编辑动作
 function CmInput({ value, placeholder, onChange, evalResult }) {
   options.placeholder = placeholder;
   let classNames = [styles.cmEval];
@@ -35,11 +34,15 @@ function CmInput({ value, placeholder, onChange, evalResult }) {
       <CodeMirror
         value={value}
         options={options}
-        onChange={(editor, data, value) => {
+        onBeforeChange={(editor, data, newValue) => {
           if (onChange) {
-            onChange(value);
+            onChange(newValue);
           }
         }}
+        // WARNING(ruitao.xu): 
+        // 太坑了，经过测试，ControlledCodeMirror 的 onBeforeChange 是传统 <input> 组件的 onChange，
+        // 而 onChange 是 props.value 发生变化以后的 callback
+        // onChange={(editor, data, newValue) => { }}
       />
       {alertNode}
     </div>
