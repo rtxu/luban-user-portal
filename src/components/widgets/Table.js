@@ -31,7 +31,15 @@ function Table({ data, columns }) {
 
   return (
     <div className={classNames.join(' ')}>
-      <AntTable bordered rowKey={genRowKey} dataSource={displayData} columns={displayColumns} />
+      <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns}
+        bordered
+        // TODO(ruitao.xu): scroll 可有效限制表格 width(x) 和 height(y)，需要根据父容器大小进行配置，以达到限定宽高的目的
+        // 360 是 debugger 的默认高度，24 是 debugger 的默认 padding
+        // y 仅负责限定 table body 的高度
+        // 75 是 table header 的高度，32 是 pagination 的高度
+        // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
+        scroll={{x: '100%', y: 360-2*24-75-32}}
+      />
     </div>
   );
 }
@@ -255,26 +263,28 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
       </Panel>
       <Panel header='列选项' key='2' >
         <Config.Label value='单列选项' />
-        <Collapse
-          defaultActiveKey={[]}
-          expandIconPosition='right'
-        >
-          { 
-            columns.map((column, index) => { 
-              const conf = column.config;
-              return (
-                <Panel header={conf.dataIndex} key={conf.dataIndex} 
-                  extra={(
-                    <ColumnVisibilityIcon 
-                      visible={column.meta.visible}
-                      onClick={(event) => toggleColumnVisibility(index, event)} 
-                  />)}
-                >
-                </Panel>
-              );
-            })
-          }
-        </Collapse>
+        <div className={styles.override} >
+          <Collapse
+            defaultActiveKey={[]}
+            expandIconPosition='left'
+          >
+            { 
+              columns.map((column, index) => { 
+                const conf = column.config;
+                return (
+                  <Panel header={conf.dataIndex} key={conf.dataIndex} showArrow={false} 
+                    extra={(
+                      <ColumnVisibilityIcon 
+                        visible={column.meta.visible}
+                        onClick={(event) => toggleColumnVisibility(index, event)} 
+                      />)}
+                  >
+                  </Panel>
+                );
+              })
+            }
+          </Collapse>
+        </div>
       </Panel>
       <Panel header='显示选项' key='3' >
       </Panel>
