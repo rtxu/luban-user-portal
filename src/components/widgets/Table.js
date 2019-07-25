@@ -127,15 +127,15 @@ function replaceObjectArr(memberArr, replaceArr, getObjId) {
 
 const initialState = Table.defaultProps;
 const ACTION_TYPE = {
-  SET_RAW_INPUT: 'setRawInput',
-  TOGGLE_COLUMN_VISIBILITY: 'toggleColumnVisibility',
-  SHOW_EVAL_RESULT: 'showEvalResult',
-  HIDE_EVAL_RESULT: 'hideEvalResult',
+  setRawInput: Symbol(),
+  toggleColumnVisibility: Symbol(),
+  showEvalResult: Symbol(),
+  hideEvalResult: Symbol(),
 }
 function reducer(prevState, action) {
-  const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
   switch (action.type) {
-    case ACTION_TYPE.SET_RAW_INPUT:
+    case ACTION_TYPE.setRawInput:
+      const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
       const evalResult = {
         code: 0,
         msg: 'ok',
@@ -179,19 +179,19 @@ function reducer(prevState, action) {
           columns: [],
         }
       }
-    case ACTION_TYPE.TOGGLE_COLUMN_VISIBILITY:
+    case ACTION_TYPE.toggleColumnVisibility:
       const columnIndex = action.payload;
       return produce(prevState, draft => {
         draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex].meta.visible;
         draft.lastValidColumns = draft.columns;
       })
-    case ACTION_TYPE.SHOW_EVAL_RESULT:
+    case ACTION_TYPE.showEvalResult:
       return produce(prevState, draft => {
         if (draft.rawInputEvalResult) {
           draft.rawInputEvalResult.visible = true;
         }
       })
-    case ACTION_TYPE.HIDE_EVAL_RESULT:
+    case ACTION_TYPE.hideEvalResult:
       return produce(prevState, draft => {
         if (draft.rawInputEvalResult) {
           draft.rawInputEvalResult.visible = false;
@@ -209,25 +209,25 @@ function ColumnVisibilityIcon({visible, onClick}) {
 }
 
 function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
-  function onRawInputChange(editor, data, newValue) {
+  function setRawInput(editor, data, newValue) {
     dispatch({
-      type: ACTION_TYPE.SET_RAW_INPUT,
+      type: ACTION_TYPE.setRawInput,
       payload: newValue,
     });
   }
-  function onShowEvalResult() {
+  function showEvalResult() {
     dispatch({
-      type: ACTION_TYPE.SHOW_EVAL_RESULT,
+      type: ACTION_TYPE.showEvalResult,
     });
   }
-  function onHideEvalResult() {
+  function hideEvalResult() {
     dispatch({
-      type: ACTION_TYPE.HIDE_EVAL_RESULT,
+      type: ACTION_TYPE.hideEvalResult,
     });
   }
-  function onColumnVisibleChange(index, event) {
+  function toggleColumnVisibility(index, event) {
     dispatch({
-      type: ACTION_TYPE.TOGGLE_COLUMN_VISIBILITY,
+      type: ACTION_TYPE.toggleColumnVisibility,
       payload: index,
     });
     event.stopPropagation();
@@ -247,9 +247,9 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
             value: rawInput, 
             evalResult: rawInputEvalResult,
             // ref: https://github.com/scniro/react-codemirror2
-            onBeforeChange: onRawInputChange,
-            onBlur: onHideEvalResult,
-            onCursor: onShowEvalResult,
+            onBeforeChange: setRawInput,
+            onBlur: hideEvalResult,
+            onCursor: showEvalResult,
           }}
         />
       </Panel>
@@ -267,7 +267,7 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
                   extra={(
                     <ColumnVisibilityIcon 
                       visible={column.meta.visible}
-                      onClick={(event) => onColumnVisibleChange(index, event)} 
+                      onClick={(event) => toggleColumnVisibility(index, event)} 
                   />)}
                 >
                 </Panel>
