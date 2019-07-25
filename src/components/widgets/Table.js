@@ -109,49 +109,20 @@ Table.defaultProps = {
   lastValidColumns: demoColumns,
 };
 
-/*
-  merge two array, when primaryKey conflicts, take baseArr[primaryKey] as result
-  baseArr: [
-    {
-      id: 1,
-      k1: '1.v1',
-      k2: '1.v2',
-    },
-    {
-      id: 2,
-      k1: '2.v1',
-      k2: '2.v2',
-    },
-  ]
-  newArr: [
-    {
-      id: 1,
-      k1: '1.v1.modified',
-      k2: '1.v2',
-    },
-    {
-      id: 3,
-      k1: '3.v1',
-      k2: '3.v2',
-    },
-  ]
-
-  return: [
-    {
-      id: 1,
-      k1: '1.v1',
-      k2: '1.v2',
-    },
-    {
-      id: 3,
-      k1: '3.v1',
-      k2: '3.v2',
-    },
-  ]
-*/
-function mergeObjectArray(baseArr, newArr, primaryKey) {
-  // TODO(ruitao.xu): impl
-  return baseArr;
+function replaceObjectArr(memberArr, replaceArr, getObjId) {
+  const replaceMap = replaceArr.reduce((result, obj) => {
+    const objId = getObjId(obj);
+    result[objId] = obj;
+    return result;
+  }, {})
+  return memberArr.map((obj) => {
+    const objId = getObjId(obj);
+    if (objId in replaceMap) {
+      return replaceMap[objId];
+    } else {
+      return obj;
+    }
+  })
 }
 
 const initialState = Table.defaultProps;
@@ -186,7 +157,10 @@ function reducer(prevState, action) {
       if (evalResult.code === 0) {
         let newColumns = [];
         if (newData.length > 0) {
-          newColumns = genColumnsByFirstRow(newData[0]);
+          newColumns = replaceObjectArr(genColumnsByFirstRow(newData[0]), 
+            prevState.lastValidColumns, 
+            (obj) => obj.config.dataIndex,
+          );
         }
         return {
           ...prevState,
@@ -194,7 +168,7 @@ function reducer(prevState, action) {
           rawInputEvalResult: evalResult,
           data: newData,
           columns: newColumns,
-          lastValidColumns: mergeObjectArray(prevState.lastValidColumns, newColumns, 'dataIndex'),
+          lastValidColumns: newColumns,
         }
       } else {
         return {
@@ -218,13 +192,11 @@ function reducer(prevState, action) {
         }
       })
     case ACTION_TYPE.HIDE_EVAL_RESULT:
-      return {
-        ...prevState,
-        rawInputEvalResult: {
-          ...prevState.rawInputEvalResult,
-          visible: false,
-        },
-      }
+      return produce(prevState, draft => {
+        if (draft.rawInputEvalResult) {
+          draft.rawInputEvalResult.visible = false;
+        }
+      })
 
     default:
       throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
