@@ -3,6 +3,27 @@
 
 .widgetTable {
   .widget();
+
+  // 超长内容下，表格样式修复
+  // 问题一：th 与 td 不对齐
+  :global(.ant-table) {
+    & table tr {
+      display: flex;
+
+      & th, & td {
+        // flex 与 width 同值，可以达到 resize 的效果
+        // 如: flex: 100 0 auto; width: 100px;
+        // width: 0; 相当于全部听从 flex 的 layout
+        flex: 1 0 auto;
+        width: 0;
+
+        word-break: break-word;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
 }
 
 // <Collapse> 里嵌套 <Collapse> 的格式修复，其他地方也可能会用到
