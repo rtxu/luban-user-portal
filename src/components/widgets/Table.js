@@ -8,6 +8,7 @@ import {
 } from "antd";
 import Config from './Config';
 import produce from 'immer';
+import OneLineOverflowText from './OneLineOverflowText';
 
 // LATER(ruitao.xu): 单纯用 index 可能存在问题，比如两次 API 加载回来的数据第一行 key 都是 1，会导致 react 不更新数据
 function genRowKey(record, index) {
@@ -25,14 +26,38 @@ function display(data, columns) {
   return [displayData, displayColumns];
 }
 
+function Cell({ record, dataIndex}) {
+  return (
+    <td>
+      <OneLineOverflowText text={String(record[dataIndex])} />
+    </td>
+  )
+}
+
 function Table({ data, columns }) {
   const classNames = [styles.widgetTable]
   const [displayData, displayColumns] = display(data, columns);
 
+  const components = {
+    body: {
+      cell: Cell,
+    },
+  }
+  const displayColumns2 = displayColumns.map(col => {
+    return {
+      ...col,
+      onCell: record => ({
+        record,
+        dataIndex: col.dataIndex,
+      }),
+    };
+  });
+
   return (
     <div className={classNames.join(' ')}>
-      <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns}
+      <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns2}
         bordered
+        components={components}
         // TODO(ruitao.xu): scroll 可有效限制表格 width(x) 和 height(y)，需要根据父容器大小进行配置，以达到限定宽高的目的
         // 360 是 debugger 的默认高度，24 是 debugger 的默认 padding
         // y 仅负责限定 table body 的高度

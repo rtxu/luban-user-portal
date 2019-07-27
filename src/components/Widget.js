@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types';
 
+// NOTICE: `Type` must be a unique description string, when drop it will be used to generate widgetId(= type + instanceId)
 export const Type = {
   TEXT: 'text',
   BUTTON: 'button',
   TABLE: 'table',
   TEXTINPUT: 'text_input',
+
+  ONE_LINE_OVERFLOW_TEXT: 'one_line_overflow_text',
 }
 
 /*

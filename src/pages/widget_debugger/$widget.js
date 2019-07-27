@@ -5,6 +5,7 @@ import Text from '../../components/widgets/Text';
 import TextInput from '../../components/widgets/TextInput';
 import Button from '../../components/widgets/Button';
 import Table from '../../components/widgets/Table';
+import OneLineOverflowText from '../../components/widgets/OneLineOverflowText';
 import Widget from '../../components/Widget';
 
 const { Sider, Content } = Layout;
@@ -14,6 +15,7 @@ function useWidgetFactory(type) {
   const textInputWidget = TextInput.use();
   const buttonWidget = Button.use();
   const tableWidget = Table.use();
+  const oneLineOverflowTextWidget = OneLineOverflowText.use();
 
   switch(type) {
     case Widget.Type.TEXT:
@@ -24,6 +26,8 @@ function useWidgetFactory(type) {
       return buttonWidget;
     case Widget.Type.TABLE:
       return tableWidget;
+    case Widget.Type.ONE_LINE_OVERFLOW_TEXT:
+      return oneLineOverflowTextWidget;
 
     default:
       throw new Error(`unexpected widget type: ${type}`);

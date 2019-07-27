@@ -1,0 +1,23 @@
+@import './widget_global.less';
+
+.widgetOneLineOverflowText {
+  .widget();
+  display: flex;
+
+  & .mightOverflow {
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  & .overflown {
+    .mightOverflow();
+  }
+
+  :global(.ant-btn-background-ghost):global(.ant-btn-link) {
+    color: #1890ff;
+  }
+  button {
+    border: none;
+  }
+}
