@@ -6,12 +6,24 @@
   "scripts": {
     "dev": "umi dev",
     "build": "umi build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "umi test",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@storybook/addon-actions": "^5.1.9",
+    "@storybook/addon-knobs": "^5.1.9",
+    "@storybook/addon-links": "^5.1.9",
+    "@storybook/addon-storyshots": "^5.1.9",
+    "@storybook/addons": "^5.1.9",
+    "@storybook/react": "^5.1.9",
+    "babel-loader": "^8.0.6",
+    "react-test-renderer": "^16.8.6",
+    "require-context.macro": "^1.1.0",
     "umi": "^2.7.0",
     "umi-plugin-react": "^1.8.0"
   },
