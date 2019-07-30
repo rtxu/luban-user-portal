@@ -1,14 +1,20 @@
 import { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import styles from './Table.less';
 import { 
   Icon, 
   Collapse,
   Table as AntTable,
 } from "antd";
-import Config from './Config';
 import produce from 'immer';
-import OneLineOverflowText from './OneLineOverflowText';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
+import styles from './Table.less';
+import Config from '../Config';
+import OneLineOverflowText from '../OneLineOverflowText';
+import ColumnCollapse from './ColumnCollapse';
+
+const { Panel } = Collapse;
 
 // LATER(ruitao.xu): 单纯用 index 可能存在问题，比如两次 API 加载回来的数据第一行 key 都是 1，会导致 react 不更新数据
 function genRowKey(record, index) {
@@ -26,9 +32,16 @@ function display(data, columns) {
   return [displayData, displayColumns];
 }
 
-function Cell({ record, dataIndex}) {
+// resizable & draggable
+function HeaderCell({ ...restProps }) {
   return (
-    <td>
+    <th {...restProps}></th>
+  )
+}
+
+function BodyCell({ record, dataIndex, ...restProps }) {
+  return (
+    <td {...restProps}>
       <OneLineOverflowText text={String(record[dataIndex])} />
     </td>
   )
@@ -40,7 +53,7 @@ function Table({ data, columns }) {
 
   const components = {
     body: {
-      cell: Cell,
+      cell: BodyCell,
     },
   }
   const displayColumns2 = displayColumns.map(col => {
@@ -63,7 +76,7 @@ function Table({ data, columns }) {
         // y 仅负责限定 table body 的高度
         // 75 是 table header 的高度，32 是 pagination 的高度
         // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
-        scroll={{x: '100%', y: 360-2*24-75-32}}
+        scroll={{x: '100%', y: 360-54-64}}
       />
     </div>
   );
@@ -165,6 +178,7 @@ const ACTION_TYPE = {
   toggleColumnVisibility: Symbol(),
   showEvalResult: Symbol(),
   hideEvalResult: Symbol(),
+  moveColumn: Symbol(),
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -231,16 +245,28 @@ function reducer(prevState, action) {
           draft.rawInputEvalResult.visible = false;
         }
       })
+    case ACTION_TYPE.moveColumn:
+      const fromIndex = action.payload.from;
+      const toIndex = action.payload.to;
+      return produce(prevState, draft => {
+        const from = prevState.columns[fromIndex];
+        draft.columns.splice(fromIndex, 1);
+        draft.columns.splice(toIndex, 0, from);
+      })
 
     default:
       throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
   }
 }
 
-function ColumnVisibilityIcon({visible, onClick}) {
-  const type = visible ? 'eye' : 'eye-invisible';
-  return <Icon type={type} onClick={onClick} />
+function ColumnCollapseContainer({ children }) {
+  return (
+    <div className={styles.removeBottomPadding} >
+      {children}
+    </div>
+  )
 }
+const DndCollapse = DragDropContext(HTML5Backend)(ColumnCollapseContainer);
 
 function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
   function setRawInput(editor, data, newValue) {
@@ -266,8 +292,15 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
     });
     event.stopPropagation();
   }
-
-  const { Panel } = Collapse;
+  function moveColumn(from, to) {
+    dispatch({
+      type: ACTION_TYPE.moveColumn,
+      payload: {
+        from: from,
+        to: to,
+      }
+    })
+  }
 
   return (
     <Collapse
@@ -289,28 +322,20 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
       </Panel>
       <Panel header='列选项' key='2' >
         <Config.Label value='单列选项' />
-        <div className={styles.override} >
-          <Collapse
-            defaultActiveKey={[]}
-            expandIconPosition='left'
-          >
-            { 
-              columns.map((column, index) => { 
-                const conf = column.config;
-                return (
-                  <Panel header={conf.dataIndex} key={conf.dataIndex} showArrow={false} 
-                    extra={(
-                      <ColumnVisibilityIcon 
-                        visible={column.meta.visible}
-                        onClick={(event) => toggleColumnVisibility(index, event)} 
-                      />)}
-                  >
-                  </Panel>
-                );
-              })
-            }
-          </Collapse>
-        </div>
+        <DndCollapse>
+          {
+            columns.map((column, index) => (
+              <ColumnCollapse 
+                key={column.config.dataIndex}
+                name={column.config.dataIndex} 
+                index={index}
+                visible={column.meta.visible}
+                visibleOnClick={toggleColumnVisibility}
+                moveColumn={moveColumn}
+              />
+            ))
+          }
+        </DndCollapse>
       </Panel>
       <Panel header='显示选项' key='3' >
       </Panel>

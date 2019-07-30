@@ -4,7 +4,7 @@ import styles from './index.less'
 import Text from '../../components/widgets/Text';
 import TextInput from '../../components/widgets/TextInput';
 import Button from '../../components/widgets/Button';
-import Table from '../../components/widgets/Table';
+import Table from '../../components/widgets/table';
 import OneLineOverflowText from '../../components/widgets/OneLineOverflowText';
 import Widget from '../../components/Widget';
 

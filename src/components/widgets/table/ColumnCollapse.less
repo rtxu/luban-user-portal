@@ -1,0 +1,49 @@
+@import '~antd/es/style/themes/default.less';
+
+.columnCollapse {
+  cursor: move;
+  background-color: #fff;
+  margin-left: -@collapse-content-padding;
+  width: calc(100% + 2 * @collapse-content-padding);
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-top: 1px solid #d9d9d9;
+
+    p {
+      margin: 0;
+    }
+    .headerTitle {
+      margin: 0;
+
+      :global(.anticon) {
+        margin-right: 5px;
+      }
+    }
+
+    :global(.anticon-eye) {
+      visibility: hidden;
+    }
+    &:hover :global(.anticon-eye) {
+      visibility: visible;
+    }
+
+    .headerTitleIcons {
+      display: flex;
+      justify-content: space-between;
+
+      :global(.anticon-eye), :global(.anticon-eye-invisible) {
+        display: flex;
+        align-items: center;
+        margin-right: 12px;
+      }
+      :global(.anticon-right) {
+        display: flex;
+        align-items: center;
+        margin-right: 5px;
+      }
+    }
+  }
+}
