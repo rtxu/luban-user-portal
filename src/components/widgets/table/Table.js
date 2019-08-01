@@ -1,7 +1,6 @@
-import { useReducer } from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { 
-  Icon, 
   Collapse,
   Table as AntTable,
 } from "antd";
@@ -266,7 +265,7 @@ function ColumnCollapseContainer({ children }) {
     </div>
   )
 }
-const DndCollapse = DragDropContext(HTML5Backend)(ColumnCollapseContainer);
+export const DndCollapse = DragDropContext(HTML5Backend)(ColumnCollapseContainer);
 
 function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
   function setRawInput(editor, data, newValue) {

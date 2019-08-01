@@ -1,4 +1,4 @@
-@import '~antd/es/style/themes/default.less';
+@import '../../../styles/antd_default.less';
 
 .columnCollapse {
   cursor: move;
@@ -15,11 +15,14 @@
     p {
       margin: 0;
     }
-    .headerTitle {
+    .headerLeftTitle {
       margin: 0;
+      display: flex;
 
       :global(.anticon) {
         margin-right: 5px;
+        display: flex;
+        align-items: center;
       }
     }
 
@@ -30,7 +33,7 @@
       visibility: visible;
     }
 
-    .headerTitleIcons {
+    .headerRightIcons {
       display: flex;
       justify-content: space-between;
 

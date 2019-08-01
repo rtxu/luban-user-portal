@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import React, { useRef } from 'react'
 import { Icon } from 'antd'
 import PropTypes from 'prop-types'
 import { useDrag, useDrop } from 'react-dnd'
@@ -67,11 +67,11 @@ function ColumnCollapse({ name, index, visible, visibleOnClick, moveColumn }) {
   return (
     <div ref={ref} style={{opacity: opacity}} className={ styles.columnCollapse } >
       <div className={ styles.header} >
-        <p className={ styles.headerTitle } >
+        <p className={ styles.headerLeftTitle } >
           <Icon type='bars' />
           {name}
         </p>
-        <p className={ styles.headerTitleIcons } >
+        <p className={ styles.headerRightIcons } >
           <Icon type={visibleIcon} onClick={(event) => visibleOnClick(index, event)} />
           <Icon type='right' />
         </p>

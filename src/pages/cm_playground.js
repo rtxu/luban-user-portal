@@ -7,6 +7,7 @@ import 'codemirror/theme/neo.css';
 import './cm_playground.less';
 import Config from '../components/widgets/Config';
 import CmInput from '../components/widgets/CmInput';
+import requireContext from 'require-context.macro';
 
 function CodeMirrorPlayGround({}) {
   return (
@@ -42,5 +43,17 @@ function CodeMirrorPlayGround({}) {
     </>
   )
 }
+
+
+// automatically import all files ending in *.stories.js
+const req = requireContext('../../src', true, /\.stories\.js$/);
+function loadStories() {
+  req.keys().forEach(filename => {
+    req(filename)
+    console.log(filename);
+  });
+}
+
+loadStories();
 
 export default CodeMirrorPlayGround;

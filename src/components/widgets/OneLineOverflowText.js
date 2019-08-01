@@ -1,4 +1,4 @@
-import { useReducer, useState, useEffect, useRef } from 'react';
+import React, { useReducer, useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styles from './OneLineOverflowText.less';
 import { 

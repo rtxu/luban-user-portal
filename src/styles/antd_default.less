@@ -1,0 +1,18 @@
+// 由于 npm run storybook 后的如下错误，暂时改为手动定义本项目所依赖的 antd 默认值 
+
+/*
+ERROR in ./src/components/widgets/CmInput.less (./node_modules/css-loader/dist/cjs.js??ref--9-1!./node_modules/less-loader/dist/cjs.js!./src/components/widgets/CmInput.less)
+Module build failed (from ./node_modules/less-loader/dist/cjs.js):
+
+
+// https://github.com/ant-design/ant-motion/issues/44
+.bezierEasingMixin();
+^
+Inline JavaScript is not enabled. Is it set in your options?
+      in /Users/rtxu/workspace/front-end/luban-user-portal/node_modules/antd/es/style/color/bezierEasing.less (line 110, column 0)
+*/
+
+// @import '~antd/es/style/themes/default.less';
+
+@collapse-content-padding: 16px;
+@normal-color: #d9d9d9;
