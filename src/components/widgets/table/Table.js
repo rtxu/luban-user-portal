@@ -40,7 +40,7 @@ function HeaderCell({ ...restProps }) {
 
 function BodyCell({ record, dataIndex, ...restProps }) {
   return (
-    <td {...restProps}>
+    <td {...restProps} /*style={{padding: '0px 8px'}} */ >
       <OneLineOverflowText text={String(record[dataIndex])} />
     </td>
   )
@@ -73,9 +73,12 @@ function Table({ data, columns }) {
         // TODO(ruitao.xu): scroll 可有效限制表格 width(x) 和 height(y)，需要根据父容器大小进行配置，以达到限定宽高的目的
         // 360 是 debugger 的默认高度，24 是 debugger 的默认 padding
         // y 仅负责限定 table body 的高度
-        // 75 是 table header 的高度，32 是 pagination 的高度
+        // 54 是 table header 的高度，64 是 pagination 的高度
         // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
         scroll={{x: '100%', y: 360-54-64}}
+        footer={() => (<div style={{height: 80, margin: -16}} ></div>)}
+        pagination={{simple: true, total: 600}}
+        size='middle'
       />
     </div>
   );
@@ -116,7 +119,7 @@ Table.propTypes = {
   lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
 };
 
-function genColumnsByFirstRow(firstRow) {
+export function genColumnsByFirstRow(firstRow) {
   const columns = [];
   for (let key of Object.keys(firstRow)) {
     columns.push({

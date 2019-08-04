@@ -23,3 +23,11 @@ storiesOf('ColumnCollapse', module)
     </div>
   ))
   .add('default', () => <ColumnCollapse {...column} {...actions} />)
+  .add('single-invisible', () => <ColumnCollapse {...{ ...column, visible: false, }} {...actions} />)
+  .add('multiple', () => (
+    <>
+      <ColumnCollapse {...{ ...column, name: 'visible', visible: true, }} {...actions} />
+      <ColumnCollapse {...{ ...column, name: 'invisible', visible: false, }} {...actions} />
+      <ColumnCollapse {...{ ...column, name: '拖我排序试试', visible: true, }} {...actions} />
+    </>
+  ))
