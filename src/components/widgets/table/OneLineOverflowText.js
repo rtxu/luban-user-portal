@@ -6,7 +6,7 @@ import {
   Tooltip,
   Button,
 } from "antd";
-import Config from './Config';
+import Config from '../Config';
 
 function OneLineOverflowText({ text }) {
   const [isOverflow, setIsOverflow] = useState(false);

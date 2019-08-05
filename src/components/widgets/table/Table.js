@@ -10,7 +10,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 
 import styles from './Table.less';
 import Config from '../Config';
-import OneLineOverflowText from '../OneLineOverflowText';
+import OneLineOverflowText from './OneLineOverflowText';
 import ColumnCollapse from './ColumnCollapse';
 import { assert } from '../../../util';
 

@@ -5,7 +5,7 @@ import Text from '../../components/widgets/Text';
 import TextInput from '../../components/widgets/TextInput';
 import Button from '../../components/widgets/Button';
 import Table from '../../components/widgets/table';
-import OneLineOverflowText from '../../components/widgets/OneLineOverflowText';
+import OneLineOverflowText from '../../components/widgets/table/OneLineOverflowText';
 import Widget from '../../components/Widget';
 
 const { Sider, Content } = Layout;
