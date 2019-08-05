@@ -29,5 +29,8 @@ module.exports = async ({ config }) => {
   console.dir(config.module.rules, { depth: null }) || config;
   */
 
+  // console.log('typeof(config.resolve.alias: ', typeof(config.resolve.alias));
+  config.resolve.alias['@'] = path.resolve(__dirname, '../src/');
+  // console.log(config.resolve.alias);
   return config;
 }

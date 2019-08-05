@@ -77,7 +77,7 @@ function Table({ data, columns }) {
         // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
         scroll={{x: '100%', y: 360-54-64}}
         footer={() => (<div style={{height: 80, margin: -16}} ></div>)}
-        pagination={{simple: true, total: 600}}
+        pagination={{simple: true, pageSizetotal: 600}}
         size='middle'
       />
     </div>
