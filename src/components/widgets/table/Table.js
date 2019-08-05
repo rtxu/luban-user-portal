@@ -12,6 +12,7 @@ import styles from './Table.less';
 import Config from '../Config';
 import OneLineOverflowText from '../OneLineOverflowText';
 import ColumnCollapse from './ColumnCollapse';
+import { assert } from '../../../util';
 
 const { Panel } = Collapse;
 
@@ -38,17 +39,57 @@ function HeaderCell({ ...restProps }) {
   )
 }
 
-function BodyCell({ record, dataIndex, ...restProps }) {
+function BodyCell({ record, dataIndex, verticalPadding, ...restProps }) {
+  const style = {
+    padding: `${verticalPadding}px 8px`,
+  }
   return (
-    <td {...restProps} /*style={{padding: '0px 8px'}} */ >
+    <td {...restProps} style={style} >
       <OneLineOverflowText text={String(record[dataIndex])} />
     </td>
   )
 }
 
-function Table({ data, columns }) {
+function calcAdaptivePageSize(height) {
+  const simplePaginationHeight = 24 + 2 * 16 /* vertical margin: 16px */;
+  // small: 8  middle: 12  default: 16
+  const middleSizeTableVerticalPadding = 12;
+  const borderHeight = 1;
+  const headerCellContentAreaHeight = 21;
+  const bodyCellContentAreaHeight = 24;
+
+  const middleSizeTableHeaderHeight = headerCellContentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
+  const restHeight = height - middleSizeTableHeaderHeight - simplePaginationHeight;
+  console.log('restHeight', restHeight);
+  const expectRowHeight = bodyCellContentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
+
+  const option1 = {}
+  option1.pageSize = Math.floor(restHeight / expectRowHeight)
+  option1.rowHeight = restHeight / option1.pageSize;
+  const option2 = {}
+  option2.pageSize = Math.ceil(restHeight / expectRowHeight)
+  option2.rowHeight = restHeight / option2.pageSize;
+
+  let answer = option1;
+  if (Math.abs(option2.rowHeight - expectRowHeight) < Math.abs(option1.rowHeight - expectRowHeight)) {
+    answer = option2;
+  }
+  const bodyCellVerticalPadding = (answer.rowHeight - bodyCellContentAreaHeight - borderHeight)/2;
+  const scrollY = height - middleSizeTableHeaderHeight - simplePaginationHeight;
+
+  return [answer.pageSize, answer.rowHeight, bodyCellVerticalPadding, scrollY]
+}
+
+function renderFooter(rowCnt, pageSize, rowHeight) {
+  assert(rowCnt < pageSize);
+  const footerHeight = rowHeight * (pageSize - rowCnt) - 2;
+  return <div style={{height: footerHeight, margin: -16}} ></div>
+}
+
+function Table({ data, columns, height }) {
   const classNames = [styles.widgetTable]
   const [displayData, displayColumns] = display(data, columns);
+  const [pageSize, rowHeight, bodyCellVerticalPadding, scrollY] = calcAdaptivePageSize(height); 
 
   const components = {
     body: {
@@ -61,6 +102,7 @@ function Table({ data, columns }) {
       onCell: record => ({
         record,
         dataIndex: col.dataIndex,
+        verticalPadding: bodyCellVerticalPadding,
       }),
     };
   });
@@ -70,14 +112,16 @@ function Table({ data, columns }) {
       <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns2}
         bordered
         components={components}
-        // TODO(ruitao.xu): scroll 可有效限制表格 width(x) 和 height(y)，需要根据父容器大小进行配置，以达到限定宽高的目的
-        // 360 是 debugger 的默认高度，24 是 debugger 的默认 padding
-        // y 仅负责限定 table body 的高度
-        // 54 是 table header 的高度，64 是 pagination 的高度
         // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
-        scroll={{x: '100%', y: 360-54-64}}
-        footer={() => (<div style={{height: 80, margin: -16}} ></div>)}
-        pagination={{simple: true, pageSizetotal: 600}}
+        scroll={{x: '100%', y: scrollY}}
+        footer={
+          displayData.length >= pageSize ? 
+            undefined : 
+            (currentPageData) => {
+              return renderFooter(displayData.length, pageSize, rowHeight)
+            }
+        }
+        pagination={{simple: true, pageSize: pageSize}}
         size='middle'
       />
     </div>
@@ -117,6 +161,7 @@ Table.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object),
   columns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
+  height: PropTypes.number.isRequired,
 };
 
 export function genColumnsByFirstRow(firstRow) {
@@ -156,6 +201,7 @@ Table.defaultProps = {
   data: demoData,
   columns: demoColumns,
   lastValidColumns: demoColumns,
+  height: 320,
 };
 
 function replaceObjectArr(memberArr, replaceArr, getObjId) {
