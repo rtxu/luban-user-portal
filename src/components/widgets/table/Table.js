@@ -55,13 +55,11 @@ function calcAdaptivePageSize(height) {
   // small: 8  middle: 12  default: 16
   const middleSizeTableVerticalPadding = 12;
   const borderHeight = 1;
-  const headerCellContentAreaHeight = 21;
-  const bodyCellContentAreaHeight = 24;
+  const contentAreaHeight = 14 /* font-size */ * 1.5 /* line-height */;
 
-  const middleSizeTableHeaderHeight = headerCellContentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
+  const middleSizeTableHeaderHeight = contentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
   const restHeight = height - middleSizeTableHeaderHeight - simplePaginationHeight;
-  console.log('restHeight', restHeight);
-  const expectRowHeight = bodyCellContentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
+  const expectRowHeight = contentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
 
   const option1 = {}
   option1.pageSize = Math.floor(restHeight / expectRowHeight)
@@ -74,7 +72,7 @@ function calcAdaptivePageSize(height) {
   if (Math.abs(option2.rowHeight - expectRowHeight) < Math.abs(option1.rowHeight - expectRowHeight)) {
     answer = option2;
   }
-  const bodyCellVerticalPadding = (answer.rowHeight - bodyCellContentAreaHeight - borderHeight)/2;
+  const bodyCellVerticalPadding = (answer.rowHeight - contentAreaHeight - borderHeight)/2;
   const scrollY = height - middleSizeTableHeaderHeight - simplePaginationHeight;
 
   return [answer.pageSize, answer.rowHeight, bodyCellVerticalPadding, scrollY]
