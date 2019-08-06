@@ -58,8 +58,17 @@ storiesOf('Table', module)
     })
     return ( <Table {...newProps} {...actions} /> )
   })
-  .add('[TODO] compact mode', () => {
-    return ( <Table {...props} {...actions} /> )
+  .add('compact mode', () => {
+    return (
+      <>
+        <p>Normal</p>
+        <Table {...props} {...actions} /> 
+        <p>Compact</p>
+        <Table {...props} isCompact={true} {...actions} /> 
+        <p>Compact, more than one page</p>
+        <Table {...props} isCompact={true} data={moreThanOnePageData} {...actions} /> 
+      </>
+    )
   })
   .add('adaptive pageSize', () => {
     return ( 

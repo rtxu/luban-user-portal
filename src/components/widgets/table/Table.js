@@ -88,7 +88,27 @@ function OverflowBodyCell({ record, dataIndex, verticalPadding, width, ...restPr
   )
 }
 
-function calcAdaptivePageSize(height) {
+function calcRowHeight(totalHeight, expectRowHeight, pageSize) {
+  if (pageSize < 1) {
+    return {
+      pageSize: 1,
+      rowHeight: expectRowHeight,
+      extraHeight: 0,
+    }
+  }
+  let extraHeight = totalHeight - expectRowHeight * pageSize;
+  const delta = Math.floor(extraHeight / pageSize);
+  const rowHeight = expectRowHeight + delta;
+  extraHeight -= delta * pageSize;
+  assert(extraHeight >= 0);
+  return {
+    pageSize,
+    rowHeight,
+    extraHeight,
+  }
+}
+
+function calcAdaptivePageSize(height, isCompact) {
   const simplePaginationHeight = 24 + 2 * 16 /* vertical margin: 16px */;
   // small: 8  middle: 12  default: 16
   const middleSizeTableVerticalPadding = 12;
@@ -97,28 +117,43 @@ function calcAdaptivePageSize(height) {
 
   const middleSizeTableHeaderHeight = contentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
   const restHeight = height - middleSizeTableHeaderHeight - simplePaginationHeight;
-  const expectRowHeight = contentAreaHeight + 2 * middleSizeTableVerticalPadding + borderHeight;
 
-  const option1 = {}
-  option1.pageSize = Math.floor(restHeight / expectRowHeight)
-  option1.rowHeight = restHeight / option1.pageSize;
-  const option2 = {}
-  option2.pageSize = Math.ceil(restHeight / expectRowHeight)
-  option2.rowHeight = restHeight / option2.pageSize;
+  let answer = {}
+  if (isCompact) {
+    const expectRowHeight = contentAreaHeight + borderHeight;
+    answer = calcRowHeight(restHeight, expectRowHeight, Math.floor(restHeight / expectRowHeight));
+  } else {
+    const expectRowHeight = contentAreaHeight + (2 * middleSizeTableVerticalPadding) + borderHeight;
+    const option1 = calcRowHeight(restHeight, expectRowHeight, Math.floor(restHeight / expectRowHeight));
+    const option2 = calcRowHeight(restHeight, expectRowHeight, Math.ceil(restHeight / expectRowHeight));
 
-  let answer = option1;
-  if (Math.abs(option2.rowHeight - expectRowHeight) < Math.abs(option1.rowHeight - expectRowHeight)) {
-    answer = option2;
+    answer = option1;
+    if (Math.abs(option2.rowHeight - expectRowHeight) < Math.abs(option1.rowHeight - expectRowHeight)) {
+      answer = option2;
+    }
   }
-  const bodyCellVerticalPadding = (answer.rowHeight - contentAreaHeight - borderHeight)/2;
-  const scrollY = height - middleSizeTableHeaderHeight - simplePaginationHeight;
+  const bodyCellVerticalPadding = (answer.rowHeight - (contentAreaHeight + borderHeight)) / 2;
+  /*
+  console.log('calcAdaptivePageSize', {
+    isCompact,
+    expectRowHeight: answer.rowHeight,
+    answer,
+    bodyCellVerticalPadding: bodyCellVerticalPadding,
+    scrollY: restHeight,
+  });
+  */
 
-  return [answer.pageSize, answer.rowHeight, bodyCellVerticalPadding, scrollY]
+  return {
+    ...answer, 
+    bodyCellVerticalPadding, 
+    scrollY: restHeight,
+  }
 }
 
-function renderFooter(rowCnt, pageSize, rowHeight) {
+function renderFooter(rowCnt, pageSize, rowHeight, extraHeight) {
   assert(rowCnt < pageSize);
-  const footerHeight = rowHeight * (pageSize - rowCnt) - 2;
+  const borderHeight = 1;
+  const footerHeight = rowHeight * (pageSize - rowCnt) - (2 * borderHeight) + extraHeight;
   return <div style={{height: footerHeight, margin: -16}} ></div>
 }
 
@@ -156,6 +191,8 @@ Table.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   height: PropTypes.number.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  isCompact: PropTypes.bool,
 };
 
 export function genColumnsByFirstRow(firstRow) {
@@ -196,6 +233,7 @@ Table.defaultProps = {
   columns: demoColumns,
   lastValidColumns: demoColumns,
   height: 320,
+  isCompact: false,
 };
 
 function replaceObjectArr(memberArr, replaceArr, getObjId) {
@@ -222,6 +260,7 @@ const ACTION_TYPE = {
   hideEvalResult: Symbol(),
   moveColumn: Symbol(),
   setColumnWidth: Symbol(),
+  setIsCompact: Symbol(),
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -301,6 +340,10 @@ function reducer(prevState, action) {
       return produce(prevState, draft => {
         draft.columns[index].config.width = width;
       })
+    case ACTION_TYPE.setIsCompact:
+      return produce(prevState, draft => {
+        draft.isCompact = action.payload;
+      })
 
     default:
       throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
@@ -316,7 +359,7 @@ function ColumnCollapseContainer({ children }) {
 }
 export const DndCollapse = DragDropContext(HTML5Backend)(ColumnCollapseContainer);
 
-function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
+function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch, isCompact }) {
   function setRawInput(editor, data, newValue) {
     dispatch({
       type: ACTION_TYPE.setRawInput,
@@ -349,6 +392,12 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
       }
     })
   }
+  function setIsCompact(checked) {
+    dispatch({
+      type: ACTION_TYPE.setIsCompact,
+      payload: checked,
+    })
+  }
 
   return (
     <Collapse
@@ -366,6 +415,11 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
             onBlur: hideEvalResult,
             onCursor: showEvalResult,
           }}
+        />
+        <Config.Switch 
+          checked={isCompact} 
+          onChange={setIsCompact}
+          description='紧凑模式' 
         />
       </Panel>
       <Panel header='列选项' key='2' >
@@ -391,10 +445,10 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
   );
 }
 
-function Table({ data, columns, height, dispatch }) {
+function Table({ data, columns, height, dispatch, isCompact }) {
   const classNames = [styles.widgetTable]
   const [displayData, displayColumns] = display(data, columns);
-  const [pageSize, rowHeight, bodyCellVerticalPadding, scrollY] = calcAdaptivePageSize(height); 
+  const {pageSize, rowHeight, bodyCellVerticalPadding, scrollY, extraHeight} = calcAdaptivePageSize(height, isCompact); 
 
   const components = {
     header: {
@@ -438,14 +492,16 @@ function Table({ data, columns, height, dispatch }) {
         components={components}
         // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
         scroll={{x: '100%', y: scrollY}}
+        /*
         footer={
           displayData.length >= pageSize ? 
             undefined : 
             (currentPageData) => {
-              return renderFooter(displayData.length, pageSize, rowHeight)
+              return renderFooter(displayData.length, pageSize, rowHeight, extraHeight)
             }
         }
-        pagination={{simple: true, pageSize: pageSize}}
+        */
+        pagination={displayData.length >= pageSize ? {simple: true, pageSize: pageSize} : false}
         size='middle'
       />
     </div>
