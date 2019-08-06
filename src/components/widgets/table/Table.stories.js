@@ -40,6 +40,7 @@ export const props = {
 }
 
 export const actions = {
+  dispatch: action('dispatch'),
 };
 
 storiesOf('Table', module)
@@ -84,9 +85,24 @@ storiesOf('Table', module)
       </>
     )
   })
-  .add('[TODO] different column width', () => {
+  .add('different column width', () => {
+    const props_width_100_200_300 = produce(props, draft => {
+      draft.columns.map((col, index) => {
+        draft.columns[index].config.width = (index + 1) * 100;
+      })
+    })
+    const props_width_none_200_300 = produce(props_width_100_200_300, draft => {
+      delete draft.columns[0].config.width;
+    })
+
     return ( 
       <>
+        <p>default: no specific width</p>
+        <Table {...props} {...actions} /> 
+        <p>width=[100, 200, 300]</p>
+        <Table {...props_width_100_200_300} {...actions} /> 
+        <p>width=[none, 200, 300]</p>
+        <Table {...props_width_none_200_300} {...actions} /> 
       </>
     )
   })

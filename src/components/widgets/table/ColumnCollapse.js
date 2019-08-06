@@ -43,7 +43,7 @@ const handleHoverThrottled = throttle((ref, index, item, monitor, moveColumn) =>
   // but it's good here for the sake of performance
   // to avoid expensive index searches.
   item.index = hoverIndex
-})
+}, 16)
 
 function ColumnCollapse({ name, index, visible, visibleOnClick, moveColumn }) {
   const dndType = 'table-column'

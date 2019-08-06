@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useRef, useReducer, useState, } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Collapse,
@@ -13,6 +13,8 @@ import Config from '../Config';
 import OneLineOverflowText from './OneLineOverflowText';
 import ColumnCollapse from './ColumnCollapse';
 import { assert } from '../../../util';
+import { Resizable } from 'react-resizable';
+import throttle from 'lodash.throttle';
 
 const { Panel } = Collapse;
 
@@ -32,15 +34,51 @@ function display(data, columns) {
   return [displayData, displayColumns];
 }
 
-// resizable & draggable
-function HeaderCell({ ...restProps }) {
-  return (
-    <th {...restProps}></th>
-  )
+function getCellStyle(width) {
+  let style = {}
+  if (width) {
+    style = {
+      flex: `${width} 0 auto`,
+      width: `${width}px`,
+      maxWidth: `${width}px`,
+    }
+  }
+  return style;
 }
 
-function BodyCell({ record, dataIndex, verticalPadding, ...restProps }) {
+function ResizableHeaderCell(props) {
+  const { onSetColumnWidth, width, ...restProps } = props;
+  const ref = useRef(null);
+  const [start, setStart] = useState(0);
+  const handleResizeStart = (e, { size }) => {
+    setStart(size.width);
+  }
+  const handleResize = throttle((e, { size }) => {
+    const delta = size.width - start;
+    if (delta != 0) {
+      const curWidth = ref.current.getBoundingClientRect().width;
+      onSetColumnWidth(curWidth + delta);
+    }
+    setStart(start + delta);
+  }, 16)
+
+  return (
+    <Resizable
+      width={100}
+      height={0}
+      axis={'x'}
+      onResize={handleResize}
+      onResizeStart={handleResizeStart}
+      draggableOpts={{ enableUserSelectHack: false }}
+    >
+      <th ref={ref} {...restProps} style={getCellStyle(width)} />
+    </Resizable>
+  );
+}
+
+function OverflowBodyCell({ record, dataIndex, verticalPadding, width, ...restProps }) {
   const style = {
+    ...getCellStyle(width),
     padding: `${verticalPadding}px 8px`,
   }
   return (
@@ -82,48 +120,6 @@ function renderFooter(rowCnt, pageSize, rowHeight) {
   assert(rowCnt < pageSize);
   const footerHeight = rowHeight * (pageSize - rowCnt) - 2;
   return <div style={{height: footerHeight, margin: -16}} ></div>
-}
-
-function Table({ data, columns, height }) {
-  const classNames = [styles.widgetTable]
-  const [displayData, displayColumns] = display(data, columns);
-  const [pageSize, rowHeight, bodyCellVerticalPadding, scrollY] = calcAdaptivePageSize(height); 
-
-  const components = {
-    body: {
-      cell: BodyCell,
-    },
-  }
-  const displayColumns2 = displayColumns.map(col => {
-    return {
-      ...col,
-      onCell: record => ({
-        record,
-        dataIndex: col.dataIndex,
-        verticalPadding: bodyCellVerticalPadding,
-      }),
-    };
-  });
-
-  return (
-    <div className={classNames.join(' ')}>
-      <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns2}
-        bordered
-        components={components}
-        // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
-        scroll={{x: '100%', y: scrollY}}
-        footer={
-          displayData.length >= pageSize ? 
-            undefined : 
-            (currentPageData) => {
-              return renderFooter(displayData.length, pageSize, rowHeight)
-            }
-        }
-        pagination={{simple: true, pageSize: pageSize}}
-        size='middle'
-      />
-    </div>
-  );
 }
 
 const ColumnMeta = {
@@ -225,6 +221,7 @@ const ACTION_TYPE = {
   showEvalResult: Symbol(),
   hideEvalResult: Symbol(),
   moveColumn: Symbol(),
+  setColumnWidth: Symbol(),
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -298,6 +295,11 @@ function reducer(prevState, action) {
         const from = prevState.columns[fromIndex];
         draft.columns.splice(fromIndex, 1);
         draft.columns.splice(toIndex, 0, from);
+      })
+    case ACTION_TYPE.setColumnWidth:
+      const { index, width } = action.payload;
+      return produce(prevState, draft => {
+        draft.columns[index].config.width = width;
       })
 
     default:
@@ -389,6 +391,68 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch }) {
   );
 }
 
+function Table({ data, columns, height, dispatch }) {
+  const classNames = [styles.widgetTable]
+  const [displayData, displayColumns] = display(data, columns);
+  const [pageSize, rowHeight, bodyCellVerticalPadding, scrollY] = calcAdaptivePageSize(height); 
+
+  const components = {
+    header: {
+      cell: ResizableHeaderCell,
+    },
+    body: {
+      cell: OverflowBodyCell,
+    },
+  }
+
+  const setColumnWidth = index => (newWidth) => {
+    dispatch({
+      type: ACTION_TYPE.setColumnWidth,
+      payload: {
+        index,
+        width: newWidth,
+      },
+    })
+  };
+
+  const displayColumns2 = displayColumns.map((col, index) => {
+    return {
+      ...col,
+      onCell: record => ({
+        record,
+        dataIndex: col.dataIndex,
+        verticalPadding: bodyCellVerticalPadding,
+        width: col.width,
+      }),
+      onHeaderCell: column => ({
+        width: column.width,
+        onSetColumnWidth: setColumnWidth(index),
+      }),
+    };
+  });
+
+  return (
+    <div className={classNames.join(' ')}>
+      <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns2}
+        bordered
+        components={components}
+        // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
+        scroll={{x: '100%', y: scrollY}}
+        footer={
+          displayData.length >= pageSize ? 
+            undefined : 
+            (currentPageData) => {
+              return renderFooter(displayData.length, pageSize, rowHeight)
+            }
+        }
+        pagination={{simple: true, pageSize: pageSize}}
+        size='middle'
+      />
+    </div>
+  );
+}
+
+
 ConfigPanel.propTypes = {
   ...Table.PropTypes,
   dispatch: PropTypes.func.isRequired,
@@ -399,7 +463,7 @@ Table.reducer = reducer;
 
 Table.use = () => {
   const [widgetProps, widgetDispatch] = useReducer(Table.reducer, Table.initialState);
-  return ([<Table {...widgetProps} />, 
+  return ([<Table {...widgetProps} dispatch={widgetDispatch} />, 
     widgetProps, 
   <Table.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
 }

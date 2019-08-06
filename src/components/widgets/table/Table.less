@@ -30,3 +30,18 @@
 .removeBottomPadding {
   margin-bottom: -@collapse-content-padding;
 }
+
+:global(.react-resizable) {
+  position: relative;
+  background-clip: padding-box;
+
+  & :global(.react-resizable-handle) {
+    position: absolute;
+    width: 50px;
+    height: 100%;
+    bottom: 0;
+    right: -25px;
+    cursor: col-resize;
+    z-index: 1;
+  }
+}
