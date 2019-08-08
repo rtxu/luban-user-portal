@@ -27,6 +27,6 @@ export default {
   ],
 
   chainWebpack(config, { webpack }) {
-    console.log('==== config.entryPoints.store: ', config.entryPoints.store);
+    // console.dir(config.module.rules);
   },
 };
