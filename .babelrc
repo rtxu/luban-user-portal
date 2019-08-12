@@ -1,0 +1,4 @@
+{
+  // ref: https://www.learnstorybook.com/react/en/simple-component/
+  "plugins": ["macros"]
+}
