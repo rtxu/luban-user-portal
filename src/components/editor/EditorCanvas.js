@@ -2,30 +2,15 @@ import React, { useState, useEffect, useLayoutEffect, useReducer } from 'react';
 import {
   Button,
 } from 'antd';
-import styles from './EditorCanvas.less';
-import { useDrag, useDrop } from 'react-dnd'
-import DndItemTypes, {isResizeHandle} from './DndItemTypes';
+import { useDrop } from 'react-dnd'
 import PropTypes from 'prop-types';
-import { getEmptyImage } from "react-dnd-html5-backend";
 import throttle from 'lodash.throttle';
+import WidgetBox from './WidgetBox';
+import { CSS, CANVAS } from './Constant';
+import styles from './EditorCanvas.less';
+import DndItemTypes, {isResizeHandle} from './DndItemTypes';
 
 const canvasId = 'canvas';
-
-// The following constants come from css. 
-// BE CAREFUL: Change it as css changes.
-const CSS = {
-  resizeHandlePadding: 2,
-  widgetBoxHPadding: 6,
-  widgetBoxVPadding: 5.5,
-
-  dotWidth: 2,
-}
-
-const CANVAS = {
-  columnCnt: 12,
-  rowHeight: 40,
-  minHeight: 450,
-}
 
 const Grid = ({ canvasHeight, canvasColumnWidth }) => {
   const height = canvasHeight + 2 * CANVAS.rowHeight;
@@ -79,119 +64,64 @@ HoverWidgetBox.propTypes = {
   canvasColumnWidth: PropTypes.number.isRequired,
 };
 
-const rhType2StyleMap = {
-  [DndItemTypes.RH_LEFT_TOP]: styles.resizeLeftTop,
-  [DndItemTypes.RH_RIGHT_TOP]: styles.resizeRightTop,
-  [DndItemTypes.RH_RIGHT_BOTTOM]: styles.resizeRightBottom,
-  [DndItemTypes.RH_LEFT_BOTTOM]: styles.resizeLeftBottom,
+const ACTION_TYPE = {
+  addOrUpdate: Symbol(),
+  setHover: Symbol(),
+  clearHover: Symbol(),
 }
+function useWidgetsReducer() {
+  const initialWidgets = {};
+  function reducer(widgets, action) {
+    switch (action.type) {
+      case ACTION_TYPE.addOrUpdate:
+        const newWidget = { ...action.widget }
+        if ('id' in action.widget ) {
+          // update
 
-const ResizeHandle = React.memo(({type, position, widget}) => {
-  const [{ isDragging }, drag, preview] = useDrag({
-    item: {type: type, widget: widget},
-    collect: monitor => ({
-      isDragging: monitor.isDragging(),
-    }),
-  })
+        } else {
+          // add
+          let maxInstanceId = 0;
+          for (let widgetId of Object.keys(widgets)) {
+            const widget = widgets[widgetId];
+            if (widget.type === action.widget.type) {
+              if (widget.instanceId > maxInstanceId) {
+                maxInstanceId = widget.instanceId;
+              }
+            }
+          }
+          maxInstanceId++;
+          newWidget.instanceId = maxInstanceId;
+          newWidget.id = newWidget.type + newWidget.instanceId;
+        }
+        return {
+          ...widgets, 
+          [newWidget.id]: newWidget,
+        };
 
-  useEffect(() => {
-    preview(getEmptyImage());
-  }, [])
+      case ACTION_TYPE.setHover:
+        return {
+          ...widgets,
+          [action.widgetId]: {
+            ...widgets[action.widgetId],
+            isHover: true,
+          },
+        };
+      case ACTION_TYPE.clearHover:
+        return {
+          ...widgets,
+          [action.widgetId]: {
+            ...widgets[action.widgetId],
+            isHover: false,
+          },
+        };
 
-  return (
-    <div ref={drag} className={styles.resizeHandle} style={ position }>
-      <div className={rhType2StyleMap[type]}>
-        <div className={styles.resizeIcon} />
-      </div>
-    </div>
-  )
-});
-
-const WidgetBox = React.memo((props) => {
-  const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, isHover, id } = props;
-  const [{ isDragging }, drag, preview] = useDrag({
-    item: props,
-    collect: monitor => ({
-      isDragging: monitor.isDragging(),
-    }),
-  })
-
-  useEffect(() => {
-    preview(getEmptyImage());
-  }, [])
-
-  console.log('WigetBox', gridLeft, gridTop, gridHeight, gridWidth, id );
-  const top = gridTop * CANVAS.rowHeight;
-  const left = gridLeft * canvasColumnWidth;
-  const style = {
-    /*
-    // try to optimize performance, use transform instead of top/left, no obvious effect
-    top: gridTop * CANVAS.rowHeight,
-    left: gridLeft * canvasColumnWidth,
-    */
-    transform: `translate(${left}px, ${top}px)`,
-    height: gridHeight * CANVAS.rowHeight,
-    width: gridWidth * canvasColumnWidth,
+      default:
+        throw new Error(`unexpected action type: ${action.type}`);
+    }
   }
-  const { resizeHandlePadding, widgetBoxHPadding: boxHPadding, widgetBoxVPadding: boxVPadding } = CSS;
-  const resizeHandlePositions = {
-    [DndItemTypes.RH_LEFT_TOP] : {
-      transform: `translate(${0-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
-    },
-    [DndItemTypes.RH_RIGHT_TOP] : {
-      transform: `translate(${style.width-boxHPadding-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
-    },
-    [DndItemTypes.RH_RIGHT_BOTTOM]: {
-      transform: `translate(${style.width-boxHPadding-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
-    },
-    [DndItemTypes.RH_LEFT_BOTTOM]: {
-      transform: `translate(${0-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
-    },
-  }
-  if (isDragging || isHover) {
-    style.display = 'none';
-  }
-  return (
-    <div ref={drag} className={styles.widgetBox} style={style} >
-      {/* the widget */}
-      <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
 
-      <ResizeHandle 
-        widget={ props }
-        type={DndItemTypes.RH_LEFT_TOP} 
-        position={resizeHandlePositions[DndItemTypes.RH_LEFT_TOP]} />
-      <ResizeHandle 
-        widget={ props }
-        type={DndItemTypes.RH_RIGHT_TOP} 
-        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_TOP]} />
-      <ResizeHandle 
-        widget={ props }
-        type={DndItemTypes.RH_RIGHT_BOTTOM} 
-        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_BOTTOM]} />
-      <ResizeHandle 
-        widget={ props }
-        type={DndItemTypes.RH_LEFT_BOTTOM} 
-        position={resizeHandlePositions[DndItemTypes.RH_LEFT_BOTTOM]} />
-
-    </div>
-  )
-});
-
-WidgetBox.propTypes = {
-  type: PropTypes.string.isRequired,       // widget type
-  instanceId: PropTypes.number.isRequired, // widget instance id of the same type
-  id: PropTypes.string.isRequired,         // type+instanceId
-  gridLeft: PropTypes.number.isRequired,
-  gridTop: PropTypes.number.isRequired,
-  gridWidth: PropTypes.number.isRequired,
-  gridHeight: PropTypes.number.isRequired,
-  canvasColumnWidth: PropTypes.number.isRequired,
-  isHover: PropTypes.bool,
-};
-
-WidgetBox.defaultProps = {
-  isHover: false,
-};
+  return useReducer(reducer, initialWidgets);
+}
 
 function getCanvasOriginOffsetByDOM() {
   const canvas = document.getElementById(canvasId);
@@ -226,65 +156,6 @@ function overlap(newWidget, widgets) {
     }
   }
   return false;
-}
-
-const ACTION_TYPE = {
-  ADD_OR_UPDATE: 'addOrUpdate',
-  SET_HOVER: 'setHover',
-  CLEAR_HOVER: 'clearHover',
-}
-function useWidgetsReducer() {
-  const initialWidgets = {};
-  function reducer(widgets, action) {
-    switch (action.type) {
-      case ACTION_TYPE.ADD_OR_UPDATE:
-        const newWidget = { ...action.widget }
-        if ('id' in action.widget ) {
-          // update
-
-        } else {
-          // add
-          let maxInstanceId = 0;
-          for (let widgetId of Object.keys(widgets)) {
-            const widget = widgets[widgetId];
-            if (widget.type === action.widget.type) {
-              if (widget.instanceId > maxInstanceId) {
-                maxInstanceId = widget.instanceId;
-              }
-            }
-          }
-          maxInstanceId++;
-          newWidget.instanceId = maxInstanceId;
-          newWidget.id = newWidget.type + newWidget.instanceId;
-        }
-        return {
-          ...widgets, 
-          [newWidget.id]: newWidget,
-        };
-
-      case ACTION_TYPE.SET_HOVER:
-        return {
-          ...widgets,
-          [action.widgetId]: {
-            ...widgets[action.widgetId],
-            isHover: true,
-          },
-        };
-      case ACTION_TYPE.CLEAR_HOVER:
-        return {
-          ...widgets,
-          [action.widgetId]: {
-            ...widgets[action.widgetId],
-            isHover: false,
-          },
-        };
-
-      default:
-        throw new Error(`unexpected action type: ${action.type}`);
-    }
-  }
-
-  return useReducer(reducer, initialWidgets);
 }
 
 function checkBoundary(widget) {
@@ -422,7 +293,7 @@ function EditorCanvas({}) {
     setHoverWidget(widget);
     if (widget && 'id' in widget) {
       dispatch({
-        type: ACTION_TYPE.SET_HOVER,
+        type: ACTION_TYPE.setHover,
         widgetId: widget.id,
       });
     }
@@ -431,7 +302,7 @@ function EditorCanvas({}) {
     handleHoverThrottled.cancel();
     if (hoverWidget && 'id' in hoverWidget) {
       dispatch({
-        type: ACTION_TYPE.CLEAR_HOVER,
+        type: ACTION_TYPE.clearHover,
         widgetId: hoverWidget.id,
       });
     }
@@ -444,7 +315,7 @@ function EditorCanvas({}) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
       console.log('dropItem:', newWidget);
       dispatch({ 
-        type: ACTION_TYPE.ADD_OR_UPDATE,
+        type: ACTION_TYPE.addOrUpdate,
         widget: newWidget,
       })
 

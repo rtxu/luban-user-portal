@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useReducer } from 'react';
 import { Layout} from 'antd';
 import ControPanel from '../../components/editor/ControlPanel';
 import ModelBrowser from '../../components/editor/ModelBrowser';
