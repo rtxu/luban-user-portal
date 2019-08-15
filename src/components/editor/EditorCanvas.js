@@ -5,6 +5,7 @@ import {
 import { useDrop } from 'react-dnd'
 import PropTypes from 'prop-types';
 import throttle from 'lodash.throttle';
+import { connect } from 'dva';
 import WidgetBox from './WidgetBox';
 import { CSS, CANVAS } from './Constant';
 import styles from './EditorCanvas.less';
@@ -63,65 +64,6 @@ HoverWidgetBox.propTypes = {
   className: PropTypes.string.isRequired,
   canvasColumnWidth: PropTypes.number.isRequired,
 };
-
-const ACTION_TYPE = {
-  addOrUpdate: Symbol(),
-  setHover: Symbol(),
-  clearHover: Symbol(),
-}
-function useWidgetsReducer() {
-  const initialWidgets = {};
-  function reducer(widgets, action) {
-    switch (action.type) {
-      case ACTION_TYPE.addOrUpdate:
-        const newWidget = { ...action.widget }
-        if ('id' in action.widget ) {
-          // update
-
-        } else {
-          // add
-          let maxInstanceId = 0;
-          for (let widgetId of Object.keys(widgets)) {
-            const widget = widgets[widgetId];
-            if (widget.type === action.widget.type) {
-              if (widget.instanceId > maxInstanceId) {
-                maxInstanceId = widget.instanceId;
-              }
-            }
-          }
-          maxInstanceId++;
-          newWidget.instanceId = maxInstanceId;
-          newWidget.id = newWidget.type + newWidget.instanceId;
-        }
-        return {
-          ...widgets, 
-          [newWidget.id]: newWidget,
-        };
-
-      case ACTION_TYPE.setHover:
-        return {
-          ...widgets,
-          [action.widgetId]: {
-            ...widgets[action.widgetId],
-            isHover: true,
-          },
-        };
-      case ACTION_TYPE.clearHover:
-        return {
-          ...widgets,
-          [action.widgetId]: {
-            ...widgets[action.widgetId],
-            isHover: false,
-          },
-        };
-
-      default:
-        throw new Error(`unexpected action type: ${action.type}`);
-    }
-  }
-
-  return useReducer(reducer, initialWidgets);
-}
 
 function getCanvasOriginOffsetByDOM() {
   const canvas = document.getElementById(canvasId);
@@ -281,10 +223,40 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
   setter(newHeight);
 }
 
-function EditorCanvas({}) {
+const NS = 'widgets';
+const mapStateToProps = (state) => {
+  const widgets = state[NS];
+  return {
+    widgets,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onSetHover: (widgetId) => {
+      dispatch({
+        type: `${NS}/setHover`,
+        widgetId,
+      });
+    },
+    onClearHover: (widgetId) => {
+      dispatch({
+        type: `${NS}/clearHover`,
+        widgetId,
+      });
+    },
+    addOrUpdate: (newWidget) => {
+      dispatch({ 
+        type: `${NS}/addOrUpdate`,
+        widget: newWidget,
+      });
+    },
+  };
+};
+
+function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate }) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
-  const [ widgets, dispatch ] = useWidgetsReducer();
   const [ hoverWidget, setHoverWidget ] = useState(null);
   const [ canvasHeight, setCanvasHeight ] = useState(CANVAS.minHeight);
   const [ canvasColumnWidth, setCanvasColumnWidth ] = useState(0);
@@ -292,19 +264,13 @@ function EditorCanvas({}) {
   const setHover = (widget) => {
     setHoverWidget(widget);
     if (widget && 'id' in widget) {
-      dispatch({
-        type: ACTION_TYPE.setHover,
-        widgetId: widget.id,
-      });
+      onSetHover(widget.id);
     }
   }
   const clearHover = () => {
     handleHoverThrottled.cancel();
     if (hoverWidget && 'id' in hoverWidget) {
-      dispatch({
-        type: ACTION_TYPE.clearHover,
-        widgetId: hoverWidget.id,
-      });
+      onClearHover(hoverWidget.id);
     }
     setHoverWidget(null);
   }
@@ -314,11 +280,7 @@ function EditorCanvas({}) {
     drop(item, monitor) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
       console.log('dropItem:', newWidget);
-      dispatch({ 
-        type: ACTION_TYPE.addOrUpdate,
-        widget: newWidget,
-      })
-
+      addOrUpdate(newWidget);
       return undefined
     },
     canDrop(item, monitor) {
@@ -418,4 +380,4 @@ function EditorCanvas({}) {
   )
 }
 
-export default EditorCanvas;
+export default connect(mapStateToProps, mapDispatchToProps)(EditorCanvas);
