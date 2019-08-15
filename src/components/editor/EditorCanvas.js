@@ -131,6 +131,14 @@ function checkBoundary(widget) {
   return result;
 }
 
+/* TODO(ruitao.xu): 目前的 calcNewWidget 主要处理两种场景
+  1. 创建 Widget，首次从 WidgetPicker 拖拽到 EditorCanvas 之时。
+  2. resize WidgetBox 之时
+
+  但是并未考虑在 EditorCanvas 之内移动的状态，此时因为 Widget 比较大，
+  而用户拖拽的点可能距离 Widget 的左上顶点较远，如果仍以左上顶点作为 
+  drop position，体验不好。用拖拽的相对距离调整顶点位置体验更好。
+*/
 function calcNewWidget(item, monitor, canvasColumnWidth) {
   if (isResizeHandle(item.type)) {
     const delta = monitor.getDifferenceFromInitialOffset();
@@ -254,6 +262,9 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
+// TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid
+// TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
+// 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
 function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate }) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
