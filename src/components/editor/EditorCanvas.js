@@ -255,8 +255,24 @@ const mapDispatchToProps = (dispatch) => {
     },
     addOrUpdate: (newWidget) => {
       dispatch({ 
-        type: `${NS}/addOrUpdate`,
-        widget: newWidget,
+        type: `${NS}/saveWidgets`,
+        payload: {
+          userId: 'user1',
+          appId: 'app1',
+          targetAction: {
+            type: `addOrUpdate`,
+            widget: newWidget,
+          },
+        },
+      });
+    },
+    loadWidgets: () => {
+      dispatch({
+        type: `${NS}/loadWidgets`,
+        payload: {
+          userId: 'user1',
+          appId: 'app1',
+        },
       });
     },
   };
@@ -265,7 +281,7 @@ const mapDispatchToProps = (dispatch) => {
 // TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid
 // TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
-function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate }) {
+function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate, loadWidgets }) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
   const [ hoverWidget, setHoverWidget ] = useState(null);
@@ -364,6 +380,10 @@ function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate }) {
       window.removeEventListener('resize', updateCanvasColumnWidth);
     }
   }, [])
+
+  useEffect(() => {
+    loadWidgets();
+  }, []);
 
   const toggleGrid = () => {
     setDragging(!dragging);

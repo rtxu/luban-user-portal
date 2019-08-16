@@ -24,7 +24,7 @@
     "babel-loader": "^8.0.6",
     "react-test-renderer": "^16.8.6",
     "require-context.macro": "^1.1.0",
-    "umi": "^2.7.0",
+    "umi": "^2.8.18",
     "umi-plugin-react": "^1.8.0"
   },
   "dependencies": {
