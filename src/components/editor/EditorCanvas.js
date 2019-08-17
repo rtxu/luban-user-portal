@@ -374,16 +374,15 @@ function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate, loadWidg
     // 
     // solution#2(current): workaround, but I DONOT know why
     //  method: add 500ms delay to the first update
-    setTimeout(updateCanvasColumnWidth , 500);
+    setTimeout(() => {
+      updateCanvasColumnWidth();
+      loadWidgets();
+    }, 500);
     window.addEventListener('resize', updateCanvasColumnWidth);
     return () => {
       window.removeEventListener('resize', updateCanvasColumnWidth);
     }
   }, [])
-
-  useEffect(() => {
-    loadWidgets();
-  }, []);
 
   const toggleGrid = () => {
     setDragging(!dragging);
