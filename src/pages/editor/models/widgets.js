@@ -14,20 +14,17 @@ export default {
         payload: resp,
       });
     },
-    *saveWidgets(action, sagaEffects) {
-      const { call, put } = sagaEffects;
+    saveWidgets: [function *(action, sagaEffects) {
+      const { call, put, select } = sagaEffects;
       const { userId, appId, targetAction } = action.payload;
       yield put(targetAction);
-      // TODO(ruitao.xu): better way to getState?
-      const widgets = window.g_app._store.getState()['widgets'];
+      const widgets = yield select(state => state.widgets);
 
       const resp = yield call(widgetsService.saveWidgets, userId, appId, widgets);
-      console.log(resp);
-    },
+    }, 'takeLatest'],
   },
   reducers: {
     initWidgets(widgets, action) {
-      console.log('here', action.payload);
       return action.payload;
     },
     addOrUpdate(widgets, action) {
