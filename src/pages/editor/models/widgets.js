@@ -46,28 +46,11 @@ export default {
         maxInstanceId++;
         newWidget.instanceId = maxInstanceId;
         newWidget.id = newWidget.type + newWidget.instanceId;
+        //newWidget.child = WidgetFactory.create(newWidget.type);
       }
       return {
         ...widgets, 
         [newWidget.id]: newWidget,
-      };
-    },
-    setHover(widgets, action) {
-      return {
-        ...widgets,
-        [action.widgetId]: {
-          ...widgets[action.widgetId],
-          isHover: true,
-        },
-      };
-    },
-    clearHover(widgets, action) {
-      return {
-        ...widgets,
-        [action.widgetId]: {
-          ...widgets[action.widgetId],
-          isHover: false,
-        },
       };
     },
 

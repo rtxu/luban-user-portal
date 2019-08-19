@@ -1,4 +1,4 @@
-import React, {  useEffect, } from 'react';
+import React, {  useEffect, useState, } from 'react';
 import { useDrag, } from 'react-dnd'
 import { getEmptyImage } from "react-dnd-html5-backend";
 import PropTypes from 'prop-types';
@@ -13,7 +13,7 @@ const rhType2StyleMap = {
   [DndItemTypes.RH_LEFT_BOTTOM]: styles.resizeLeftBottom,
 }
 
-const ResizeHandle = React.memo(({type, position, widget}) => {
+const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
   const [{ isDragging }, drag, preview] = useDrag({
     item: {type: type, widget: widget},
     collect: monitor => ({
@@ -25,6 +25,10 @@ const ResizeHandle = React.memo(({type, position, widget}) => {
     preview(getEmptyImage());
   }, [])
 
+  useEffect(() => {
+    setIsDragging(isDragging);
+  }, [isDragging])
+
   return (
     <div ref={drag} className={styles.resizeHandle} style={ position }>
       <div className={rhType2StyleMap[type]}>
@@ -35,6 +39,7 @@ const ResizeHandle = React.memo(({type, position, widget}) => {
 });
 
 const WidgetBox = React.memo((props) => {
+  const [isResizing, setIsResizing] = useState(false);
   const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, isHover, id } = props;
   const [{ isDragging }, drag, preview] = useDrag({
     item: props,
@@ -75,7 +80,7 @@ const WidgetBox = React.memo((props) => {
       transform: `translate(${0-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
     },
   }
-  if (isDragging || isHover) {
+  if (isDragging || isResizing) {
     style.display = 'none';
   }
   return (
@@ -86,19 +91,27 @@ const WidgetBox = React.memo((props) => {
       <ResizeHandle 
         widget={ props }
         type={DndItemTypes.RH_LEFT_TOP} 
-        position={resizeHandlePositions[DndItemTypes.RH_LEFT_TOP]} />
+        position={resizeHandlePositions[DndItemTypes.RH_LEFT_TOP]}
+        setIsDragging={setIsResizing}
+      />
       <ResizeHandle 
         widget={ props }
         type={DndItemTypes.RH_RIGHT_TOP} 
-        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_TOP]} />
+        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_TOP]} 
+        setIsDragging={setIsResizing}
+      />
       <ResizeHandle 
         widget={ props }
         type={DndItemTypes.RH_RIGHT_BOTTOM} 
-        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_BOTTOM]} />
+        position={resizeHandlePositions[DndItemTypes.RH_RIGHT_BOTTOM]} 
+        setIsDragging={setIsResizing}
+      />
       <ResizeHandle 
         widget={ props }
         type={DndItemTypes.RH_LEFT_BOTTOM} 
-        position={resizeHandlePositions[DndItemTypes.RH_LEFT_BOTTOM]} />
+        position={resizeHandlePositions[DndItemTypes.RH_LEFT_BOTTOM]}
+        setIsDragging={setIsResizing}
+      />
 
     </div>
   )
@@ -112,12 +125,12 @@ WidgetBox.propTypes = {
   gridTop: PropTypes.number.isRequired,
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
+
+  // canvas-own props
   canvasColumnWidth: PropTypes.number.isRequired,
-  isHover: PropTypes.bool,
 };
 
 WidgetBox.defaultProps = {
-  isHover: false,
 };
 
 export default WidgetBox;

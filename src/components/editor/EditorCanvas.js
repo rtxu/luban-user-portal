@@ -241,22 +241,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    onSetHover: (widgetId) => {
-      dispatch({
-        type: `${NS}/setHover`,
-        widgetId,
-      });
-    },
-    onClearHover: (widgetId) => {
-      dispatch({
-        type: `${NS}/clearHover`,
-        widgetId,
-      });
-    },
     addOrUpdate: (newWidget) => {
       dispatch({ 
         type: `${NS}/saveWidgets`,
         payload: {
+          // TODO(ruitao.xu): real user, real app
           userId: 'user1',
           appId: 'app1',
           targetAction: {
@@ -270,6 +259,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch({
         type: `${NS}/loadWidgets`,
         payload: {
+          // TODO(ruitao.xu): real user, real app
           userId: 'user1',
           appId: 'app1',
         },
@@ -281,7 +271,7 @@ const mapDispatchToProps = (dispatch) => {
 // TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid
 // TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
-function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate, loadWidgets }) {
+function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
   const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
   const [ hoverWidget, setHoverWidget ] = useState(null);
@@ -290,15 +280,9 @@ function EditorCanvas({ widgets, onSetHover, onClearHover, addOrUpdate, loadWidg
 
   const setHover = (widget) => {
     setHoverWidget(widget);
-    if (widget && 'id' in widget) {
-      onSetHover(widget.id);
-    }
   }
   const clearHover = () => {
     handleHoverThrottled.cancel();
-    if (hoverWidget && 'id' in hoverWidget) {
-      onClearHover(hoverWidget.id);
-    }
     setHoverWidget(null);
   }
 
