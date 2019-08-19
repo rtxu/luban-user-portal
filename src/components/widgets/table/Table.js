@@ -7,14 +7,14 @@ import {
 import produce from 'immer';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import { Resizable } from 'react-resizable';
+import throttle from 'lodash.throttle';
 
+import { assert } from '@/util';
 import styles from './Table.less';
 import Config from '../Config';
 import OneLineOverflowText from './OneLineOverflowText';
 import ColumnCollapse from './ColumnCollapse';
-import { assert } from '../../../util';
-import { Resizable } from 'react-resizable';
-import throttle from 'lodash.throttle';
 
 const { Panel } = Collapse;
 

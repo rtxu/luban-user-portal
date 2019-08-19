@@ -1,3 +1,4 @@
+import { createMockHandler } from '@/util'
 
 // widgets mem store
 const store = {}
@@ -26,22 +27,20 @@ function saveWidgets(userId, appId, widgets) {
 
 // req 和 res 的文档：https://expressjs.com/en/4x/api.html#req
 export default {
-  'GET /api/users/:userId/apps/:appId/widgets': function (req, res) {
+  'GET /api/users/:userId/apps/:appId/widgets': createMockHandler((req, res) => {
     const userId = req.params.userId;
     const appId = req.params.appId;
     const widgets = getWidgets(userId, appId);
-    console.log(`mock GET /api/users/${userId}/apps/${appId}/widgets`);
     console.log(`typeof(widgets)`, typeof(widgets));
     console.log(`widgets`, widgets);
     res.json(widgets);
-  },
-  'POST /api/users/:userId/apps/:appId/widgets': function (req, res) {
+  }),
+  'POST /api/users/:userId/apps/:appId/widgets': createMockHandler((req, res) => {
     const userId = req.params.userId;
     const appId = req.params.appId;
     const widgets = req.body;
-    console.log(`mock POST /api/users/${userId}/apps/${appId}/widgets`);
     console.log(widgets);
     saveWidgets(userId, appId, widgets);
     res.status(200).json({});
-  },
+  }),
 }
