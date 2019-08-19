@@ -22,7 +22,7 @@ function createState(type) {
     case Type.TEXTINPUT:
       return lodash.cloneDeep(TextInput.initialState);
     default:
-      throw new Error(`unexpected widget type: ${type}`);
+      throw new Error(`in createState: unexpected widget type: ${type}`);
   }
 }
 
@@ -37,7 +37,22 @@ function createElement(type, props) {
     case Type.TEXTINPUT:
       return <TextInput {...props} />
     default:
-      throw new Error(`unexpected widget type: ${type}`);
+      throw new Error(`in createElement: unexpected widget type: ${type}`);
+  }
+}
+
+function getReducer(type) {
+  switch (type) {
+    case Type.TEXT:
+      return Text.reducer;
+    case Type.BUTTON:
+      return Button.reducer;
+    case Type.TABLE:
+      return Table.reducer;
+    case Type.TEXTINPUT:
+      return TextInput.reducer;
+    default:
+      throw new Error(`in getReducer: unexpected widget type: ${type}`);
   }
 }
 
@@ -45,5 +60,6 @@ const WidgetFactory = {};
 WidgetFactory.Type = Type;
 WidgetFactory.createState = createState;
 WidgetFactory.createElement = createElement;
+WidgetFactory.getReducer = getReducer;
 
 export default WidgetFactory;

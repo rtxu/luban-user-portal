@@ -6,10 +6,14 @@ import { useDrop } from 'react-dnd'
 import PropTypes from 'prop-types';
 import throttle from 'lodash.throttle';
 import { connect } from 'dva';
+
 import WidgetBox from './WidgetBox';
 import { CSS, CANVAS } from './Constant';
 import styles from './EditorCanvas.less';
 import DndItemTypes, {isResizeHandle} from './DndItemTypes';
+import { createLogger } from '@/util';
+
+const logger = createLogger('/components/editor/EditorCanvas');
 
 const canvasId = 'canvas';
 
@@ -210,7 +214,7 @@ const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidge
       } else {
         newWidget.className = styles.hoverWidgetBoxCanNotPlace;
       }
-      console.log('in hover(), new: ', newWidget.gridLeft, newWidget.gridTop, newWidget.className);
+      logger.debug('in hover(), new: ', newWidget.gridLeft, newWidget.gridTop, newWidget.className);
       setHoverWidget(newWidget);
     }
   }

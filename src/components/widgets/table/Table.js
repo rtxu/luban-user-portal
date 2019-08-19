@@ -51,9 +51,12 @@ function ResizableHeaderCell(props) {
   const ref = useRef(null);
   const [start, setStart] = useState(0);
   const handleResizeStart = (e, { size }) => {
+    e.stopPropagation();
+
     setStart(size.width);
   }
   const handleResize = throttle((e, { size }) => {
+    e.stopPropagation();
     const delta = size.width - start;
     if (delta != 0) {
       const curWidth = ref.current.getBoundingClientRect().width;

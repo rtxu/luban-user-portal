@@ -3,6 +3,7 @@ import { useDrag, } from 'react-dnd'
 import { getEmptyImage } from "react-dnd-html5-backend";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { connect } from 'dva';
 
 import { CSS, CANVAS } from './Constant';
 import DndItemTypes from './DndItemTypes';
@@ -40,6 +41,23 @@ const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
     </div>
   )
 });
+
+const NS = 'widgets';
+const mapStateToProps = (state) => ({});
+const mapDispatchToProps = (dispatch) => {
+  return {
+    widgetDispatch: (widgetId, widgetAction) => {
+      dispatch({
+        type: `${NS}/updateContent`,
+        payload: {
+          widgetId,
+          widgetAction,
+        },
+      })
+    },
+  };
+};
+
 
 const WidgetBox = React.memo((props) => {
   const [isResizing, setIsResizing] = useState(false);
@@ -89,9 +107,16 @@ const WidgetBox = React.memo((props) => {
     [styles.dragging]: isDragging || isResizing,
     [styles.bordered]: !(isDragging || isResizing) && props.showBorder,
   });
+
   return (
     <div ref={drag} className={cls} style={style} >
-      { WidgetFactory.createElement(props.type, {...props.content}) }
+      { 
+        WidgetFactory.createElement(props.type, 
+        {
+          ...props.content, 
+          dispatch: (action) => props.widgetDispatch(props.id, action) 
+        }) 
+      }
 
       <ResizeHandle 
         widget={ props }
@@ -131,13 +156,16 @@ WidgetBox.propTypes = {
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
 
-  // canvas-own props
+  // from canvas
   canvasColumnWidth: PropTypes.number.isRequired,
   showBorder: PropTypes.bool,
+
+  // from connect
+  widgetDispatch: PropTypes.func.isRequired,
 };
 
 WidgetBox.defaultProps = {
   showBorder: false,
 };
 
-export default WidgetBox;
+export default connect(mapStateToProps, mapDispatchToProps)(WidgetBox);

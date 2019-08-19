@@ -59,6 +59,21 @@ export default {
         [newWidget.id]: newWidget,
       };
     },
-
+    updateContent(widgets, action) {
+      const widgetId = action.payload.widgetId;
+      if (widgetId in widgets) {
+        const widget = widgets[widgetId];
+        return {
+          ...widgets,
+          [widgetId]: {
+            ...widget,
+            content: WidgetFactory.getReducer(widget.type)(widget.content, action.payload.widgetAction),
+          }
+        }
+      } else {
+        console.log(`widgetId('${widgetId}') not found in updateContent`);
+        return widgets;
+      }
+    },
   },
 };
