@@ -6,7 +6,7 @@ import TextInput from '../../components/widgets/TextInput';
 import Button from '../../components/widgets/Button';
 import Table from '../../components/widgets/table';
 import OneLineOverflowText from '../../components/widgets/table/OneLineOverflowText';
-import Widget from '../../components/Widget';
+import WidgetFactory from '../../components/WidgetFactory';
 
 const { Sider, Content } = Layout;
 
@@ -18,15 +18,15 @@ function useWidgetFactory(type) {
   const oneLineOverflowTextWidget = OneLineOverflowText.use();
 
   switch(type) {
-    case Widget.Type.TEXT:
+    case WidgetFactory.Type.TEXT:
       return textWidget;
-    case Widget.Type.TEXTINPUT:
+    case WidgetFactory.Type.TEXTINPUT:
       return textInputWidget;
-    case Widget.Type.BUTTON:
+    case WidgetFactory.Type.BUTTON:
       return buttonWidget;
-    case Widget.Type.TABLE:
+    case WidgetFactory.Type.TABLE:
       return tableWidget;
-    case Widget.Type.ONE_LINE_OVERFLOW_TEXT:
+    case WidgetFactory.Type.ONE_LINE_OVERFLOW_TEXT:
       return oneLineOverflowTextWidget;
 
     default:

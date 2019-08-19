@@ -1,8 +1,8 @@
-import Widget from '../Widget';
+import WidgetFactory from '../WidgetFactory';
 
 const _ = {
   // widget
-  ...Widget.Type,
+  ...WidgetFactory.Type,
 
   // resize handle
   RH_LEFT_TOP: 'resize.left_top',

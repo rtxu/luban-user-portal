@@ -385,7 +385,11 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
           { mounted && dragging && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
           { mounted && hoverWidget && <HoverWidgetBox {...hoverWidget} canvasColumnWidth={canvasColumnWidth} /> }
           { mounted && Object.keys(widgets).map(widgetId => (
-            <WidgetBox key={widgetId} {...widgets[widgetId]} canvasColumnWidth={canvasColumnWidth} />
+            <WidgetBox key={widgetId} 
+              {...widgets[widgetId]} 
+              canvasColumnWidth={canvasColumnWidth} 
+              showBorder={hoverWidget !== null}
+            />
           )) }
           <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>

@@ -1,7 +1,13 @@
-import * as widgetsService from "../services/widgets";
+import * as widgetsService from '../services/widgets';
+import WidgetFactory from '@/components/WidgetFactory';
 
 const initialWidgets = {};
 
+/*
+  一个 Widget 的状态由两部分组成：
+  1. WidgetBox：负责维护 Widget 在 canvas 上的位置、大小（height & width）等
+  2. content：负责维护 Widget 内的 UI(包括 View 和 交互) 和 数据
+*/
 export default {
   state: initialWidgets,
   effects: {
@@ -46,7 +52,7 @@ export default {
         maxInstanceId++;
         newWidget.instanceId = maxInstanceId;
         newWidget.id = newWidget.type + newWidget.instanceId;
-        //newWidget.child = WidgetFactory.create(newWidget.type);
+        newWidget.content = WidgetFactory.createState(newWidget.type);
       }
       return {
         ...widgets, 

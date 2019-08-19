@@ -2,9 +2,12 @@ import React, {  useEffect, useState, } from 'react';
 import { useDrag, } from 'react-dnd'
 import { getEmptyImage } from "react-dnd-html5-backend";
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+
 import { CSS, CANVAS } from './Constant';
 import DndItemTypes from './DndItemTypes';
 import styles from './EditorCanvas.less';
+import WidgetFactory from '../WidgetFactory';
 
 const rhType2StyleMap = {
   [DndItemTypes.RH_LEFT_TOP]: styles.resizeLeftTop,
@@ -40,7 +43,7 @@ const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
 
 const WidgetBox = React.memo((props) => {
   const [isResizing, setIsResizing] = useState(false);
-  const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, isHover, id } = props;
+  const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, id } = props;
   const [{ isDragging }, drag, preview] = useDrag({
     item: props,
     collect: monitor => ({
@@ -66,6 +69,7 @@ const WidgetBox = React.memo((props) => {
     width: gridWidth * canvasColumnWidth,
   }
   const { resizeHandlePadding, widgetBoxHPadding: boxHPadding, widgetBoxVPadding: boxVPadding } = CSS;
+  // TODO(ruitao.xu): use absolute position instead of calclated position
   const resizeHandlePositions = {
     [DndItemTypes.RH_LEFT_TOP] : {
       transform: `translate(${0-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,
@@ -80,13 +84,14 @@ const WidgetBox = React.memo((props) => {
       transform: `translate(${0-resizeHandlePadding}px, ${style.height-boxVPadding-resizeHandlePadding}px)`,
     },
   }
-  if (isDragging || isResizing) {
-    style.display = 'none';
-  }
+  const cls = classNames({
+    [styles.widgetBox]: true,
+    [styles.dragging]: isDragging || isResizing,
+    [styles.bordered]: !(isDragging || isResizing) && props.showBorder,
+  });
   return (
-    <div ref={drag} className={styles.widgetBox} style={style} >
-      {/* the widget */}
-      <div style={{height: '100%', width: '100%', backgroundColor: 'rgba(52, 177, 181, 0.6)'}} />
+    <div ref={drag} className={cls} style={style} >
+      { WidgetFactory.createElement(props.type, {...props.content}) }
 
       <ResizeHandle 
         widget={ props }
@@ -128,9 +133,11 @@ WidgetBox.propTypes = {
 
   // canvas-own props
   canvasColumnWidth: PropTypes.number.isRequired,
+  showBorder: PropTypes.bool,
 };
 
 WidgetBox.defaultProps = {
+  showBorder: false,
 };
 
 export default WidgetBox;

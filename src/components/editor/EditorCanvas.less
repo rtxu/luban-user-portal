@@ -28,7 +28,15 @@
         transition-property: height,width,transform;
         transition-duration: .1s;
         padding: @widgetBoxVPadding @widgetBoxHPadding;
-        background-color: rgba(100, 196, 68, 0.6);
+
+        &.dragging {
+          visibility: hidden;
+        }
+
+        &.bordered {
+          border: 1px dashed rgba(150, 0, 0, .15);
+          padding: calc(@widgetBoxVPadding - 1px) calc(@widgetBoxHPadding - 1px);
+        }
 
         &:hover > .resizeHandle {
           opacity: 1;
