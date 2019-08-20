@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useLayoutEffect, useReducer } from 'react';
-import {
-  Button,
-} from 'antd';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useDrop } from 'react-dnd'
 import PropTypes from 'prop-types';
 import throttle from 'lodash.throttle';
 import { connect } from 'dva';
+import classNames from 'classnames';
 
 import WidgetBox from './WidgetBox';
 import { CSS, CANVAS } from './Constant';
@@ -276,7 +274,6 @@ const mapDispatchToProps = (dispatch) => {
 // TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
 function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
-  const [ dragging, setDragging ] = useState(false);
   const [ mounted, setMounted ] = useState(false);
   const [ hoverWidget, setHoverWidget ] = useState(null);
   const [ canvasHeight, setCanvasHeight ] = useState(CANVAS.minHeight);
@@ -329,10 +326,6 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
   })
 
   useLayoutEffect(() => {
-    setDragging(isOver);
-  }, [isOver])
-
-  useLayoutEffect(() => {
     if (isOver) {
     } else {
       clearHover();
@@ -372,21 +365,16 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
     }
   }, [])
 
-  const toggleGrid = () => {
-    setDragging(!dragging);
-  }
-
-  const canvasClassArray = [styles.canvas]
-  if (dragging) {
-    canvasClassArray.push(styles.lift);
-  }
-  const canvasClassName = canvasClassArray.join(' ');
+  const canvasClassName = classNames({
+    [styles.canvas]: true,
+    [styles.lift]: isOver,
+  });
 
   return (
     <div className={styles.root}>
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
-          { mounted && dragging && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
+          { mounted && isOver && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
           { mounted && hoverWidget && <HoverWidgetBox {...hoverWidget} canvasColumnWidth={canvasColumnWidth} /> }
           { mounted && Object.keys(widgets).map(widgetId => (
             <WidgetBox key={widgetId} 
@@ -395,7 +383,6 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
               showBorder={hoverWidget !== null}
             />
           )) }
-          <Button onClick={toggleGrid}>Toggle Grid</Button>
         </div>
       </div>
     </div>
