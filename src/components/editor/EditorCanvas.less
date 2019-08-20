@@ -30,7 +30,9 @@
         padding: @widgetBoxVPadding @widgetBoxHPadding;
 
         &.dragging {
-          visibility: hidden;
+          // 使用 visibility: hidden 时，拖拽 table 时，table 中的内容隐藏存在明显延迟
+          // visibility: hidden;
+          display: none;
         }
 
         &.bordered {
