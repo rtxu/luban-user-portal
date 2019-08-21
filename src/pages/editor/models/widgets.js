@@ -1,7 +1,30 @@
 import * as widgetsService from '../services/widgets';
 import WidgetFactory from '@/components/WidgetFactory';
+import { createLogger } from '@/util';
+
+const logger = createLogger('/pages/editor/models/widgets');
 
 const initialWidgets = {};
+export const NS = 'widgets';
+
+function removePrefix(str, prefix) {
+  if (str.startsWith(prefix)) {
+    return str.slice(prefix.length);
+  } else {
+    return str;
+  }
+}
+
+// action midware
+export function withSave(action) {
+  return {
+    type: `${NS}/saveWidgets`,
+    payload: { 
+      ...action,
+      type: removePrefix(action.type, `${NS}/`),
+    },
+  }
+}
 
 /*
   一个 Widget 的状态由两部分组成：
@@ -22,7 +45,9 @@ export default {
     },
     saveWidgets: [function *(action, sagaEffects) {
       const { call, put, select } = sagaEffects;
-      const { userId, appId, targetAction } = action.payload;
+      const targetAction = action.payload;
+      const { userId, appId } = targetAction.payload;
+      logger.debug(`in ${NS}/saveWidgets effect, targetAction: `, targetAction);
       yield put(targetAction);
       const widgets = yield select(state => state.widgets);
 
@@ -34,8 +59,8 @@ export default {
       return action.payload;
     },
     addOrUpdate(widgets, action) {
-      const newWidget = { ...action.widget }
-      if ('id' in action.widget ) {
+      const newWidget = { ...action.payload.widget }
+      if ('id' in newWidget ) {
         // update
 
       } else {
@@ -43,7 +68,7 @@ export default {
         let maxInstanceId = 0;
         for (let widgetId of Object.keys(widgets)) {
           const widget = widgets[widgetId];
-          if (widget.type === action.widget.type) {
+          if (widget.type === newWidget.type) {
             if (widget.instanceId > maxInstanceId) {
               maxInstanceId = widget.instanceId;
             }

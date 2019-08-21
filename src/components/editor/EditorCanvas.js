@@ -10,6 +10,7 @@ import { CSS, CANVAS } from './Constant';
 import styles from './EditorCanvas.less';
 import DndItemTypes, {isResizeHandle} from './DndItemTypes';
 import { createLogger } from '@/util';
+import { NS, withSave } from '@/pages/editor/models/widgets';
 
 const logger = createLogger('/components/editor/EditorCanvas');
 
@@ -233,7 +234,6 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
   setter(newHeight);
 }
 
-const NS = 'widgets';
 const mapStateToProps = (state) => {
   const widgets = state[NS];
   return {
@@ -244,18 +244,15 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     addOrUpdate: (newWidget) => {
-      dispatch({ 
-        type: `${NS}/saveWidgets`,
+      dispatch(withSave({ 
+        type: `${NS}/addOrUpdate`,
         payload: {
           // TODO(ruitao.xu): real user, real app
           userId: 'user1',
           appId: 'app1',
-          targetAction: {
-            type: `addOrUpdate`,
-            widget: newWidget,
-          },
+          widget: newWidget,
         },
-      });
+      }));
     },
     loadWidgets: () => {
       dispatch({
