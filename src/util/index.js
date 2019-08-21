@@ -37,7 +37,7 @@ export function createLogger(loggerName) {
     debug: baseLogger.extend('debug'),
     info: baseLogger.extend('info'),
     warn: baseLogger.extend('warn'),
-    // TODO(ruitao.xu): when fatal log, throw exception
+    // BETTER TODO(ruitao.xu): when fatal log, throw exception
     fatal: baseLogger.extend('fatal'),
   }
 }

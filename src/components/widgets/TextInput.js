@@ -7,7 +7,7 @@ import {
 } from "antd";
 import Config from './Config';
 
-// TODO(ruitao.xu): support different display mode
+// BETTER(feature) TODO(ruitao.xu): support different display mode
 // [done] one-line mode: <label> <input>
 // two-line mode: <label>\n <input>
 // multi-line mode: <label>\n <textarea>

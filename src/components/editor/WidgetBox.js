@@ -89,7 +89,7 @@ const WidgetBox = React.memo((props) => {
     width: gridWidth * canvasColumnWidth,
   }
   const { resizeHandlePadding, widgetBoxHPadding: boxHPadding, widgetBoxVPadding: boxVPadding } = CSS;
-  // TODO(ruitao.xu): use absolute position instead of calclated position
+  // BETTER(style) TODO(ruitao.xu): use absolute position instead of calclated position
   const resizeHandlePositions = {
     [DndItemTypes.RH_LEFT_TOP] : {
       transform: `translate(${0-resizeHandlePadding}px, ${0-resizeHandlePadding}px)`,

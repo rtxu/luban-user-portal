@@ -55,7 +55,7 @@ function LabelInput({ label, input, }) {
   return (
     <div className={styles.labelEntry}>
       <Label {...label} />
-      {/* TODO(ruitao.xu): all config input is implmented by CodeMirror */}
+      {/* TODO(ruitao.xu): replace all config input by CodeMirror */}
       <AntInput {...input} />
     </div>
   );

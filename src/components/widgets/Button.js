@@ -10,7 +10,7 @@ import Config from './Config';
 const BUTTON_ACTION_OPTION_MAP = {
   TriggerAnAction: '触发 Action',    // doing
   OpenAnyWebPage: '打开任意网页',     // done
-  // TODO(ruitao.xu): lower priority
+  // BETTER(feature) TODO(ruitao.xu): low priority
   // OpenAnotherLocalPage: '打开本站其他页面',
 }
 
@@ -80,10 +80,10 @@ TriggerAnActionConfigPanel.defaultProps = {
 }
 
 function OpenAnotherLocalPageConfigPanel({ isOpenInNewTab }) {
-  // TODO(ruitao.xu): load already exist page
+  // BETTER TODO(ruitao.xu): load already exist page
   const options = ['placeholder #1', 'placeholder #2'];
 
-  // TODO(ruitao.xu): 
+  // BETTER TODO(ruitao.xu): 
   function onChange(value) {
     console.log('in OpenAnotherLocalPageConfigPanel::onChange, selected: ', value);
   }

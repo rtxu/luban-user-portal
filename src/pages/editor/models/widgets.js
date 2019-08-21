@@ -56,7 +56,7 @@ export default {
       const widgets = yield select(state => state.widgets);
 
       const resp = yield call(widgetsService.saveWidgets, userId, appId, widgets);
-      // TODO(ruitao.xu): some action is triggered too frequent, e.g Table.setColumnWidth
+      // BETTER(performance) TODO(ruitao.xu): some action is triggered too frequent, e.g Table.setColumnWidth
       // consider to throttle it.
     }, 'takeLatest'],
   },

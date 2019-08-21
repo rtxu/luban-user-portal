@@ -7,7 +7,7 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 
 const { Meta } = Card;
 
-// TODO(ruitao.xu): adjust font
+// BETTER(style) TODO(ruitao.xu): adjust font
 const widgetGroups = [
   {
     header: '常用',
