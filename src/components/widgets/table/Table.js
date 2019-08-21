@@ -10,11 +10,13 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { Resizable } from 'react-resizable';
 import throttle from 'lodash.throttle';
 
-import { assert } from '@/util';
+import { assert, createLogger } from '@/util';
 import styles from './Table.less';
 import Config from '../Config';
 import OneLineOverflowText from './OneLineOverflowText';
 import ColumnCollapse from './ColumnCollapse';
+
+const logger = createLogger('/components/widgets/Table');
 
 const { Panel } = Collapse;
 
@@ -339,6 +341,7 @@ function reducer(prevState, action) {
       })
     case ACTION_TYPE.setColumnWidth:
       const { index, width } = action.payload;
+      logger.debug(`in table reducer, setColumnWidth(index=${index}, width=${width})`);
       return produce(prevState, draft => {
         draft.columns[index].config.width = width;
       })

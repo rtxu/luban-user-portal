@@ -9,6 +9,11 @@ import { CSS, CANVAS } from './Constant';
 import DndItemTypes from './DndItemTypes';
 import styles from './EditorCanvas.less';
 import WidgetFactory from '../WidgetFactory';
+import { NS, withAfterSave } from '@/pages/editor/models/widgets';
+import { wrapDispatchToFire } from '@/util'
+import { createLogger } from '../../util';
+
+const logger = createLogger('/components/editor/WidgetBox');
 
 const rhType2StyleMap = {
   [DndItemTypes.RH_LEFT_TOP]: styles.resizeLeftTop,
@@ -42,22 +47,19 @@ const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
   )
 });
 
-const NS = 'widgets';
 const mapStateToProps = (state) => ({});
 const mapDispatchToProps = (dispatch) => {
-  return {
-    widgetDispatch: (widgetId, widgetAction) => {
-      dispatch({
-        type: `${NS}/updateContent`,
-        payload: {
+  return wrapDispatchToFire(dispatch, (fire) => {
+    return {
+      widgetDispatch: (widgetId, widgetAction) => {
+        fire(`${NS}/updateContent`, {
           widgetId,
           widgetAction,
-        },
-      })
-    },
-  };
+        }, withAfterSave)
+      },
+    };
+  })
 };
-
 
 const WidgetBox = React.memo((props) => {
   const [isResizing, setIsResizing] = useState(false);
@@ -114,7 +116,10 @@ const WidgetBox = React.memo((props) => {
         WidgetFactory.createElement(props.type, 
         {
           ...props.content, 
-          dispatch: (action) => props.widgetDispatch(props.id, action) 
+          dispatch: (action) => {
+            logger.debug(`widget(${props.id}) dispatch action(${action})`);
+            props.widgetDispatch(props.id, action)
+          }
         }) 
       }
 

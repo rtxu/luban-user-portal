@@ -246,18 +246,11 @@ const mapDispatchToProps = (dispatch) => {
     return {
       addOrUpdate: (newWidget) => {
         fire(`${NS}/addOrUpdate`, {
-          // TODO(ruitao.xu): real user, real app
-          userId: 'user1',
-          appId: 'app1',
           widget: newWidget,
         }, withAfterSave)
       },
       loadWidgets: () => {
-        fire(`${NS}/loadWidgets`, {
-          // TODO(ruitao.xu): real user, real app
-          userId: 'user1',
-          appId: 'app1',
-        })
+        fire(`${NS}/loadWidgets`, { })
       },
     };
   })

@@ -36,7 +36,9 @@ export default {
   effects: {
     *loadWidgets(action, sagaEffects) {
       const { call, put } = sagaEffects;
-      const { userId, appId } = action.payload;
+      // TODO(ruitao.xu): real user, real app
+      const userId = 'user1';
+      const appId = 'app1';
       const resp = yield call(widgetsService.loadWidgets, userId, appId);
       yield put({
         type: 'initWidgets',
@@ -46,12 +48,16 @@ export default {
     saveWidgets: [function *(action, sagaEffects) {
       const { call, put, select } = sagaEffects;
       const targetAction = action.payload;
-      const { userId, appId } = targetAction.payload;
-      logger.debug(`in ${NS}/saveWidgets effect, targetAction: `, targetAction);
+      // TODO(ruitao.xu): real user, real app
+      const userId = 'user1';
+      const appId = 'app1';
       yield put(targetAction);
+      logger.debug(`in ${NS}/saveWidgets effect, targetAction: `, targetAction);
       const widgets = yield select(state => state.widgets);
 
       const resp = yield call(widgetsService.saveWidgets, userId, appId, widgets);
+      // TODO(ruitao.xu): some action is triggered too frequent, e.g Table.setColumnWidth
+      // consider to throttle it.
     }, 'takeLatest'],
   },
   reducers: {
@@ -85,14 +91,15 @@ export default {
       };
     },
     updateContent(widgets, action) {
-      const widgetId = action.payload.widgetId;
+      const { widgetId, widgetAction } = action.payload;
+      logger.debug(`updateContent(widgetId=${widgetId}, widgetAction=${widgetAction})`);
       if (widgetId in widgets) {
         const widget = widgets[widgetId];
         return {
           ...widgets,
           [widgetId]: {
             ...widget,
-            content: WidgetFactory.getReducer(widget.type)(widget.content, action.payload.widgetAction),
+            content: WidgetFactory.getReducer(widget.type)(widget.content, widgetAction),
           }
         }
       } else {
