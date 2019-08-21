@@ -9,8 +9,8 @@ import WidgetBox from './WidgetBox';
 import { CSS, CANVAS } from './Constant';
 import styles from './EditorCanvas.less';
 import DndItemTypes, {isResizeHandle} from './DndItemTypes';
-import { createLogger } from '@/util';
-import { NS, withSave } from '@/pages/editor/models/widgets';
+import { createLogger, wrapDispatchToFire } from '@/util';
+import { NS, withAfterSave } from '@/pages/editor/models/widgets';
 
 const logger = createLogger('/components/editor/EditorCanvas');
 
@@ -242,29 +242,25 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {
-    addOrUpdate: (newWidget) => {
-      dispatch(withSave({ 
-        type: `${NS}/addOrUpdate`,
-        payload: {
+  return wrapDispatchToFire(dispatch, (fire) => {
+    return {
+      addOrUpdate: (newWidget) => {
+        fire(`${NS}/addOrUpdate`, {
           // TODO(ruitao.xu): real user, real app
           userId: 'user1',
           appId: 'app1',
           widget: newWidget,
-        },
-      }));
-    },
-    loadWidgets: () => {
-      dispatch({
-        type: `${NS}/loadWidgets`,
-        payload: {
+        }, withAfterSave)
+      },
+      loadWidgets: () => {
+        fire(`${NS}/loadWidgets`, {
           // TODO(ruitao.xu): real user, real app
           userId: 'user1',
           appId: 'app1',
-        },
-      });
-    },
-  };
+        })
+      },
+    };
+  })
 };
 
 // TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid

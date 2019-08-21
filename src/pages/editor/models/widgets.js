@@ -16,7 +16,7 @@ function removePrefix(str, prefix) {
 }
 
 // action midware
-export function withSave(action) {
+export function withAfterSave(action) {
   return {
     type: `${NS}/saveWidgets`,
     payload: { 

@@ -41,3 +41,12 @@ export function createLogger(loggerName) {
     fatal: baseLogger.extend('fatal'),
   }
 }
+
+export const wrapDispatchToFire = (dispatch, userFn) => {
+  const fire = (type, payload, midware) => {
+    const action = { type, payload }
+    dispatch(midware ? midware(action): action);
+  }
+
+  return userFn(fire)
+}
