@@ -56,8 +56,9 @@ export default {
       const widgets = yield select(state => state.widgets);
 
       const resp = yield call(widgetsService.saveWidgets, userId, appId, widgets);
-      // BETTER(performance) TODO(ruitao.xu): some action is triggered too frequent, e.g Table.setColumnWidth
-      // consider to throttle it.
+      // BETTER(performance) TODO(ruitao.xu): some action is triggered too frequent, e.g Table.setColumnWidth.
+      // make effect 'takeLatest' or debounce widgetService.saveWidgets.
+      // when to use 'takeLatest'?
     }, 'takeLatest'],
   },
   reducers: {

@@ -48,6 +48,7 @@ function getCellStyle(width) {
   return style;
 }
 
+// TODO(ruitao.xu): consider to disable the last column's resize ability by default
 function ResizableHeaderCell(props) {
   const { onSetColumnWidth, width, ...restProps } = props;
   const ref = useRef(null);
@@ -59,8 +60,10 @@ function ResizableHeaderCell(props) {
   }
   const handleResize = throttle((e, { size }) => {
     const delta = size.width - start;
+    logger.debug(`resize column width, delta: ${delta}`);
     if (delta != 0) {
       const curWidth = ref.current.getBoundingClientRect().width;
+      logger.debug(`resize column width, current width: ${curWidth}`);
       onSetColumnWidth(curWidth + delta);
     }
     setStart(start + delta);
