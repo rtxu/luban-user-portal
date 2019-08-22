@@ -91,6 +91,14 @@ export default {
         [newWidget.id]: newWidget,
       };
     },
+    deleteOne(widgets, action) {
+      const leftWidgetsId = Object.keys(widgets).filter(id => id != action.payload.widgetId)
+      const newWidgets = {}
+      for (const id of leftWidgetsId) {
+        newWidgets[id] = widgets[id]
+      }
+      return newWidgets;
+    }, 
     updateContent(widgets, action) {
       const { widgetId, widgetAction } = action.payload;
       logger.debug(`updateContent(widgetId=${widgetId}, widgetAction=${widgetAction})`);

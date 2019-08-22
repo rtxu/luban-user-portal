@@ -112,8 +112,19 @@ const WidgetBox = React.memo((props) => {
     [styles.selected]: props.selected,
   });
 
+  function deleteSelectedWidgetIfAny(e) {
+    if (e.key === 'Backspace') {
+      props.deleteOne(props.id);
+    }
+  }
+
   return (
-    <div ref={drag} className={cls} style={style} onClick={props.onClick} >
+    <div ref={drag} className={cls} style={style} onClick={props.onClick}
+      // element can not be focused if no tabIndex attr
+      // unable to focus => unable to recv keydown event
+      tabIndex='0'
+      onKeyDown={deleteSelectedWidgetIfAny}
+    >
       <Tag>{props.id}</Tag>
       { 
         WidgetFactory.createElement(props.type, 
@@ -169,6 +180,7 @@ WidgetBox.propTypes = {
   showBorder: PropTypes.bool,
   onClick: PropTypes.func,
   selected: PropTypes.bool,
+  deleteOne: PropTypes.func,
 
   // from connect
   widgetDispatch: PropTypes.func.isRequired,

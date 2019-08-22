@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, } from 'react';
 import { useDrop } from 'react-dnd'
 import PropTypes from 'prop-types';
 import throttle from 'lodash.throttle';
@@ -249,6 +249,9 @@ const mapDispatchToProps = (dispatch) => {
           widget: newWidget,
         }, withAfterSave)
       },
+      deleteOne: (widgetId) => {
+        fire(`${NS}/deleteOne`, { widgetId, }, withAfterSave) 
+      },
       loadWidgets: () => {
         fire(`${NS}/loadWidgets`, { })
       },
@@ -259,7 +262,8 @@ const mapDispatchToProps = (dispatch) => {
 // BETTER(user experience) TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid
 // BETTER(user experience) TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
-function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
+function EditorCanvas(props) {
+  const { widgets } = props;
   const [ mounted, setMounted ] = useState(false);
   const [ hoverWidget, setHoverWidget ] = useState(null);
   const [ canvasHeight, setCanvasHeight ] = useState(CANVAS.minHeight);
@@ -278,7 +282,7 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
     drop(item, monitor) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
       console.log('dropItem:', newWidget);
-      addOrUpdate(newWidget);
+      props.addOrUpdate(newWidget);
       return undefined
     },
     canDrop(item, monitor) {
@@ -343,7 +347,7 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
     //  method: add 500ms delay to the first update
     setTimeout(() => {
       updateCanvasColumnWidth();
-      loadWidgets();
+      props.loadWidgets();
     }, 500);
     window.addEventListener('resize', updateCanvasColumnWidth);
     return () => {
@@ -357,7 +361,6 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
   });
 
   const [selectedWidgetId, setSelectedWidgetId] = useState(null); 
-
   function widgetOnClick(widgetId, e) {
     setSelectedWidgetId(widgetId);
     // DO NOT bubble up, which will clear the selected state
@@ -377,6 +380,10 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
               showBorder={hoverWidget !== null}
               onClick={(e) => widgetOnClick(widgetId, e)}
               selected={selectedWidgetId === widgetId}
+              deleteOne={(widgetId) => {
+                props.deleteOne(widgetId);
+                setSelectedWidgetId(null);
+              }}
             />
           )) }
         </div>
