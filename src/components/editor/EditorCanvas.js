@@ -356,8 +356,16 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
     [styles.lift]: isOver,
   });
 
+  const [selectedWidgetId, setSelectedWidgetId] = useState(null); 
+
+  function widgetOnClick(widgetId, e) {
+    setSelectedWidgetId(widgetId);
+    // DO NOT bubble up, which will clear the selected state
+    e.stopPropagation();
+  }
+
   return (
-    <div className={styles.root}>
+    <div className={styles.root} onClick={() => setSelectedWidgetId(null)}>
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
           { mounted && isOver && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
@@ -367,6 +375,8 @@ function EditorCanvas({ widgets, addOrUpdate, loadWidgets }) {
               {...widgets[widgetId]} 
               canvasColumnWidth={canvasColumnWidth} 
               showBorder={hoverWidget !== null}
+              onClick={(e) => widgetOnClick(widgetId, e)}
+              selected={selectedWidgetId === widgetId}
             />
           )) }
         </div>

@@ -4,6 +4,7 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'dva';
+import { Tag } from 'antd'
 
 import { CSS, CANVAS } from './Constant';
 import DndItemTypes from './DndItemTypes';
@@ -108,10 +109,12 @@ const WidgetBox = React.memo((props) => {
     [styles.widgetBox]: true,
     [styles.dragging]: isDragging || isResizing,
     [styles.bordered]: !(isDragging || isResizing) && props.showBorder,
+    [styles.selected]: props.selected,
   });
 
   return (
-    <div ref={drag} className={cls} style={style} >
+    <div ref={drag} className={cls} style={style} onClick={props.onClick} >
+      <Tag>{props.id}</Tag>
       { 
         WidgetFactory.createElement(props.type, 
         {
@@ -164,6 +167,8 @@ WidgetBox.propTypes = {
   // from canvas
   canvasColumnWidth: PropTypes.number.isRequired,
   showBorder: PropTypes.bool,
+  onClick: PropTypes.func,
+  selected: PropTypes.bool,
 
   // from connect
   widgetDispatch: PropTypes.func.isRequired,

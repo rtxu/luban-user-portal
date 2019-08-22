@@ -29,6 +29,40 @@
         transition-duration: .1s;
         padding: @widgetBoxVPadding @widgetBoxHPadding;
 
+        & > :global(.ant-tag) {
+          transform: translate(-1px, -23px);
+          position: absolute;
+          border-radius: 1px;
+          opacity: 0;
+          cursor: pointer;
+          display: flex;
+          padding: 1px 3px;
+          justify-content: center;
+          align-items: center;
+          font-family: 'Courier New', Courier, monospace;
+        }
+
+        &:hover {
+          //background-color: hsla(0, 100%, 97%, .3);
+          & > :global(.ant-tag) {
+            background-color: hsla(0, 100%, 97%, .8);
+            color: #d73435;
+            opacity: 1;
+          }
+        }
+
+
+        &.selected {
+          outline: none;
+          z-index: 5;
+          background-color: rgba(240, 240, 255, .3);
+          & > :global(.ant-tag) {
+            background-color: rgba(240, 240, 255, .8);
+            color: #0e77ca;
+            opacity: 1;
+          }
+        }
+
         &.dragging {
           // 使用 visibility: hidden 时，拖拽 table 时，table 中的内容隐藏存在明显延迟
           // visibility: hidden;
