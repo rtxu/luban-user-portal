@@ -4,7 +4,7 @@ import { getEmptyImage } from "react-dnd-html5-backend";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'dva';
-import { Tag } from 'antd'
+import { Tag, Modal } from 'antd'
 
 import { CSS, CANVAS } from './Constant';
 import DndItemTypes from './DndItemTypes';
@@ -114,7 +114,16 @@ const WidgetBox = React.memo((props) => {
 
   function deleteSelectedWidgetIfAny(e) {
     if (e.key === 'Backspace') {
-      props.deleteOne(props.id);
+      Modal.confirm({
+        title: `确定要删除 ${props.id} 吗？`,
+        okText: '删除',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk() {
+          props.deleteOne(props.id);
+        },
+        onCancel() { },
+      });
     }
   }
 
