@@ -42,62 +42,14 @@ const widgetGroups = [
           gridHeight: 1,
         },
       },
-    ],
-  },
-  {
-    header: '控制类',
-    widgets: [
       {
-        title: '文本',
-        description: '显示文本、标注用途等',
+        title: '文本输入',
+        description: '以用户输入控制其他组件，如：根据用户输入的查询词展示相应结果',
 
         dragItem: {
-          type: DndItemTypes.TEXT,
-        },
-      },
-      {
-        title: '表格',
-        description: '展示表格数据',
-
-        dragItem: {
-          type: DndItemTypes.TABLE,
-        },
-      },
-      {
-        title: '按钮（Button）',
-        description: '触发数据库查询、提交数据操作结果等',
-
-        dragItem: {
-          type: DndItemTypes.BUTTON,
-        },
-      },
-    ],
-  },
-  {
-    header: '输入类',
-    widgets: [
-      {
-        title: '文本',
-        description: '显示文本、标注用途等',
-
-        dragItem: {
-          type: DndItemTypes.TEXT,
-        },
-      },
-      {
-        title: '表格',
-        description: '展示表格数据',
-
-        dragItem: {
-          type: DndItemTypes.TABLE,
-        },
-      },
-      {
-        title: '按钮（Button）',
-        description: '触发数据库查询、提交数据操作结果等',
-
-        dragItem: {
-          type: DndItemTypes.BUTTON,
+          type: DndItemTypes.TEXTINPUT,
+          gridWidth: 4,
+          gridHeight: 1,
         },
       },
     ],
