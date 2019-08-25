@@ -360,7 +360,7 @@ function EditorCanvas(props) {
     [styles.lift]: isOver,
   });
 
-  const [selectedWidgetId, setSelectedWidgetId] = useState(null); 
+  const {selectedWidgetId, setSelectedWidgetId} = props;
   function widgetOnClick(widgetId, e) {
     setSelectedWidgetId(widgetId);
     // DO NOT bubble up, which will clear the selected state
@@ -391,5 +391,19 @@ function EditorCanvas(props) {
     </div>
   )
 }
+
+EditorCanvas.propTypes = {
+  // from `widgets` model
+  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
+  loadWidgets: PropTypes.func.isRequired,
+  addOrUpdate: PropTypes.func.isRequired,
+  deleteOne: PropTypes.func.isRequired,
+
+  // from pages/editor/:app
+  selectedWidgetId: PropTypes.string.isRequired,
+  setSelectedWidgetId: PropTypes.func.isRequired,
+}
+
+EditorCanvas.defaultProps = { }
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditorCanvas);

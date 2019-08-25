@@ -183,15 +183,16 @@ WidgetBox.propTypes = {
   gridTop: PropTypes.number.isRequired,
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
+  content: PropTypes.object,
 
-  // from canvas
+  // from EditorCanvas
   canvasColumnWidth: PropTypes.number.isRequired,
   showBorder: PropTypes.bool,
   onClick: PropTypes.func,
   selected: PropTypes.bool,
   deleteOne: PropTypes.func,
 
-  // from connect
+  // from `widgets` model
   widgetDispatch: PropTypes.func.isRequired,
 };
 

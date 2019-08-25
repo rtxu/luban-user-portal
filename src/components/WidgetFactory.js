@@ -41,6 +41,21 @@ function createElement(type, props) {
   }
 }
 
+function createConfigPanelElement(type, props) {
+  switch (type) {
+    case Type.TEXT:
+      return <Text.ConfigPanel {...props} />
+    case Type.BUTTON:
+      return <Button.ConfigPanel {...props} />
+    case Type.TABLE:
+      return <Table.ConfigPanel {...props} />
+    case Type.TEXTINPUT:
+      return <TextInput.ConfigPanel {...props} />
+    default:
+      throw new Error(`in createConfigPanelElement: unexpected widget type: ${type}`);
+  }
+}
+
 function getReducer(type) {
   switch (type) {
     case Type.TEXT:
@@ -60,6 +75,7 @@ const WidgetFactory = {};
 WidgetFactory.Type = Type;
 WidgetFactory.createState = createState;
 WidgetFactory.createElement = createElement;
+WidgetFactory.createConfigPanelElement = createConfigPanelElement;
 WidgetFactory.getReducer = getReducer;
 
 export default WidgetFactory;
