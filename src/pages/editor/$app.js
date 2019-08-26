@@ -42,9 +42,8 @@ function SubLayout({widgets, widgetDispatch}) {
     rightSider = WidgetFactory.createConfigPanelElement(
       selectedWidget.type,
       {
-        ...selectedWidget.Content,
+        ...selectedWidget.content,
         dispatch: (action) => {
-          logger.debug(`widget(${selectedWidgetId}) dispatch action(${action})`);
           widgetDispatch(selectedWidgetId, action)
         },
       },

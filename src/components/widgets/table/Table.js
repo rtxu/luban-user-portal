@@ -5,8 +5,6 @@ import {
   Table as AntTable,
 } from "antd";
 import produce from 'immer';
-import { DragDropContext } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
 import { Resizable } from 'react-resizable';
 import throttle from 'lodash.throttle';
 
@@ -358,16 +356,16 @@ function reducer(prevState, action) {
   }
 }
 
-function ColumnCollapseContainer({ children }) {
+export function ColumnCollapseContainer({ children }) {
   return (
     <div className={styles.removeBottomPadding} >
       {children}
     </div>
   )
 }
-export const DndCollapse = DragDropContext(HTML5Backend)(ColumnCollapseContainer);
 
-function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch, isCompact }) {
+function ConfigPanel(props) {
+  const { rawInput, rawInputEvalResult, columns, dispatch, isCompact } = props;
   function setRawInput(editor, data, newValue) {
     dispatch({
       type: ACTION_TYPE.setRawInput,
@@ -432,7 +430,7 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch, isCompac
       </Panel>
       <Panel header='列选项' key='2' >
         <Config.Label value='单列选项' />
-        <DndCollapse>
+        <ColumnCollapseContainer>
           {
             columns.map((column, index) => (
               <ColumnCollapse 
@@ -445,7 +443,7 @@ function ConfigPanel({ rawInput, rawInputEvalResult, columns, dispatch, isCompac
               />
             ))
           }
-        </DndCollapse>
+        </ColumnCollapseContainer>
       </Panel>
       <Panel header='显示选项' key='3' >
       </Panel>

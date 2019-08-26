@@ -1,9 +1,11 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 import ColumnCollapse from './ColumnCollapse';
-import { DndCollapse } from './Table';
+import { ColumnCollapseContainer } from './Table';
 
 export const column = {
   name: 'Test Column#1',
@@ -15,6 +17,8 @@ export const actions = {
   visibleOnClick: action('visibleOnClick'),
   moveColumn: action('moveColumn'),
 };
+
+const DndCollapse = DragDropContext(HTML5Backend)(ColumnCollapseContainer);
 
 storiesOf('ColumnCollapse', module)
   .addDecorator(story => (

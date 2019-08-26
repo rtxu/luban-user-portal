@@ -400,7 +400,7 @@ EditorCanvas.propTypes = {
   deleteOne: PropTypes.func.isRequired,
 
   // from pages/editor/:app
-  selectedWidgetId: PropTypes.string.isRequired,
+  selectedWidgetId: PropTypes.string,   // may be null
   setSelectedWidgetId: PropTypes.func.isRequired,
 }
 
