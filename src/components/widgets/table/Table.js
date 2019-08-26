@@ -445,8 +445,10 @@ function ConfigPanel(props) {
           }
         </ColumnCollapseContainer>
       </Panel>
+      {/*
       <Panel header='显示选项' key='3' >
       </Panel>
+      */}
     </Collapse>
   );
 }

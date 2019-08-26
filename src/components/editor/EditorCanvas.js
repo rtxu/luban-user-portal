@@ -379,7 +379,7 @@ function EditorCanvas(props) {
               canvasColumnWidth={canvasColumnWidth} 
               showBorder={hoverWidget !== null}
               onClick={(e) => widgetOnClick(widgetId, e)}
-              selected={selectedWidgetId === widgetId}
+              selected={widgetId === selectedWidgetId}
               deleteOne={(widgetId) => {
                 props.deleteOne(widgetId);
                 setSelectedWidgetId(null);

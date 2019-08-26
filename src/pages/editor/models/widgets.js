@@ -26,6 +26,41 @@ export function withAfterSave(action) {
   }
 }
 
+function _addOrUpdate(widgets, newWidget) {
+  if ('id' in newWidget) {
+    // update
+
+  } else {
+    // add
+    let maxInstanceId = 0;
+    for (let widgetId of Object.keys(widgets)) {
+      const widget = widgets[widgetId];
+      if (widget.type === newWidget.type) {
+        if (widget.instanceId > maxInstanceId) {
+          maxInstanceId = widget.instanceId;
+        }
+      }
+    }
+    maxInstanceId++;
+    newWidget.instanceId = maxInstanceId;
+    newWidget.id = newWidget.type + newWidget.instanceId;
+    newWidget.content = WidgetFactory.createState(newWidget.type);
+  }
+  return {
+    ...widgets,
+    [newWidget.id]: newWidget,
+  };
+}
+
+function _deleteOne(widgets, widgetIdToDelete) {
+  const leftWidgetsId = Object.keys(widgets).filter(id => id != widgetIdToDelete)
+  const newWidgets = {}
+  for (const id of leftWidgetsId) {
+    newWidgets[id] = widgets[id]
+  }
+  return newWidgets;
+} 
+
 /*
   一个 Widget 的状态由两部分组成：
   1. WidgetBox：负责维护 Widget 在 canvas 上的位置、大小（height & width）等
@@ -67,37 +102,10 @@ export default {
     },
     addOrUpdate(widgets, action) {
       const newWidget = { ...action.payload.widget }
-      if ('id' in newWidget ) {
-        // update
-
-      } else {
-        // add
-        let maxInstanceId = 0;
-        for (let widgetId of Object.keys(widgets)) {
-          const widget = widgets[widgetId];
-          if (widget.type === newWidget.type) {
-            if (widget.instanceId > maxInstanceId) {
-              maxInstanceId = widget.instanceId;
-            }
-          }
-        }
-        maxInstanceId++;
-        newWidget.instanceId = maxInstanceId;
-        newWidget.id = newWidget.type + newWidget.instanceId;
-        newWidget.content = WidgetFactory.createState(newWidget.type);
-      }
-      return {
-        ...widgets, 
-        [newWidget.id]: newWidget,
-      };
+      return _addOrUpdate(widgets, newWidget)
     },
     deleteOne(widgets, action) {
-      const leftWidgetsId = Object.keys(widgets).filter(id => id != action.payload.widgetId)
-      const newWidgets = {}
-      for (const id of leftWidgetsId) {
-        newWidgets[id] = widgets[id]
-      }
-      return newWidgets;
+      return _deleteOne(widgets, action.payload.widgetId)
     }, 
     updateContent(widgets, action) {
       const { widgetId, widgetAction } = action.payload;
@@ -113,6 +121,19 @@ export default {
         }
       } else {
         console.log(`widgetId('${widgetId}') not found in updateContent`);
+        return widgets;
+      }
+    },
+    changeWidgetId(widgets, action) {
+      const { oldWidgetId, newWidgetId } = action.payload;
+      logger.debug(`changeWidgetId(oldWidgetId=${oldWidgetId}, newWidgetId=${newWidgetId})`);
+      if (oldWidgetId in widgets) {
+        const widget = widgets[oldWidgetId];
+        widget.id = newWidgetId;
+        const newWidgets = _deleteOne(widgets, oldWidgetId)
+        return _addOrUpdate(newWidgets, widget)
+      } else {
+        console.log(`widgetId('${widgetId}') not found in changeWidgetId`);
         return widgets;
       }
     },
