@@ -50,16 +50,15 @@ const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
 
 const mapStateToProps = (state) => ({});
 const mapDispatchToProps = (dispatch) => {
-  return wrapDispatchToFire(dispatch, (fire) => {
-    return {
-      widgetDispatch: (widgetId, widgetAction) => {
-        fire(`${NS}/updateContent`, {
-          widgetId,
-          widgetAction,
-        }, withAfterSave)
-      },
-    };
-  })
+  const fire = wrapDispatchToFire(dispatch);
+  return {
+    widgetDispatch: (widgetId, widgetAction) => {
+      fire(`${NS}/updateContent`, {
+        widgetId,
+        widgetAction,
+      }, withAfterSave)
+    },
+  };
 };
 
 const WidgetBox = React.memo((props) => {

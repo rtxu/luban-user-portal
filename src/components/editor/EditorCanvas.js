@@ -242,21 +242,20 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return wrapDispatchToFire(dispatch, (fire) => {
-    return {
-      addOrUpdate: (newWidget) => {
-        fire(`${NS}/addOrUpdate`, {
-          widget: newWidget,
-        }, withAfterSave)
-      },
-      deleteOne: (widgetId) => {
-        fire(`${NS}/deleteOne`, { widgetId, }, withAfterSave) 
-      },
-      loadWidgets: () => {
-        fire(`${NS}/loadWidgets`, { })
-      },
-    };
-  })
+  const fire = wrapDispatchToFire(dispatch);
+  return {
+    addOrUpdate: (newWidget) => {
+      fire(`${NS}/addOrUpdate`, {
+        widget: newWidget,
+      }, withAfterSave)
+    },
+    deleteOne: (widgetId) => {
+      fire(`${NS}/deleteOne`, { widgetId, }, withAfterSave) 
+    },
+    loadWidgets: () => {
+      fire(`${NS}/loadWidgets`, { })
+    },
+  };
 };
 
 // BETTER(user experience) TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid

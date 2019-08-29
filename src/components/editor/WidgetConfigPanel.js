@@ -13,22 +13,21 @@ const mapStateToProps = (state) => ({
   widgets: state[NS],
 });
 const mapDispatchToProps = (dispatch) => {
-  return wrapDispatchToFire(dispatch, (fire) => {
-    return {
-      widgetDispatch: (widgetId, widgetAction) => {
-        fire(`${NS}/updateContent`, {
-          widgetId,
-          widgetAction,
-        }, withAfterSave)
-      },
-      changeWidgetId: (oldWidgetId, newWidgetId) => {
-        fire(`${NS}/changeWidgetId`, {
-          oldWidgetId,
-          newWidgetId,
-        }, withAfterSave)
-      },
-    };
-  })
+  const fire = wrapDispatchToFire(dispatch);
+  return {
+    widgetDispatch: (widgetId, widgetAction) => {
+      fire(`${NS}/updateContent`, {
+        widgetId,
+        widgetAction,
+      }, withAfterSave)
+    },
+    changeWidgetId: (oldWidgetId, newWidgetId) => {
+      fire(`${NS}/changeWidgetId`, {
+        oldWidgetId,
+        newWidgetId,
+      }, withAfterSave)
+    },
+  };
 };
 
 function Header(props) {

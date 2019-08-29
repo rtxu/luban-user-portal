@@ -42,11 +42,11 @@ export function createLogger(loggerName) {
   }
 }
 
-export const wrapDispatchToFire = (dispatch, userFn) => {
+export function wrapDispatchToFire(dispatch) {
   const fire = (type, payload, midware) => {
     const action = { type, payload }
     dispatch(midware ? midware(action): action);
   }
 
-  return userFn(fire)
+  return fire
 }
