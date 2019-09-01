@@ -19,25 +19,33 @@
   }
 }
 
+// HELPME(ruitao.xu): 
+// 方案一：上述样式的结果是无需额外设置 margin-right，但是 cmEvalResult 的内容会被紧邻的 collapse-header 覆盖掉
+/*
 .cmEval {
+  position: relative;
+  
+  .cmEvalResult {
+    position: absolute;
+    z-index: 1;
+  }
+}
+// 
+*/
 
+// 方案二：当 config panel 过长而出现 scroll 的时候，msg box 出现在固定位置，不随 scroll 移动
+/*
+.cmEval {
   .cmEvalMsg {
-    // HELPME(ruitao.xu): another solution, but not work
-    /*
-    .cmEval {
-      position: relative;
-      
-      .cmEvalResult {
-        position: absolute;
-        z-index: 1;
-      }
-    }
-    // 上述样式的结果是无需额外设置 margin-right，但是 cmEvalResult 的内容会被紧邻的 collapse-header 覆盖掉
-    */
     position: absolute;
     // HELPME(ruitao.xu): I donot know why `margin-right` is needed, but it works.
     margin-right: calc(@cmBorderWidth + @collapse-content-padding);
     z-index: 1;
+  }
+}
+*/
+.cmEval {
+  .cmEvalMsg {
   }
 
   &Ok {
