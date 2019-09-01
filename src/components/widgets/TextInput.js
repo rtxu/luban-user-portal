@@ -11,9 +11,21 @@ import Config from './Config';
 // [done] one-line mode: <label> <input>
 // two-line mode: <label>\n <input>
 // multi-line mode: <label>\n <textarea>
-function TextInput({ label, labelMaxWidth, input }) {
+function TextInput({ label, labelMaxWidth, input, dispatch }) {
   const labelStyle = {
     maxWidth: labelMaxWidth,
+  }
+
+  function onChange(e) {
+    dispatch({
+      type: ACTION_TYPE.SET_INPUT_VALUE,
+      payload: e.target.value,
+    });
+  }
+
+  function onKeyDown(e) {
+    // disable DELETE propagation
+    e.stopPropagation();
   }
   return (
     <div className={styles.widgetTextInput}>
@@ -22,6 +34,8 @@ function TextInput({ label, labelMaxWidth, input }) {
         type={input.type}
         placeholder={input.placeholder} 
         value={input.value} 
+        onChange={onChange}
+        onKeyDown={onKeyDown}
       />
     </div>
   );
@@ -38,6 +52,7 @@ TextInput.propTypes = {
     // onChange: PropTypes.func,
     // onPressEnter: PropTypes.func,
   }),
+  dispatch: PropTypes.func.isRequired,
 };
 
 TextInput.defaultProps = {
@@ -47,6 +62,13 @@ TextInput.defaultProps = {
     type: 'text',
   }
 };
+
+TextInput.export = (props) => {
+  return {
+    value: props.input.value,
+    label: props.label,
+  }
+}
 
 const initialState = TextInput.defaultProps;
 const ACTION_TYPE = {
@@ -162,6 +184,7 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
             onChange: onInputTypeChange,
           }}
         />
+        {/*  暂时没有想到应用场景
         <Config.LabelInput
           label={{ value: '初始值' }}
           input={{
@@ -169,6 +192,7 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
             onChange: onInputValueChange,
           }}
         />
+        */}
       </Panel>
       <Panel header='显示选项' key='2' >
         <Config.LabelInput

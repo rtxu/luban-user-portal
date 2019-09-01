@@ -33,6 +33,12 @@ Text.defaultProps = {
   isExpandWhenHover: false,
 };
 
+Text.export = (props) => {
+  return {
+    value: props.value,
+  }
+}
+
 const initialState = Text.defaultProps;
 const ACTION_TYPE = {
   SET_IS_SCROLL_WHEN_OVERFLOW: 'setIsScrollWhenOverflow',

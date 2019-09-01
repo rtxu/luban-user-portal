@@ -175,6 +175,11 @@ Button.defaultProps = {
   actionTriggerAnAction: TriggerAnActionConfigPanel.defaultProps,
   actionOpenAnyWebPage: OpenAnyWebPageConfigPanel.defaultProps,
 }
+Button.export = (props) => {
+  return {
+    text: props.text,
+  }
+}
 
 const initialState = Button.defaultProps;
 const ACTION_TYPE = {

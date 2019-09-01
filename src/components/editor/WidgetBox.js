@@ -112,6 +112,7 @@ const WidgetBox = React.memo((props) => {
   });
 
   function deleteSelectedWidgetIfAny(e) {
+    // console.log(`event(${e.type}) occurred on ${e.currentTarget}`);
     if (e.key === 'Backspace') {
       Modal.confirm({
         title: `确定要删除 ${props.id} 吗？`,
