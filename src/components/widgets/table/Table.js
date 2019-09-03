@@ -196,8 +196,11 @@ Table.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   height: PropTypes.number.isRequired,
-  dispatch: PropTypes.func.isRequired,
   isCompact: PropTypes.bool,
+
+  selectedRowIndex: PropTypes.number.isRequired, 
+
+  dispatch: PropTypes.func.isRequired,
 };
 
 export function genColumnsByFirstRow(firstRow) {
@@ -239,6 +242,7 @@ Table.defaultProps = {
   lastValidColumns: demoColumns,
   height: 320,
   isCompact: false,
+  selectedRowIndex: 0,
 };
 
 function replaceObjectArr(memberArr, replaceArr, getObjId) {
@@ -266,6 +270,7 @@ const ACTION_TYPE = {
   moveColumn: Symbol(),
   setColumnWidth: Symbol(),
   setIsCompact: Symbol(),
+  setSelectedRowIndex: Symbol(),
 }
 function reducer(prevState, action) {
   switch (action.type) {
@@ -349,6 +354,10 @@ function reducer(prevState, action) {
     case ACTION_TYPE.setIsCompact:
       return produce(prevState, draft => {
         draft.isCompact = action.payload;
+      })
+    case ACTION_TYPE.setSelectedRowIndex:
+      return produce(prevState, draft => {
+        draft.selectedRowIndex = action.payload;
       })
 
     default:
@@ -445,16 +454,18 @@ function ConfigPanel(props) {
           }
         </ColumnCollapseContainer>
       </Panel>
-      {/*
-      <Panel header='显示选项' key='3' >
-      </Panel>
-      */}
     </Collapse>
   );
 }
 
-function Table({ data, columns, height, dispatch, isCompact }) {
-  const classNames = [styles.widgetTable]
+function Table({ 
+  data, 
+  columns, 
+  height, 
+  dispatch, 
+  isCompact,
+  selectedRowIndex, 
+}) {
   const [displayData, displayColumns] = display(data, columns);
   const {pageSize, rowHeight, bodyCellVerticalPadding, scrollY, extraHeight} = calcAdaptivePageSize(height, isCompact); 
 
@@ -493,24 +504,44 @@ function Table({ data, columns, height, dispatch, isCompact }) {
     };
   });
 
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedCurrentPageRowIndex, setSelectedCurrentPageRowIndex] = useState(0);
+
   return (
-    <div className={classNames.join(' ')}>
+    <div className={styles.widgetTable}>
       <AntTable rowKey={genRowKey} dataSource={displayData} columns={displayColumns2}
         bordered
         components={components}
         // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
         scroll={{x: '100%', y: scrollY}}
-        /*
-        footer={
-          displayData.length >= pageSize ? 
-            undefined : 
-            (currentPageData) => {
-              return renderFooter(displayData.length, pageSize, rowHeight, extraHeight)
-            }
-        }
-        */
-        pagination={displayData.length >= pageSize ? {simple: true, pageSize: pageSize} : false}
+        pagination={{
+          simple: true, 
+          current: currentPage,
+          pageSize: pageSize, 
+          hideOnSinglePage: true, 
+          onChange: (page, pageSize) => {
+            setCurrentPage(page);
+          },
+        }}
         size='middle'
+        onRow={ (record, index) => {
+          return {
+            onClick: (e) => {
+              setSelectedCurrentPageRowIndex(index);
+              dispatch({
+                type: ACTION_TYPE.setSelectedRowIndex,
+                payload: (currentPage-1) * pageSize + index,
+              });
+            },
+          }
+        } }
+        rowClassName={(record, index) => {
+          if (((currentPage-1) * pageSize + index) === selectedRowIndex) {
+            return styles.selected;
+          } else {
+            return '';
+          }
+        } }
       />
     </div>
   );
@@ -524,6 +555,19 @@ ConfigPanel.propTypes = {
 Table.ConfigPanel = ConfigPanel;
 Table.initialState = initialState;
 Table.reducer = reducer;
+Table.export = (props) => {
+  const selectedRow = {
+    index: props.selectedRowIndex,
+  }
+  if (props.data.length > selectedRow.index) {
+    selectedRow.data = props.data[selectedRow.index];
+  }
+  
+  return {
+    data: props.data,
+    selectedRow,
+  }
+}
 
 Table.use = () => {
   const [widgetProps, widgetDispatch] = useReducer(Table.reducer, Table.initialState);
