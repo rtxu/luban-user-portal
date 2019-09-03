@@ -63,13 +63,6 @@ TextInput.defaultProps = {
   }
 };
 
-TextInput.export = (props) => {
-  return {
-    value: props.input.value,
-    label: props.label,
-  }
-}
-
 const initialState = TextInput.defaultProps;
 const ACTION_TYPE = {
   SET_LABEL: 'setLabel',
@@ -223,6 +216,13 @@ ConfigPanel.propTypes = {
 TextInput.ConfigPanel = ConfigPanel;
 TextInput.initialState = initialState;
 TextInput.reducer = reducer;
+TextInput.exporter = (props) => {
+  return {
+    value: props.input.value,
+    label: props.label,
+  }
+}
+
 
 TextInput.use = () => {
   const [widgetProps, widgetDispatch] = useReducer(TextInput.reducer, TextInput.initialState);

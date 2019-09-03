@@ -175,11 +175,6 @@ Button.defaultProps = {
   actionTriggerAnAction: TriggerAnActionConfigPanel.defaultProps,
   actionOpenAnyWebPage: OpenAnyWebPageConfigPanel.defaultProps,
 }
-Button.export = (props) => {
-  return {
-    text: props.text,
-  }
-}
 
 const initialState = Button.defaultProps;
 const ACTION_TYPE = {
@@ -316,6 +311,11 @@ ConfigPanel.defaultProps = Button.defaultProps
 Button.ConfigPanel = ConfigPanel;
 Button.initialState = initialState;
 Button.reducer = reducer;
+Button.exporter = (props) => {
+  return {
+    text: props.text,
+  }
+}
 
 Button.use = () => {
   const [widgetProps, widgetDispatch] = useReducer(Button.reducer, Button.initialState);

@@ -71,11 +71,27 @@ function getReducer(type) {
   }
 }
 
+function getExporter(type) {
+  switch (type) {
+    case Type.TEXT:
+      return Text.exporter;
+    case Type.BUTTON:
+      return Button.exporter;
+    case Type.TABLE:
+      return Table.exporter;
+    case Type.TEXTINPUT:
+      return TextInput.exporter;
+    default:
+      throw new Error(`in getExporter: unexpected widget type: ${type}`);
+  }
+}
+
 const WidgetFactory = {};
 WidgetFactory.Type = Type;
 WidgetFactory.createState = createState;
 WidgetFactory.createElement = createElement;
 WidgetFactory.createConfigPanelElement = createConfigPanelElement;
 WidgetFactory.getReducer = getReducer;
+WidgetFactory.getExporter = getExporter;
 
 export default WidgetFactory;

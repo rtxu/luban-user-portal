@@ -2,6 +2,7 @@ import React, { useState, } from 'react';
 import { Layout} from 'antd';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import PropTypes from 'prop-types';
 
 import ControPanel from '../../components/editor/ControlPanel';
 import ModelBrowser from '../../components/editor/ModelBrowser';
@@ -13,8 +14,7 @@ import styles from './index.less';
 
 const { Header, Sider, Content } = Layout;
 
-function SubLayout({}) {
-  const [selectedWidgetId, setSelectedWidgetId] = useState(null);
+function SubLayout({ selectedWidgetId, setSelectedWidgetId }) {
   let rightSider;
   if (selectedWidgetId) {
     rightSider = <WidgetConfigPanel widgetId={selectedWidgetId} notifyWidgetIdChanged={setSelectedWidgetId} />
@@ -31,29 +31,33 @@ function SubLayout({}) {
           <QueryEditor />
         </Layout>
       </Layout>
-      <Sider className={[styles.defaultBg].join(' ')} width={300} >
+      <Sider className={styles.defaultBg} width={275} >
         {rightSider}
       </Sider>
     </Layout>
   )
 }
 
-SubLayout.propTypes = { }
+SubLayout.propTypes = {
+  selectedWidgetId: PropTypes.string,
+  setSelectedWidgetId: PropTypes.func,
+}
 SubLayout.defaultProps = { }
 
 const EditorDndLayout = DragDropContext(HTML5Backend)(SubLayout);
 
 function EditorLayout({}) {
+  const [selectedWidgetId, setSelectedWidgetId] = useState(null);
   return (
     <Layout style={{ height: '100vh' }}>
       <Header className={styles.defaultBg}>
         <ControPanel />
       </Header>
       <Layout style={{ height: '100%' }}>
-        <Sider className={styles.defaultBg} style={{display: 'none'}}>
-          <ModelBrowser />
+        <Sider className={styles.defaultBg} width={275}>
+          <ModelBrowser selectedWidgetId={selectedWidgetId} />
         </Sider>
-        <EditorDndLayout />
+        <EditorDndLayout selectedWidgetId={selectedWidgetId} setSelectedWidgetId={setSelectedWidgetId} />
       </Layout>
     </Layout>
   )

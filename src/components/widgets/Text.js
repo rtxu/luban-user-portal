@@ -33,12 +33,6 @@ Text.defaultProps = {
   isExpandWhenHover: false,
 };
 
-Text.export = (props) => {
-  return {
-    value: props.value,
-  }
-}
-
 const initialState = Text.defaultProps;
 const ACTION_TYPE = {
   SET_IS_SCROLL_WHEN_OVERFLOW: 'setIsScrollWhenOverflow',
@@ -125,6 +119,12 @@ ConfigPanel.propTypes = {
 Text.ConfigPanel = ConfigPanel;
 Text.initialState = initialState;
 Text.reducer = reducer;
+Text.exporter = (props) => {
+  return {
+    value: props.value,
+  }
+}
+
 
 Text.use = () => {
   const [widgetProps, widgetDispatch] = useReducer(Text.reducer, Text.initialState);

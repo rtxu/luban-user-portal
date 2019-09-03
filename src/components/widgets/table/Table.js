@@ -555,7 +555,7 @@ ConfigPanel.propTypes = {
 Table.ConfigPanel = ConfigPanel;
 Table.initialState = initialState;
 Table.reducer = reducer;
-Table.export = (props) => {
+Table.exporter = (props) => {
   const selectedRow = {
     index: props.selectedRowIndex,
   }
