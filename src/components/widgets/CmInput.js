@@ -4,8 +4,9 @@ import 'codemirror/mode/javascript/javascript';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
 import 'codemirror/addon/display/placeholder';
-import styles from './CmInput.less';
 import { Alert } from 'antd';
+import classNames from 'classnames';
+import styles from './CmInput.less';
 
 const options = {
   mode: 'javascript',
@@ -17,32 +18,32 @@ const options = {
 
 function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
   options.placeholder = placeholder;
-  let classNames = [styles.cmEval];
-  let alertNode = null;
-  if (evalResult && evalResult.code !== 0) {
-    classNames.push(styles.cmEvalFail);
-    if (evalResult.visible) {
-      alertNode = (
-        <div className={styles.cmEvalMsg} >
-          <Alert closable message={evalResult.msg} type='error' />
-        </div>
-      );
-    }
-  } else {
-    classNames.push(styles.cmEvalOk);
+  const cls = classNames({
+    [styles.cmEval]: true,
+    [styles.cmEvalFail]: evalResult && evalResult.code !== 0,
+    [styles.cmEvalOk]: !(evalResult && evalResult.code !== 0),
+  });
+  let evalResultNode = null;
+  if (evalResult && evalResult.visible) {
+    const msgType = evalResult.code === 0 ? 'success' : 'error';
+    evalResultNode = (
+      <div className={styles.cmEvalMsg} >
+        <Alert message={evalResult.msg} type={msgType} />
+      </div>
+    );
   }
   return (
     // WARNING(ruitao.xu): 
     // 太坑了，经过测试，ControlledCodeMirror 的 onBeforeChange 是传统 <input> 组件的 onChange，
     // 而 onChange 是 props.value 发生变化以后的 callback
     // onChange={(editor, data, newValue) => { }}
-    <div className={classNames.join(' ')} >
+    <div className={cls} >
       <CodeMirror
         value={value}
         options={options}
         { ...eventHandlers }
       />
-      {alertNode}
+      {evalResultNode}
     </div>
   )
 }
