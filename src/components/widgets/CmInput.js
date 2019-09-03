@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import PropTypes from 'prop-types';
 import 'codemirror/mode/javascript/javascript';
@@ -17,6 +18,7 @@ const options = {
 };
 
 function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
+  const [evalResultVisible, setEvalResultVisible] = useState(false);
   options.placeholder = placeholder;
   const cls = classNames({
     [styles.cmEval]: true,
@@ -24,7 +26,7 @@ function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
     [styles.cmEvalOk]: !(evalResult && evalResult.code !== 0),
   });
   let evalResultNode = null;
-  if (evalResult && evalResult.visible) {
+  if (evalResult && evalResultVisible) {
     const msgType = evalResult.code === 0 ? 'success' : 'error';
     evalResultNode = (
       <div className={styles.cmEvalMsg} >
@@ -42,6 +44,8 @@ function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
         value={value}
         options={options}
         { ...eventHandlers }
+        onBlur={() => setEvalResultVisible(false)}
+        onCursor={() => setEvalResultVisible(true)}
       />
       {evalResultNode}
     </div>
@@ -52,7 +56,6 @@ export const EvalResult = {};
 EvalResult.propTypes = {
   code: PropTypes.number.isRequired,
   msg: PropTypes.string.isRequired,
-  visible: PropTypes.bool.isRequired,
 }
 
 CmInput.propTypes = {

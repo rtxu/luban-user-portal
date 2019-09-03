@@ -245,6 +245,12 @@ Table.defaultProps = {
   selectedRowIndex: 0,
 };
 
+/*
+ * memberArr 和 replaceArr 都是 array of object
+ * getObjId 以 object 为 param，返回 object 的唯一标识符 id
+ * 返回的结果也是一个 array of object，以 memberArr 中的 obj 为准
+ * 如果 replaceArr 中有相同 obj，则用其代替 memberArr 中的 obj
+ */
 function replaceObjectArr(memberArr, replaceArr, getObjId) {
   const replaceMap = replaceArr.reduce((result, obj) => {
     const objId = getObjId(obj);
@@ -265,8 +271,6 @@ const initialState = Table.defaultProps;
 const ACTION_TYPE = {
   setRawInput: Symbol(),
   toggleColumnVisibility: Symbol(),
-  showEvalResult: Symbol(),
-  hideEvalResult: Symbol(),
   moveColumn: Symbol(),
   setColumnWidth: Symbol(),
   setIsCompact: Symbol(),
@@ -325,18 +329,6 @@ function reducer(prevState, action) {
         draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex].meta.visible;
         draft.lastValidColumns = draft.columns;
       })
-    case ACTION_TYPE.showEvalResult:
-      return produce(prevState, draft => {
-        if (draft.rawInputEvalResult) {
-          draft.rawInputEvalResult.visible = true;
-        }
-      })
-    case ACTION_TYPE.hideEvalResult:
-      return produce(prevState, draft => {
-        if (draft.rawInputEvalResult) {
-          draft.rawInputEvalResult.visible = false;
-        }
-      })
     case ACTION_TYPE.moveColumn:
       const fromIndex = action.payload.from;
       const toIndex = action.payload.to;
@@ -381,16 +373,6 @@ function ConfigPanel(props) {
       payload: newValue,
     });
   }
-  function showEvalResult() {
-    dispatch({
-      type: ACTION_TYPE.showEvalResult,
-    });
-  }
-  function hideEvalResult() {
-    dispatch({
-      type: ACTION_TYPE.hideEvalResult,
-    });
-  }
   function toggleColumnVisibility(index, event) {
     dispatch({
       type: ACTION_TYPE.toggleColumnVisibility,
@@ -427,8 +409,6 @@ function ConfigPanel(props) {
             evalResult: rawInputEvalResult,
             // ref: https://github.com/scniro/react-codemirror2
             onBeforeChange: setRawInput,
-            onBlur: hideEvalResult,
-            onCursor: showEvalResult,
           }}
         />
         <Config.Switch 
