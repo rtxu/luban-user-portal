@@ -59,17 +59,18 @@ function parse(tmpl) {
   }
 }
 
+// TODO(ruitao.xu): unsafe，这里的 functionBody 并没有做过多限制，用户可能注入恶意代码，要非常小心！
 function callFn(functionBody, ctx) {
-  const paramKeys = [];
+  const paramNames = [];
   const paramValues = [];
   if (ctx) {
-    for (const paramKey of Object.keys(ctx)) {
-      paramKeys.push(paramKey);
-      paramValues.push(ctx[paramKey]);
+    for (const paramName of Object.keys(ctx)) {
+      paramNames.push(paramName);
+      paramValues.push(ctx[paramName]);
     }
   }
 
-  const fn = new Function(...paramKeys, functionBody);
+  const fn = new Function(...paramNames, functionBody);
   const result = fn.apply(null, paramValues);
   return result;
 }
@@ -101,7 +102,7 @@ function renderTemplateString_v1_deprecated(tmpl, ctx) {
     cursor = match.index + match[0].length;
   }
   functionBody += tmpl.substr(cursor, tmpl.length - cursor) + `${TemplateStringMark.end})`;
-  console.log('functionBody', functionBody);
+  // console.log('functionBody', functionBody);
   const newCtx = {
     ...ctx,
     ctx,
