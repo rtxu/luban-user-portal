@@ -168,37 +168,59 @@ class EvalTopologyGraph {
 
     // build dependency
     for (const child of nodeArr) {
-      const { depsMap } = TemplateEngine.parse(child.tmpl);
-      const parents = {}
-      for (const dep of Object.keys(depsMap)) {
-        if (dep in this.evalNodeMap) {
-          const parent = this.evalNodeMap[dep];
-          parents[parent.id] = parent;
-        }
-      }
-      child.setParents(parents);
+      this._buildNodeDependency(child);
     }
-
-    this.evaluate();
   }
 
-  // TODO(ruitao.xu): impl
+  _buildNodeDependency(node) {
+    const { depsMap } = TemplateEngine.parse(node.tmpl);
+    const parents = {}
+    for (const dep of Object.keys(depsMap)) {
+      if (dep in this.evalNodeMap) {
+        const parent = this.evalNodeMap[dep];
+        parents[parent.id] = parent;
+      }
+    }
+    node.setParents(parents);
+  }
+
   // [[[ add/remove/updateEvalNode 都假设在调用前整个 EvalTopologyGraph 中的所有 EvalNode 处于终止状态
+  // 事件: 用户新增 widget
   // 新增节点不可能成为别人的依赖，要么是 literal 要么依赖已有节点
   addEvalNode(node) {
+    this.evalNodeMap[node.id] = node;
+    this._buildNodeDependency(node);
+    this._reset();
   }
 
-  // 所有子节点触发 re-evaluate，从 context 中找当前被删节点，进而报错 undefined
+  // 事件: 用户删除 widget
+  // 子节点更新依赖关系，所有后代节点置为 pending
   removeEvalNode(nodeId) {
+    const node = this.evalNodeMap[nodeId];
+    if (node) {
+      delete this.evalNodeMap[nodeId];
+      for (const child of Object.values(node.getChildren())) {
+        this._buildNodeDependency(child);
+      }
+      this._reset();
+    }
   }
 
-  // 更新依赖
-  updateEvalNode(node) {
+  // 事件: 用户更新 tmpl 内容
+  // 1. 更新当前节点的依赖关系
+  // 2. 当前节点及其后代节点置为 pending
+  updateEvalNode(nodeId, tmpl) {
+    const node = this.evalNodeMap[nodeId];
+    if (node) {
+      node.tmpl = tmpl;
+      this._buildNodeDependency(node);
+      this._reset();
+    }
   }
   // ]]]
 
   checkCyclicDependency(nodes) {
-    function dfs(currentNode, currentPath, globalVisited) {
+    function _dfs(currentNode, currentPath, globalVisited) {
       currentPath.push(currentNode);
       globalVisited[currentNode.id] = true;
 
@@ -221,7 +243,7 @@ class EvalTopologyGraph {
         } else if (globalVisited[child.id]) {
           // no need to re-visit
         } else {
-          dfs(child, currentPath, globalVisited);
+          _dfs(child, currentPath, globalVisited);
         }
       }
       currentPath.pop();
@@ -231,8 +253,14 @@ class EvalTopologyGraph {
     for (const node of nodes) {
       if (!visited[node.id]) {
         const path = [];
-        dfs(node, path, visited)
+        _dfs(node, path, visited)
       }
+    }
+  }
+
+  _reset() {
+    for (const node of Object.values(this.evalNodeMap)) {
+      node.state = EvalState.PENDING;
     }
   }
 
@@ -256,8 +284,10 @@ class EvalTopologyGraph {
           node.evaluate(ctx, depCtx);
           break;
         case EvalState.ERROR:
-          node.setError(new DependencyNotMeetError(`所依赖节点存在错误: [${errDeps.join(',')}]`));
+          node.setError(new DependencyNotMeetError(`所依赖节点存在错误: [${errDeps.join(', ')}]`));
           break;
+        default:
+          throw new Error(`${node.id} got unexpected depState: ${depState}`);
       }
     }
   }
