@@ -1,10 +1,7 @@
 import { useState, useReducer } from 'react';
 import { Layout } from 'antd';
 import styles from './index.less'
-import Text from '../../components/widgets/Text';
-import TextInput from '../../components/widgets/TextInput';
-import Button from '../../components/widgets/Button';
-import Table from '../../components/widgets/table';
+import { Text, TextInput, Button, Table } from '../../components/widgets';
 import OneLineOverflowText from '../../components/widgets/table/OneLineOverflowText';
 import WidgetFactory from '../../components/WidgetFactory';
 

@@ -14,13 +14,13 @@ export const Type = {
 function createState(type) {
   switch (type) {
     case Type.TEXT:
-      return lodash.cloneDeep(Text.initialState);
+      return lodash.cloneDeep(Text.defaultProps);
     case Type.BUTTON:
-      return lodash.cloneDeep(Button.initialState);
+      return lodash.cloneDeep(Button.defaultProps);
     case Type.TABLE:
-      return lodash.cloneDeep(Table.initialState);
+      return lodash.cloneDeep(Table.defaultProps);
     case Type.TEXTINPUT:
-      return lodash.cloneDeep(TextInput.initialState);
+      return lodash.cloneDeep(TextInput.defaultProps);
     default:
       throw new Error(`in createState: unexpected widget type: ${type}`);
   }
