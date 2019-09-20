@@ -9,9 +9,6 @@ import { wrapDispatchToFire } from '@/util'
 import WidgetFactory from '../WidgetFactory';
 import styles from './WidgetConfigPanel.less';
 
-const mapStateToProps = (state) => ({
-  widgets: state[NS],
-});
 const mapDispatchToProps = (dispatch) => {
   const fire = wrapDispatchToFire(dispatch);
   return {
@@ -57,25 +54,24 @@ Header.propTypes = {
 Header.defaultProps = {
 }
 
-function WidgetConfigPanel({widgetId, widgets, widgetDispatch, changeWidgetId, notifyWidgetIdChanged}) {
-  const widget = widgets[widgetId];
+function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, notifyWidgetIdChanged}) {
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
     {
       ...widget.content,
       dispatch: (action) => {
-        widgetDispatch(widgetId, action)
+        widgetDispatch(widget.id, action)
       },
     },
   );
 
   function onChange(newWidgetId) {
-    changeWidgetId(widgetId, newWidgetId)
+    changeWidgetId(widget.id, newWidgetId)
     notifyWidgetIdChanged(newWidgetId);
   }
   return (
     <div className={styles.widgetConfigPanel}>
-      <Header widgetId={widgetId} onChange={onChange} />
+      <Header widgetId={widget.id} onChange={onChange} />
       {widgetConfigPanel}
     </div>
   )
@@ -83,12 +79,11 @@ function WidgetConfigPanel({widgetId, widgets, widgetDispatch, changeWidgetId, n
 
 WidgetConfigPanel.propTypes = {
   // from `widgets` model
-  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
   widgetDispatch: PropTypes.func.isRequired,
   changeWidgetId: PropTypes.func.isRequired,
 
   // from pages/editor/$app
-  widgetId: PropTypes.string.isRequired,
+  widget: PropTypes.shape(WidgetBox.propTypes),
   notifyWidgetIdChanged: PropTypes.func.isRequired,
 }
 
@@ -96,4 +91,4 @@ WidgetConfigPanel.defaultProps = {
 }
 
 WidgetConfigPanel.Header = Header;
-export default connect(mapStateToProps, mapDispatchToProps)(WidgetConfigPanel);
+export default connect(undefined, mapDispatchToProps)(WidgetConfigPanel);

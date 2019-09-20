@@ -4,9 +4,10 @@ import {
 } from "antd";
 import Text from './Text';
 import Config from '../Config';
-import { setIsExpandWhenHover, setIsScrollWhenOverflow, setValue, } from './reducer';
+import { setIsExpandWhenHover, setIsScrollWhenOverflow, setTemplateOfValue, } from './reducer';
+import TemplateEntry from '../TemplateEntry';
 
-function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch}) {
+function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, dispatch}) {
   function onIsScrollChange(checked) {
     dispatch(setIsScrollWhenOverflow(checked));
   }
@@ -15,7 +16,7 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
   }
   // better to debounce
   function onTextChange(editor, data, newValue) {
-    dispatch(setValue(newValue));
+    dispatch(setTemplateOfValue(newValue));
   }
 
   const { Panel } = Collapse;
@@ -29,8 +30,8 @@ function ConfigPanel({value, isScrollWhenOverflow, isExpandWhenHover, dispatch})
         <Config.LabelCmInput
           label={{ value:'文本' }}
           input={{ 
-            value: value, 
-            evalResult: null,
+            value: templateMap.value.template, 
+            evalResult: TemplateEntry.toEvalResult(templateMap.value),
             onBeforeChange: onTextChange, 
           }}
         />

@@ -4,23 +4,15 @@ import { connect } from 'dva';
 import PropTypes from 'prop-types';
 import JSONTree from 'react-json-tree';
 
-import { NS } from '@/pages/editor/models/widgets';
 import WidgetBox from './WidgetBox';
 import WidgetFactory from '../WidgetFactory';
-
-const mapStateToProps = (state) => {
-  const widgets = state[NS];
-  return {
-    widgets,
-  };
-};
 
 function ModelBrowser({ widgets, selectedWidgetId }) {
   const { Panel } = Collapse;
   const widgetsJson = {};
   Object.keys(widgets).map((widgetId) => {
     const widget = widgets[widgetId];
-    const exporter = WidgetFactory.getExporter(widget.type);
+    const exporter = WidgetFactory.getExportedState(widget.type);
     widgetsJson[widgetId] = exporter(widget.content);
   })
   const themes = [
@@ -123,11 +115,9 @@ function ModelBrowser({ widgets, selectedWidgetId }) {
 }
 
 ModelBrowser.propTypes = {
-  // from `widgets` model
-  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-
   // fron editor
   selectedWidgetId: PropTypes.string,
+  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
 }
 
-export default connect(mapStateToProps)(ModelBrowser);
+export default ModelBrowser;

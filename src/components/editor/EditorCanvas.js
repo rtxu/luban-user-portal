@@ -234,13 +234,6 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
   setter(newHeight);
 }
 
-const mapStateToProps = (state) => {
-  const widgets = state[NS];
-  return {
-    widgets,
-  };
-};
-
 const mapDispatchToProps = (dispatch) => {
   const fire = wrapDispatchToFire(dispatch);
   return {
@@ -393,16 +386,16 @@ function EditorCanvas(props) {
 
 EditorCanvas.propTypes = {
   // from `widgets` model
-  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
   loadWidgets: PropTypes.func.isRequired,
   addOrUpdate: PropTypes.func.isRequired,
   deleteOne: PropTypes.func.isRequired,
 
   // from pages/editor/:app
+  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
   selectedWidgetId: PropTypes.string,   // may be null
   setSelectedWidgetId: PropTypes.func.isRequired,
 }
 
 EditorCanvas.defaultProps = { }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditorCanvas);
+export default connect(undefined, mapDispatchToProps)(EditorCanvas);

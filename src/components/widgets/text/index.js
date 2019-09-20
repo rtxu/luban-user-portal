@@ -1,7 +1,6 @@
 import Text from './Text';
 import ConfigPanel from './ConfigPanel';
-import reducer from './reducer';
-import exporter from './exporter';
+import reducer, { getExportedState, getExportedStateNoTemplate } from './reducer';
 
 // View: <Text> and <Text.ConfigPanel>
 Text.ConfigPanel = ConfigPanel;
@@ -10,6 +9,7 @@ Text.ConfigPanel = ConfigPanel;
 Text.reducer = reducer;
 
 // determine which properties other component could reference
-Text.exporter = exporter;
+Text.getExportedState = getExportedState;
+Text.getExportedStateNoTemplate = getExportedStateNoTemplate;
 
 export default Text;

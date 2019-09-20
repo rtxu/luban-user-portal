@@ -1,10 +1,13 @@
 import { createAction, handleActions } from 'redux-actions';
+import produce from 'immer';
 import Text from './Text';
 
 //- Actions
 export const setIsScrollWhenOverflow = createAction('IS_SCROLL_WHEN_OVERFLOW_SET');
 export const setIsExpandWhenHover = createAction('IS_EXPAND_WHEN_HOVER_SET');
-export const setValue = createAction('VALUE_SET');
+export const setTemplateOfValue = createAction('TEMPLATE_OF_VALUE_SET');
+
+const initialState = Text.defaultProps;
 
 //- Reducers
 export default handleActions({
@@ -20,17 +23,23 @@ export default handleActions({
       isExpandWhenHover: action.payload,
     }
   },
-  [setValue]: (state, action) => {
-    return {
-      ...state,
-      value: action.payload,
-    }
+  [setTemplateOfValue]: (state, action) => {
+    return produce(state, draft => {
+      draft.templateMap.value.template = action.payload;
+    })
   },
-}, Text.defaultProps);
+}, initialState);
 
 //- Selectors
-export const getExported = (state) => (
+// ModelBrowser 使用，组件公开的所有数据
+export const getExportedState = (state) => (
   {
-    value: state.value,
+    value: state.templateMap.value.value,
+  }
+)
+
+// 用于构造计算模板结果时使用的 context，不包含模板项
+export const getExportedStateNoTemplate = (state) => (
+  {
   }
 )

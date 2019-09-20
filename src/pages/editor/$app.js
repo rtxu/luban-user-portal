@@ -1,8 +1,9 @@
-import React, { useState, } from 'react';
+import React, { useState, useEffect, } from 'react';
 import { Layout} from 'antd';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
+import { connect } from 'dva';
 
 import ControPanel from '../../components/editor/ControlPanel';
 import ModelBrowser from '../../components/editor/ModelBrowser';
@@ -11,13 +12,17 @@ import QueryEditor from '../../components/editor/QueryEditor';
 import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
+import { getEvaluatedWidgets } from './selectors';
 
 const { Header, Sider, Content } = Layout;
 
-function SubLayout({ selectedWidgetId, setSelectedWidgetId }) {
+function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets }) {
   let rightSider;
   if (selectedWidgetId) {
-    rightSider = <WidgetConfigPanel widgetId={selectedWidgetId} notifyWidgetIdChanged={setSelectedWidgetId} />
+    rightSider = <WidgetConfigPanel 
+      widget={widgets[selectedWidgetId]} 
+      notifyWidgetIdChanged={setSelectedWidgetId}
+    />
   } else {
     rightSider = <WidgetPicker />
   }
@@ -25,7 +30,10 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId }) {
     <Layout>
       <Layout>
         <Content className={styles.defaultBg}>
-          <EditorCanvas selectedWidgetId={selectedWidgetId} setSelectedWidgetId={setSelectedWidgetId} />
+          <EditorCanvas 
+            selectedWidgetId={selectedWidgetId} 
+            setSelectedWidgetId={setSelectedWidgetId}
+            widgets={widgets} />
         </Content>
         <Layout className={styles.defaultBg} style={{ display: 'none' }}>
           <QueryEditor />
@@ -46,8 +54,21 @@ SubLayout.defaultProps = { }
 
 const EditorDndLayout = DragDropContext(HTML5Backend)(SubLayout);
 
-function EditorLayout({}) {
+const mapStateToProps = (state) => {
+  return {
+    widgets: getEvaluatedWidgets(state),
+  };
+};
+
+function EditorLayout({ match, widgets }) {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null);
+
+  useEffect(() => {
+    console.log(`app initializing: ${match.params.app}`)
+    return function cleanup() {
+      console.log(`app un-initializing: ${match.params.app}`)
+    }
+  }, []);
   return (
     <Layout style={{ height: '100vh' }}>
       <Header className={styles.defaultBg}>
@@ -55,12 +76,16 @@ function EditorLayout({}) {
       </Header>
       <Layout style={{ height: '100%' }}>
         <Sider className={styles.defaultBg} width={275}>
-          <ModelBrowser selectedWidgetId={selectedWidgetId} />
+          <ModelBrowser selectedWidgetId={selectedWidgetId} widgets={widgets} />
         </Sider>
-        <EditorDndLayout selectedWidgetId={selectedWidgetId} setSelectedWidgetId={setSelectedWidgetId} />
+        <EditorDndLayout 
+          selectedWidgetId={selectedWidgetId} 
+          setSelectedWidgetId={setSelectedWidgetId} 
+          widgets={widgets}
+        />
       </Layout>
     </Layout>
   )
 }
 
-export default EditorLayout;
+export default connect(mapStateToProps)(EditorLayout);

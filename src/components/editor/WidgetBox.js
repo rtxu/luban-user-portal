@@ -48,7 +48,6 @@ const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
   )
 });
 
-const mapStateToProps = (state) => ({});
 const mapDispatchToProps = (dispatch) => {
   const fire = wrapDispatchToFire(dispatch);
   return {
@@ -200,4 +199,4 @@ WidgetBox.defaultProps = {
   showBorder: false,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(WidgetBox);
+export default connect(undefined, mapDispatchToProps)(WidgetBox);
