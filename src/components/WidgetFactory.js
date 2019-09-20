@@ -16,7 +16,7 @@ function createState(type) {
     case Type.TEXT:
       return lodash.cloneDeep(Text.initialState);
     case Type.BUTTON:
-      return lodash.cloneDeep(Button.defaultProps);
+      return lodash.cloneDeep(Button.initialState);
     case Type.TABLE:
       return lodash.cloneDeep(Table.initialState);
     case Type.TEXTINPUT:
@@ -76,7 +76,7 @@ function getExportedState(type) {
     case Type.TEXT:
       return Text.getExportedState;
     case Type.BUTTON:
-      return Button.exporter;
+      return Button.getExportedState;
     case Type.TABLE:
       return Table.getExportedState;
     case Type.TEXTINPUT:
@@ -91,7 +91,7 @@ function getExportedStateNoTemplate(type) {
     case Type.TEXT:
       return Text.getExportedStateNoTemplate;
     case Type.BUTTON:
-      return Button.exporter;
+      return Button.getExportedStateNoTemplate;
     case Type.TABLE:
       return Table.getExportedStateNoTemplate;
     case Type.TEXTINPUT:

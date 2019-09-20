@@ -175,7 +175,4 @@ export const getExportedState = (state) => {
 }
 
 // 用于构造计算模板结果时使用的 context，不包含模板项
-export const getExportedStateNoTemplate = (state) => (
-  {
-  }
-)
+export const getExportedStateNoTemplate = getExportedState;
