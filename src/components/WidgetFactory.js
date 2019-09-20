@@ -20,7 +20,7 @@ function createState(type) {
     case Type.TABLE:
       return lodash.cloneDeep(Table.initialState);
     case Type.TEXTINPUT:
-      return lodash.cloneDeep(TextInput.defaultProps);
+      return lodash.cloneDeep(TextInput.initialState);
     default:
       throw new Error(`in createState: unexpected widget type: ${type}`);
   }
@@ -80,7 +80,7 @@ function getExportedState(type) {
     case Type.TABLE:
       return Table.getExportedState;
     case Type.TEXTINPUT:
-      return TextInput.exporter;
+      return TextInput.getExportedState;
     default:
       throw new Error(`in getExporter: unexpected widget type: ${type}`);
   }
@@ -95,7 +95,7 @@ function getExportedStateNoTemplate(type) {
     case Type.TABLE:
       return Table.getExportedStateNoTemplate;
     case Type.TEXTINPUT:
-      return TextInput.exporter;
+      return TextInput.getExportedStateNoTemplate;
     default:
       throw new Error(`in getExporter: unexpected widget type: ${type}`);
   }
