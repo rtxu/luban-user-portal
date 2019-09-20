@@ -1,13 +1,20 @@
 import { createAction, handleActions } from 'redux-actions';
 import produce from 'immer';
-import Text from './Text';
 
 //- Actions
 export const setIsScrollWhenOverflow = createAction('IS_SCROLL_WHEN_OVERFLOW_SET');
 export const setIsExpandWhenHover = createAction('IS_EXPAND_WHEN_HOVER_SET');
 export const setTemplateOfValue = createAction('TEMPLATE_OF_VALUE_SET');
 
-const initialState = Text.defaultProps;
+export const initialState = {
+  isScrollWhenOverflow: false,
+  isExpandWhenHover: false,
+  templateMap: {
+    value: {
+      template: '这里填被展示的文本 😃',
+    }
+  },
+};
 
 //- Reducers
 export default handleActions({

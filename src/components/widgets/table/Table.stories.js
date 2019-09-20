@@ -4,7 +4,8 @@ import { action } from '@storybook/addon-actions';
 import { withKnobs, object, array } from '@storybook/addon-knobs/react';
 import produce from 'immer';
 
-import Table, { genColumnsByFirstRow } from './Table';
+import Table  from './Table';
+import { genColumnsByFirstRow } from './reducer';
 
 const data = [
   {

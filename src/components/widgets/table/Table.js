@@ -1,22 +1,15 @@
-import React, { useRef, useReducer, useState, } from 'react';
+import React, { useRef, useState, } from 'react';
 import PropTypes from 'prop-types';
-import { 
-  Collapse,
-  Table as AntTable,
-} from "antd";
-import produce from 'immer';
+import { Table as AntTable, } from "antd";
 import { Resizable } from 'react-resizable';
 import throttle from 'lodash.throttle';
 
-import { assert, createLogger } from '@/util';
+import { assert } from '@/util';
 import styles from './Table.less';
 import Config from '../Config';
 import OneLineOverflowText from './OneLineOverflowText';
-import ColumnCollapse from './ColumnCollapse';
-
-const logger = createLogger('/components/widgets/Table');
-
-const { Panel } = Collapse;
+import { setColumnWidth, setSelectedRowIndex } from './reducer';
+import { logger } from './common';
 
 // LATER(ruitao.xu): 单纯用 index 可能存在问题，比如两次 API 加载回来的数据第一行 key 都是 1，会导致 react 不更新数据
 function genRowKey(record, index) {
@@ -203,241 +196,6 @@ Table.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-export function genColumnsByFirstRow(firstRow) {
-  const columns = [];
-  for (let key of Object.keys(firstRow)) {
-    columns.push({
-      meta: {
-        visible: true,
-      },
-      config: {
-        title: key,
-        dataIndex: key, 
-      }
-    });
-  }
-  return columns;
-}
-
-const demoData = [
-  {
-    name: '胡彦斌',
-    age: 32,
-    address: '西湖区湖底公园1号',
-  },
-  {
-    name: '胡彦祖',
-    age: 42,
-    // 这段超长的内容可以测试出很多有关 table 样式的 bug
-    address: '西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号',
-  },
-];
-const demoRawInput = JSON.stringify(demoData, null, 2);
-const demoColumns = genColumnsByFirstRow(demoData[0]);
-
-Table.defaultProps = {
-  rawInput: demoRawInput,
-  data: demoData,
-  columns: demoColumns,
-  lastValidColumns: demoColumns,
-  height: 320,
-  isCompact: false,
-  selectedRowIndex: 0,
-};
-
-/*
- * memberArr 和 replaceArr 都是 array of object
- * getObjId 以 object 为 param，返回 object 的唯一标识符 id
- * 返回的结果也是一个 array of object，以 memberArr 中的 obj 为准
- * 如果 replaceArr 中有相同 obj，则用其代替 memberArr 中的 obj
- */
-function replaceObjectArr(memberArr, replaceArr, getObjId) {
-  const replaceMap = replaceArr.reduce((result, obj) => {
-    const objId = getObjId(obj);
-    result[objId] = obj;
-    return result;
-  }, {})
-  return memberArr.map((obj) => {
-    const objId = getObjId(obj);
-    if (objId in replaceMap) {
-      return replaceMap[objId];
-    } else {
-      return obj;
-    }
-  })
-}
-
-const initialState = Table.defaultProps;
-const ACTION_TYPE = {
-  setRawInput: Symbol(),
-  toggleColumnVisibility: Symbol(),
-  moveColumn: Symbol(),
-  setColumnWidth: Symbol(),
-  setIsCompact: Symbol(),
-  setSelectedRowIndex: Symbol(),
-}
-function reducer(prevState, action) {
-  switch (action.type) {
-    case ACTION_TYPE.setRawInput:
-      const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
-      const evalResult = {
-        code: 0,
-        msg: 'ok',
-        visible: true,
-      }
-      let newData = [];
-      try {
-        const obj = JSON.parse(action.payload);
-        if (Array.isArray(obj)) {
-          newData = obj;
-        } else {
-          evalResult.code = 101;
-          evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
-        }
-      } catch (e) {
-        evalResult.code = 102;
-        evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
-      }
-      if (evalResult.code === 0) {
-        let newColumns = [];
-        if (newData.length > 0) {
-          newColumns = replaceObjectArr(genColumnsByFirstRow(newData[0]), 
-            prevState.lastValidColumns, 
-            (obj) => obj.config.dataIndex,
-          );
-        }
-        return {
-          ...prevState,
-          rawInput: action.payload,
-          rawInputEvalResult: evalResult,
-          data: newData,
-          columns: newColumns,
-          lastValidColumns: newColumns,
-        }
-      } else {
-        return {
-          ...prevState,
-          rawInput: action.payload,
-          rawInputEvalResult: evalResult,
-          data: [],
-          columns: [],
-        }
-      }
-    case ACTION_TYPE.toggleColumnVisibility:
-      const columnIndex = action.payload;
-      return produce(prevState, draft => {
-        draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex].meta.visible;
-        draft.lastValidColumns = draft.columns;
-      })
-    case ACTION_TYPE.moveColumn:
-      const fromIndex = action.payload.from;
-      const toIndex = action.payload.to;
-      return produce(prevState, draft => {
-        const from = prevState.columns[fromIndex];
-        draft.columns.splice(fromIndex, 1);
-        draft.columns.splice(toIndex, 0, from);
-      })
-    case ACTION_TYPE.setColumnWidth:
-      const { index, width } = action.payload;
-      logger.debug(`in table reducer, setColumnWidth(index=${index}, width=${width})`);
-      return produce(prevState, draft => {
-        draft.columns[index].config.width = width;
-      })
-    case ACTION_TYPE.setIsCompact:
-      return produce(prevState, draft => {
-        draft.isCompact = action.payload;
-      })
-    case ACTION_TYPE.setSelectedRowIndex:
-      return produce(prevState, draft => {
-        draft.selectedRowIndex = action.payload;
-      })
-
-    default:
-      throw new Error(`in TableWidget reducer(): unexpected action type: ${action.type}`);
-  }
-}
-
-export function ColumnCollapseContainer({ children }) {
-  return (
-    <div className={styles.removeBottomPadding} >
-      {children}
-    </div>
-  )
-}
-
-function ConfigPanel(props) {
-  const { rawInput, rawInputEvalResult, columns, dispatch, isCompact } = props;
-  function setRawInput(editor, data, newValue) {
-    dispatch({
-      type: ACTION_TYPE.setRawInput,
-      payload: newValue,
-    });
-  }
-  function toggleColumnVisibility(index, event) {
-    dispatch({
-      type: ACTION_TYPE.toggleColumnVisibility,
-      payload: index,
-    });
-    event.stopPropagation();
-  }
-  function moveColumn(from, to) {
-    dispatch({
-      type: ACTION_TYPE.moveColumn,
-      payload: {
-        from: from,
-        to: to,
-      }
-    })
-  }
-  function setIsCompact(checked) {
-    dispatch({
-      type: ACTION_TYPE.setIsCompact,
-      payload: checked,
-    })
-  }
-
-  return (
-    <Collapse
-      defaultActiveKey={['1', '2', '3']}
-      expandIconPosition='right'
-    >
-      <Panel header='内容' key='1' >
-        <Config.LabelCmInput 
-          label={{ value: '数据', }}
-          input={{ 
-            value: rawInput, 
-            evalResult: rawInputEvalResult,
-            // ref: https://github.com/scniro/react-codemirror2
-            onBeforeChange: setRawInput,
-          }}
-        />
-        <Config.Switch 
-          checked={isCompact} 
-          onChange={setIsCompact}
-          description='紧凑模式' 
-        />
-      </Panel>
-      <Panel header='列选项' key='2' >
-        <Config.Label value='单列选项' />
-        <ColumnCollapseContainer>
-          {
-            columns.map((column, index) => (
-              <ColumnCollapse 
-                key={column.config.dataIndex}
-                name={column.config.dataIndex} 
-                index={index}
-                visible={column.meta.visible}
-                visibleOnClick={toggleColumnVisibility}
-                moveColumn={moveColumn}
-              />
-            ))
-          }
-        </ColumnCollapseContainer>
-      </Panel>
-    </Collapse>
-  );
-}
-
 function Table({ 
   data, 
   columns, 
@@ -458,14 +216,11 @@ function Table({
     },
   }
 
-  const setColumnWidth = index => (newWidth) => {
-    dispatch({
-      type: ACTION_TYPE.setColumnWidth,
-      payload: {
-        index,
-        width: newWidth,
-      },
-    })
+  const setIndexColumnWidth = index => (newWidth) => {
+    dispatch(setColumnWidth({
+      index,
+      width: newWidth,
+    }));
   };
 
   const displayColumns2 = displayColumns.map((col, index) => {
@@ -479,7 +234,7 @@ function Table({
       }),
       onHeaderCell: column => ({
         width: column.width,
-        onSetColumnWidth: setColumnWidth(index),
+        onSetColumnWidth: setIndexColumnWidth(index),
       }),
     };
   });
@@ -508,10 +263,7 @@ function Table({
           return {
             onClick: (e) => {
               setSelectedCurrentPageRowIndex(index);
-              dispatch({
-                type: ACTION_TYPE.setSelectedRowIndex,
-                payload: (currentPage-1) * pageSize + index,
-              });
+              dispatch(setSelectedRowIndex((currentPage-1) * pageSize + index));
             },
           }
         } }
@@ -525,35 +277,6 @@ function Table({
       />
     </div>
   );
-}
-
-
-ConfigPanel.propTypes = {
-  ...Table.PropTypes,
-  dispatch: PropTypes.func.isRequired,
-}
-Table.ConfigPanel = ConfigPanel;
-Table.initialState = initialState;
-Table.reducer = reducer;
-Table.exporter = (props) => {
-  const selectedRow = {
-    index: props.selectedRowIndex,
-  }
-  if (props.data.length > selectedRow.index) {
-    selectedRow.data = props.data[selectedRow.index];
-  }
-  
-  return {
-    data: props.data,
-    selectedRow,
-  }
-}
-
-Table.use = () => {
-  const [widgetProps, widgetDispatch] = useReducer(Table.reducer, Table.initialState);
-  return ([<Table {...widgetProps} dispatch={widgetDispatch} />, 
-    widgetProps, 
-  <Table.ConfigPanel dispatch={widgetDispatch} {...widgetProps} />]);
 }
 
 export default Table;

@@ -23,14 +23,4 @@ Text.propTypes = {
   templateMap: PropTypes.objectOf(PropTypes.shape(TemplateEntry.propTypes)),
 };
 
-Text.defaultProps = {
-  isScrollWhenOverflow: false,
-  isExpandWhenHover: false,
-  templateMap: {
-    value: {
-      template: '这里填被展示的文本 😃',
-    }
-  },
-};
-
 export default Text;

@@ -14,11 +14,11 @@ export const Type = {
 function createState(type) {
   switch (type) {
     case Type.TEXT:
-      return lodash.cloneDeep(Text.defaultProps);
+      return lodash.cloneDeep(Text.initialState);
     case Type.BUTTON:
       return lodash.cloneDeep(Button.defaultProps);
     case Type.TABLE:
-      return lodash.cloneDeep(Table.defaultProps);
+      return lodash.cloneDeep(Table.initialState);
     case Type.TEXTINPUT:
       return lodash.cloneDeep(TextInput.defaultProps);
     default:
@@ -78,7 +78,7 @@ function getExportedState(type) {
     case Type.BUTTON:
       return Button.exporter;
     case Type.TABLE:
-      return Table.exporter;
+      return Table.getExportedState;
     case Type.TEXTINPUT:
       return TextInput.exporter;
     default:
@@ -93,7 +93,7 @@ function getExportedStateNoTemplate(type) {
     case Type.BUTTON:
       return Button.exporter;
     case Type.TABLE:
-      return Table.exporter;
+      return Table.getExportedStateNoTemplate;
     case Type.TEXTINPUT:
       return TextInput.exporter;
     default:
