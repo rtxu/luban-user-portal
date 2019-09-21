@@ -8,8 +8,9 @@
 @dotWidth: 2px;
 // --]
 
-@widgetBoxSelectedZIndex: 5;
-@widgetBoxHoverZIndex: @widgetBoxSelectedZIndex+1;
+@widgetBoxZIndexWhenSelected: 5;
+@widgetBoxZIndexWhenHover: @widgetBoxZIndexWhenSelected+1;
+@hoverWidgetBoxZIndex: @widgetBoxZIndexWhenHover+1;
 
 .root {
   padding: 15px;
@@ -25,12 +26,16 @@
       margin: 12.5px;
       position: relative;
 
-      .widgetBox {
+      .widgetBoxCommon {
         position: absolute;
         will-change: transform;
         transition-property: height,width,transform;
         transition-duration: .1s;
         padding: @widgetBoxVPadding @widgetBoxHPadding;
+      }
+
+      .widgetBox {
+        .widgetBoxCommon();
 
         & > :global(.ant-tag) {
           transform: translate(-1px, -23px);
@@ -46,7 +51,7 @@
         }
 
         &:hover {
-          z-index: @widgetBoxHoverZIndex;
+          z-index: @widgetBoxZIndexWhenHover;
           background-color: hsla(0, 100%, 97%, .3);
           & > :global(.ant-tag) {
             background-color: hsla(0, 100%, 97%, .8);
@@ -62,7 +67,7 @@
 
         &.selected {
           outline: none;
-          z-index: @widgetBoxSelectedZIndex;
+          z-index: @widgetBoxZIndexWhenSelected;
           background-color: rgba(240, 240, 255, .3);
           & > :global(.ant-tag) {
             background-color: rgba(240, 240, 255, .8);
@@ -132,9 +137,10 @@
       }
 
       .hoverWidgetBox {
-        .widgetBox();
+        .widgetBoxCommon();
+
         background-color: rgba(63, 191, 63, 0.2);
-        z-index: 10;
+        z-index: @hoverWidgetBoxZIndex;
       }
 
       .hoverWidgetBoxCanNotPlace {
