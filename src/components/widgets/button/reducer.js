@@ -62,12 +62,16 @@ export default handleActions({
 }, initialState);
 
 //- Selectors
-// ModelBrowser 使用，组件公开的所有数据
-export const getExportedState = (state) => (
+// 用于构造计算模板结果时使用的 context，不包含模板项
+export const getExportedStateNoTemplate = (state) => (
   {
     text: state.text,
   }
 )
 
-// 用于构造计算模板结果时使用的 context，不包含模板项
-export const getExportedStateNoTemplate = getExportedState;
+// ModelBrowser 使用，组件公开的所有数据
+export const getExportedState = (state) => (
+  {
+    ...getExportedStateNoTemplate(state),
+  }
+)
