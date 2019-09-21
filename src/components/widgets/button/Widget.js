@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import styles from './Button.less';
+import styles from './Widget.less';
 import { Button as AntButton } from "antd";
 import { actionOptions, BUTTON_ACTION_OPTION_MAP } from './common';
 import TriggerAnActionConfigPanel from './TriggerAnActionConfigPanel';
@@ -49,6 +49,8 @@ Button.propTypes = {
   actionType: PropTypes.oneOf(actionOptions),
   actionTriggerAnAction: PropTypes.shape(TriggerAnActionConfigPanel.propTypes),
   actionOpenAnyWebPage: PropTypes.shape(OpenAnyWebPageConfigPanel.propTypes),
+
+  dispatch: PropTypes.func.isRequired,
 }
 
 export default Button;

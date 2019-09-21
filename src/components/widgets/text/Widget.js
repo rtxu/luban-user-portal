@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import styles from './Text.less';
+import styles from './Widget.less';
 import classNames from 'classnames';
 import TemplateEntry from '../TemplateEntry';
 
@@ -21,6 +21,8 @@ Text.propTypes = {
   isExpandWhenHover: PropTypes.bool,
 
   templateMap: PropTypes.objectOf(PropTypes.shape(TemplateEntry.propTypes)),
+  
+  dispatch: PropTypes.func.isRequired,
 };
 
 export default Text;

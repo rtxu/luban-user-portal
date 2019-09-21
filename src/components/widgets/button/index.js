@@ -1,17 +1,17 @@
-import Button from './Button';
+import Widget from './Widget';
 import ConfigPanel from './ConfigPanel';
 import reducer, { initialState, getExportedState, getExportedStateNoTemplate } from './reducer';
 
-// View: <Button> and <Button.ConfigPanel>
-Button.ConfigPanel = ConfigPanel;
+// View: <Widget> and <Widget.ConfigPanel>
+Widget.ConfigPanel = ConfigPanel;
 
 // state transformer: reducer
-Button.initialState = initialState;
-Button.reducer = reducer;
+Widget.initialState = initialState;
+Widget.reducer = reducer;
 
 // determine which properties other component could reference
-Button.getExportedState = getExportedState;
+Widget.getExportedState = getExportedState;
 // determine which properties other component could reference when evaluating template
-Button.getExportedStateNoTemplate = getExportedStateNoTemplate;
+Widget.getExportedStateNoTemplate = getExportedStateNoTemplate;
 
-export default Button;
+export default Widget;

@@ -1,18 +1,18 @@
-import Table from './Table';
+import Widget from './Widget';
 import ConfigPanel from './ConfigPanel';
 import reducer, { initialState, getExportedState, getExportedStateNoTemplate } from './reducer';
 
-// View: <Table> and <Table.ConfigPanel>
-Table.ConfigPanel = ConfigPanel;
+// View: <Widget> and <Widget.ConfigPanel>
+Widget.ConfigPanel = ConfigPanel;
 
 // state transformer: reducer
-Table.initialState = initialState;
-Table.reducer = reducer;
+Widget.initialState = initialState;
+Widget.reducer = reducer;
 
 // determine which properties other component could reference
-Table.getExportedState = getExportedState;
+Widget.getExportedState = getExportedState;
 
 // determine which properties other component could reference when evaluating template
-Table.getExportedStateNoTemplate = getExportedStateNoTemplate;
+Widget.getExportedStateNoTemplate = getExportedStateNoTemplate;
 
-export default Table;
+export default Widget;

@@ -1,9 +1,8 @@
-import PropTypes from 'prop-types';
+import React from 'react';
 import { Collapse, } from "antd";
 
 import { setTemplateOfData, toggleColumnVisibility, moveColumn, setIsCompact } from './reducer';
-import styles from './Table.less';
-import Table from './Table';
+import styles from './Widget.less';
 import ColumnCollapse from './ColumnCollapse';
 import Config from '../Config';
 
@@ -67,11 +66,6 @@ function ConfigPanel(props) {
       </Panel>
     </Collapse>
   );
-}
-
-ConfigPanel.propTypes = {
-  ...Table.PropTypes,
-  dispatch: PropTypes.func.isRequired,
 }
 
 export default ConfigPanel;

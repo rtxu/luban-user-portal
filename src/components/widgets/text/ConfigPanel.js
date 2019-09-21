@@ -1,8 +1,5 @@
-import PropTypes from 'prop-types';
-import { 
-  Collapse,
-} from "antd";
-import Text from './Text';
+import { Collapse, } from "antd";
+
 import Config from '../Config';
 import { setIsExpandWhenHover, setIsScrollWhenOverflow, setTemplateOfValue, } from './reducer';
 import TemplateEntry from '../TemplateEntry';
@@ -51,11 +48,6 @@ function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, disp
       </Panel>
     </Collapse>
   );
-}
-
-ConfigPanel.propTypes = {
-  ...Text.PropTypes,
-  dispatch: PropTypes.func.isRequired,
 }
 
 export default ConfigPanel;

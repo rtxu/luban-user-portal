@@ -1,17 +1,17 @@
-import TextInput from './TextInput';
+import Widget from './Widget';
 import ConfigPanel from './ConfigPanel';
 import reducer, { initialState, getExportedState, getExportedStateNoTemplate } from './reducer';
 
-// View: <TextInput> and <TextInput.ConfigPanel>
-TextInput.ConfigPanel = ConfigPanel;
+// View: <Widget> and <Widget.ConfigPanel>
+Widget.ConfigPanel = ConfigPanel;
 
 // state transformer: reducer
-TextInput.initialState = initialState;
-TextInput.reducer = reducer;
+Widget.initialState = initialState;
+Widget.reducer = reducer;
 
 // determine which properties other component could reference
-TextInput.getExportedState = getExportedState;
+Widget.getExportedState = getExportedState;
 // determine which properties other component could reference when evaluating template
-TextInput.getExportedStateNoTemplate = getExportedStateNoTemplate;
+Widget.getExportedStateNoTemplate = getExportedStateNoTemplate;
 
-export default TextInput;
+export default Widget;

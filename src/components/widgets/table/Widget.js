@@ -5,7 +5,7 @@ import { Resizable } from 'react-resizable';
 import throttle from 'lodash.throttle';
 
 import { assert } from '@/util';
-import styles from './Table.less';
+import styles from './Widget.less';
 import Config from '../Config';
 import OneLineOverflowText from './OneLineOverflowText';
 import { setColumnWidth, setSelectedRowIndex } from './reducer';

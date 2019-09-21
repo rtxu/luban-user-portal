@@ -1,17 +1,17 @@
-import Text from './Text';
+import Widget from './Widget';
 import ConfigPanel from './ConfigPanel';
 import reducer, { initialState, getExportedState, getExportedStateNoTemplate } from './reducer';
 
-// View: <Text> and <Text.ConfigPanel>
-Text.ConfigPanel = ConfigPanel;
+// View: <Widget> and <Widget.ConfigPanel>
+Widget.ConfigPanel = ConfigPanel;
 
 // state transformer: reducer
-Text.initialState = initialState;
-Text.reducer = reducer;
+Widget.initialState = initialState;
+Widget.reducer = reducer;
 
 // determine which properties other component could reference
-Text.getExportedState = getExportedState;
+Widget.getExportedState = getExportedState;
 // determine which properties other component could reference when evaluating template
-Text.getExportedStateNoTemplate = getExportedStateNoTemplate;
+Widget.getExportedStateNoTemplate = getExportedStateNoTemplate;
 
-export default Text;
+export default Widget;

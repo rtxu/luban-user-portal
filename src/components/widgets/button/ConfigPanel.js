@@ -1,10 +1,8 @@
-import PropTypes from 'prop-types';
 import { Collapse } from "antd";
 
-import Button from './Button';
 import Config from '../Config';
 import { BUTTON_ACTION_OPTION_MAP, actionOptions } from './common';
-import { initialState, setText, setColor, setActionType } from './reducer';
+import { setText, setColor, setActionType } from './reducer';
 import TriggerAnActionConfigPanel from './TriggerAnActionConfigPanel';
 import OpenAnotherLocalPageConfigPanel from './OpenAnotherLocalPageConfigPanel';
 import OpenAnyWebPageConfigPanel from './OpenAnyWebPageConfigPanel';
@@ -73,11 +71,5 @@ function ConfigPanel({ text, color, dispatch, actionType, actionOpenAnyWebPage }
     </Collapse>
   );
 }
-
-ConfigPanel.propTypes = {
-  ...Button.propTypes,
-  dispatch: PropTypes.func.isRequired,
-}
-ConfigPanel.defaultProps = initialState;
 
 export default ConfigPanel;

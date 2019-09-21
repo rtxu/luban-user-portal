@@ -5,7 +5,7 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
 import ColumnCollapse from './ColumnCollapse';
-import { ColumnCollapseContainer } from './Table';
+import { ColumnCollapseContainer } from './ConfigPanel';
 
 export const column = {
   name: 'Test Column#1',

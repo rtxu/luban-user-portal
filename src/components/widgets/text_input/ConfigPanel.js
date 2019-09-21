@@ -1,7 +1,5 @@
-import PropTypes from 'prop-types';
 import { Collapse, } from "antd";
 
-import TextInput from './TextInput';
 import Config from '../Config';
 import { setLabel, setLabelMaxWidth, setInputValue, setInputPlaceholder, setInputType } from './reducer';
 
@@ -67,11 +65,6 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
       </Panel>
     </Collapse>
   );
-}
-
-ConfigPanel.propTypes = {
-  ...TextInput.propTypes,
-  dispatch: PropTypes.func.isRequired,
 }
 
 export default ConfigPanel;

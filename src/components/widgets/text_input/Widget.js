@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { Input, } from "antd";
 
-import styles from './TextInput.less';
+import styles from './Widget.less';
 import { setInputValue } from './reducer';
 
 // BETTER(feature) TODO(ruitao.xu): support different display mode

@@ -4,7 +4,7 @@ import { action } from '@storybook/addon-actions';
 import { withKnobs, object, array } from '@storybook/addon-knobs/react';
 import produce from 'immer';
 
-import Table  from './Table';
+import Table from './Widget';
 import { genColumnsByFirstRow } from './reducer';
 
 const data = [
@@ -38,6 +38,8 @@ const columns = genColumnsByFirstRow(data[0]);
 export const props = {
   data: data,
   columns: columns,
+  height: 320,
+  selectedRowIndex: 0,
 }
 
 export const actions = {
@@ -48,16 +50,17 @@ storiesOf('Table', module)
   .addDecorator(withKnobs)
   .add('default', () => (
     <Table 
+      {...props}
       data={object('data', props.data)}
       columns={object('columns', props.columns)}
       {...actions} />
   ))
-  .add('no data', () => <Table data={[]} columns={[]} {...actions} />)
+  .add('no data', () => <Table {...props} data={[]} columns={[]} {...actions} />)
   .add('hide a column', () => {
     const newProps = produce(props, draft => {
       draft.columns[1].meta.visible = false;
     })
-    return ( <Table {...newProps} {...actions} /> )
+    return ( <Table  {...newProps} {...actions} />)
   })
   .add('compact mode', () => {
     return (
