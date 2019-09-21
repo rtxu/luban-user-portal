@@ -11,7 +11,7 @@ function Text({ templateMap, isScrollWhenOverflow, isExpandWhenHover }) {
   });
   return (
     <div className={cls}>
-      <p>{templateMap.value.value}</p>
+      <span>{templateMap.value.value}</span>
     </div>
   );
 }
