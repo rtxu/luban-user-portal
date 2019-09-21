@@ -8,6 +8,9 @@
 @dotWidth: 2px;
 // --]
 
+@widgetBoxSelectedZIndex: 5;
+@widgetBoxHoverZIndex: @widgetBoxSelectedZIndex+1;
+
 .root {
   padding: 15px;
   height: 100%;
@@ -43,7 +46,7 @@
         }
 
         &:hover {
-          //background-color: hsla(0, 100%, 97%, .3);
+          z-index: @widgetBoxHoverZIndex;
           & > :global(.ant-tag) {
             background-color: hsla(0, 100%, 97%, .8);
             color: #d73435;
@@ -58,7 +61,7 @@
 
         &.selected {
           outline: none;
-          z-index: 5;
+          z-index: @widgetBoxSelectedZIndex;
           background-color: rgba(240, 240, 255, .3);
           & > :global(.ant-tag) {
             background-color: rgba(240, 240, 255, .8);
