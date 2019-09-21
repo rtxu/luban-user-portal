@@ -8,10 +8,12 @@ export const setInputPlaceholder = createAction('INPUT_PLACEHOLDER_SET');
 export const setInputType = createAction('INPUT_TYPE_SET');
 
 export const initialState = {
-  label: '字段名',
+  label: '搜索',
   labelMaxWidth: 150,
   input: {
     type: 'text',
+    value: '',
+    placeholder: '请输入关键词...',
   }
 };
 
