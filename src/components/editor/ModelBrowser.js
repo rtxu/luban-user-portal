@@ -1,6 +1,5 @@
-import react from 'react';
+import React from 'react';
 import { Collapse } from 'antd';
-import { connect } from 'dva';
 import PropTypes from 'prop-types';
 import JSONTree from 'react-json-tree';
 

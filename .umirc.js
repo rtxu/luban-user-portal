@@ -5,8 +5,8 @@ export default {
     // component: 相对于 page 目录的路径
     { path: '/', component: '../layouts/BasicLayout' },
     { path: '/editor/:app', component: './editor/$app.js' },
-    { path: '/widget_debugger/:widget', component: './widget_debugger/$widget.js' },
-    { path: '/cm_playground', component: './cm_playground.js' },
+    { path: '/playground/codemirror2', component: './playground/codemirror2.js' },
+    { path: '/playground/alasql', component: './playground/alasql.js' },
   ],
 
   /*

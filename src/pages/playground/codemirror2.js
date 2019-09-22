@@ -4,9 +4,10 @@ import 'codemirror/mode/javascript/javascript';
 import 'codemirror/addon/display/placeholder';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
-import './cm_playground.less';
-import Config from '../components/widgets/Config';
-import CmInput from '../components/widgets/CmInput';
+
+import './codemirror2.less';
+import Config from '../../components/widgets/Config';
+import CmInput from '../../components/widgets/CmInput';
 import requireContext from 'require-context.macro';
 
 function CodeMirrorPlayGround({}) {
