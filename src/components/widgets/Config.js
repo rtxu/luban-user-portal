@@ -7,7 +7,7 @@ import {
   Tooltip,
   Select,
 } from "antd";
-import CmInput, { EvalResult } from './CmInput';
+import CmEvalInput, { EvalResult } from '../CmEvalInput';
 
 // [layout
 // layout]
@@ -73,18 +73,32 @@ LabelInput.propTypes = {
   }),
 };
 
-function LabelCmInput({ label, input, }) {
+function LabelCmEvalInput({ label, input, }) {
+  const defaultOptions = {
+    mode: 'javascript',
+    theme: 'neo',
+    lineWrapping: true,
+    lineNumbers: false,
+    viewportMargin: Infinity,
+  };
+
+  const { options: userOptions } = input;
+  const options = {
+    ...defaultOptions,
+    ...userOptions,
+  }
+
   return (
     <div className={styles.labelEntry}>
       <Label {...label} />
-      <CmInput {...input} />
+      <CmEvalInput {...input} options={options} />
     </div>
   );
 }
 
-LabelCmInput.propTypes = {
+LabelCmEvalInput.propTypes = {
   label: PropTypes.shape(Label.propTypes).isRequired,
-  input: PropTypes.shape(CmInput.propTypes),
+  input: PropTypes.shape(CmEvalInput.propTypes),
 };
 
 
@@ -121,8 +135,8 @@ const _ = {};
 _.Switch = Switch;
 _.Label = Label;
 _.LabelInput = LabelInput;
-_.LabelCmInput = LabelCmInput;
-_.LabelCmInput.EvalResult = EvalResult;
+_.LabelCmEvalInput = LabelCmEvalInput;
+_.LabelCmEvalInput.EvalResult = EvalResult;
 _.LabelSelect = LabelSelect;
 
 export default _;

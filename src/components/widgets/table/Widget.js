@@ -184,7 +184,7 @@ const Column = {
 
 Table.propTypes = {
   rawInput: PropTypes.string,
-  rawInputEvalResult: PropTypes.shape(Config.LabelCmInput.EvalResult.propTypes),
+  rawInputEvalResult: PropTypes.shape(Config.LabelCmEvalInput.EvalResult.propTypes),
   data: PropTypes.arrayOf(PropTypes.object),
   columns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),

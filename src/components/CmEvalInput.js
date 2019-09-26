@@ -1,25 +1,18 @@
 import { useState } from 'react';
 import { Controlled as CodeMirror } from 'react-codemirror2'
-import PropTypes from 'prop-types';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
 import 'codemirror/addon/display/placeholder';
+import PropTypes from 'prop-types';
 import { Alert } from 'antd';
 import classNames from 'classnames';
-import styles from './CmInput.less';
 
-const options = {
-  mode: 'javascript',
-  theme: 'neo',
-  lineWrapping: true,
-  lineNumbers: false,
-  viewportMargin: Infinity,
-};
+import styles from './CmEvalInput.less';
 
-function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
+// CodeMirror Evalation Input
+function CmEvalInput({ value, options, evalResult, onChange}) {
   const [evalResultVisible, setEvalResultVisible] = useState(false);
-  options.placeholder = placeholder;
   const cls = classNames({
     [styles.cmEval]: true,
     [styles.cmEvalFail]: evalResult && evalResult.code !== 0,
@@ -39,11 +32,12 @@ function CmInput({ value, placeholder, evalResult, ...eventHandlers }) {
     // 太坑了，经过测试，ControlledCodeMirror 的 onBeforeChange 是传统 <input> 组件的 onChange，
     // 而 onChange 是 props.value 发生变化以后的 callback
     // onChange={(editor, data, newValue) => { }}
+    // ref: https://github.com/scniro/react-codemirror2
     <div className={cls} >
       <CodeMirror
         value={value}
         options={options}
-        { ...eventHandlers }
+        onBeforeChange={(editor, data, newValue) => { onChange(newValue) }}
         onBlur={() => setEvalResultVisible(false)}
         onCursor={() => setEvalResultVisible(true)}
       />
@@ -58,10 +52,14 @@ EvalResult.propTypes = {
   msg: PropTypes.string.isRequired,
 }
 
-CmInput.propTypes = {
+CmEvalInput.propTypes = {
   value: PropTypes.string,
-  placeholder: PropTypes.string,
+  // ref: https://codemirror.net/doc/manual.html#config
+  options: PropTypes.object,
   evalResult: PropTypes.shape(EvalResult),
+
+  // actions
+  onChange: PropTypes.func.isRequired,
 }
 
-export default CmInput;
+export default CmEvalInput;

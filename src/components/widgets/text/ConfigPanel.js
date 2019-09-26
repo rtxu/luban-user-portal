@@ -12,7 +12,7 @@ function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, disp
     dispatch(setIsExpandWhenHover(checked));
   }
   // better to debounce
-  function onTextChange(editor, data, newValue) {
+  function onTextChange(newValue) {
     dispatch(setTemplateOfValue(newValue));
   }
 
@@ -24,12 +24,12 @@ function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, disp
       expandIconPosition='right'
     >
       <Panel header='内容' key='1' >
-        <Config.LabelCmInput
+        <Config.LabelCmEvalInput
           label={{ value:'文本' }}
           input={{ 
             value: templateMap.value.template, 
             evalResult: TemplateEntry.toEvalResult(templateMap.value),
-            onBeforeChange: onTextChange, 
+            onChange: onTextChange, 
           }}
         />
       </Panel>

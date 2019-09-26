@@ -7,7 +7,7 @@ import 'codemirror/theme/neo.css';
 
 import './codemirror2.less';
 import Config from '../../components/widgets/Config';
-import CmInput from '../../components/widgets/CmInput';
+import CmEvalInput from '../../components/CmEvalInput';
 
 function CodeMirrorPlayGround({}) {
   return (
@@ -31,7 +31,7 @@ function CodeMirrorPlayGround({}) {
       }}
     />
 
-    <CmInput 
+    <CmEvalInput 
       value={ JSON.stringify([{'k1': 'v1', 'k2': 'v2'}, {'k1': 'v1', 'k2': 'v2'}], null, 2) }
     />
     <Config.LabelInput 

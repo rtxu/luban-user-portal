@@ -196,7 +196,7 @@ function NormalOpHeader({op, dispatch}) {
       }}>删除</Button>
       {/* <Button>格式化</Button> */}
       {/* <Button>复制</Button> */}
-      <Button disabled>保存</Button>
+      {/* <Button disabled>保存</Button> */}
       <Button type='primary' onClick={() => {
         if (op.template) {
           asyncRunSql(op.template)

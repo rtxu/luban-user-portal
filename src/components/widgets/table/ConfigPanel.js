@@ -25,13 +25,12 @@ function ConfigPanel(props) {
       expandIconPosition='right'
     >
       <Panel header='内容' key='1' >
-        <Config.LabelCmInput 
+        <Config.LabelCmEvalInput 
           label={{ value: '数据', }}
           input={{ 
             value: rawInput, 
             evalResult: rawInputEvalResult,
-            // ref: https://github.com/scniro/react-codemirror2
-            onBeforeChange: (editor, data, newValue) => {
+            onChange: (newValue) => {
               dispatch(setTemplateOfData(newValue));
             },
           }}
