@@ -8,7 +8,7 @@ import { connect } from 'dva';
 import ControPanel from '../../components/editor/ControlPanel';
 import ModelBrowser from '../../components/editor/ModelBrowser';
 import EditorCanvas from '../../components/editor/EditorCanvas';
-import QueryEditor from '../../components/editor/QueryEditor';
+import OperationEditor from '../../components/editor/OperationEditor';
 import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
@@ -16,12 +16,13 @@ import { getEvaluatedWidgets } from './selectors';
 
 const { Header, Sider, Content } = Layout;
 
-function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets }) {
+function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, activeOp, dispatch }) {
   let rightSider;
   if (selectedWidgetId) {
     rightSider = <WidgetConfigPanel 
       widget={widgets[selectedWidgetId]} 
       notifyWidgetIdChanged={setSelectedWidgetId}
+      widgets={widgets}
     />
   } else {
     rightSider = <WidgetPicker />
@@ -35,8 +36,8 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets }) {
             setSelectedWidgetId={setSelectedWidgetId}
             widgets={widgets} />
         </Content>
-        <Layout className={styles.defaultBg} style={{ display: 'none' }}>
-          <QueryEditor />
+        <Layout className={styles.defaulBg} >
+          <OperationEditor opMap={opMap} activeOp={activeOp} dispatch={dispatch} />
         </Layout>
       </Layout>
       <Sider className={styles.defaultBg} width={275} >
@@ -57,10 +58,12 @@ const EditorDndLayout = DragDropContext(HTML5Backend)(SubLayout);
 const mapStateToProps = (state) => {
   return {
     widgets: getEvaluatedWidgets(state),
+    opMap: state.operations.opMap,
+    activeOp: state.operations.activeOp,
   };
 };
 
-function EditorLayout({ match, widgets }) {
+function EditorLayout({ match, widgets, opMap, activeOp, dispatch }) {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null);
 
   useEffect(() => {
@@ -82,6 +85,9 @@ function EditorLayout({ match, widgets }) {
           selectedWidgetId={selectedWidgetId} 
           setSelectedWidgetId={setSelectedWidgetId} 
           widgets={widgets}
+          opMap={opMap}
+          activeOp={activeOp}
+          dispatch={dispatch}
         />
       </Layout>
     </Layout>

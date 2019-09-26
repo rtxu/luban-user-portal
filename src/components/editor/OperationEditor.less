@@ -1,10 +1,14 @@
-.queryEditor {
-  height: 100%;
+
+@naviBarHeight: 42px;
+@headerHeight: 42px;
+
+.opEditor {
+  height: 300px;
 }
 
-.qeNaviBar {
-  height: 42px;
-  line-height: 42px;
+.opNaviBar {
+  height: @naviBarHeight;
+  line-height: @naviBarHeight;
   display: flex;
   border-bottom: 1px solid gainsboro;
 
@@ -42,11 +46,14 @@
   }
 }
 
-.qeHeader {
-  height: 42px;
-  line-height: 42px;
+.opHeader {
+  height: @headerHeight;
+  line-height: @headerHeight;
   display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-bottom: 1px solid gainsboro;
+  background-color: #fff;
 
   .left {
     flex: 1 1;
@@ -69,11 +76,25 @@
   }
 }
 
-.qeBody {
-  overflow: auto;
+.opBody {
   /* WARNING(ruitao.xu): SPACE IS REQUIRED */
-  height: calc(100% - (42px + 42px));
+  height: calc(100% - (@naviBarHeight + @headerHeight));
   padding: 20px 5px;
+  background-color: #fff;
+  overflow: auto;
+}
 
-  background-color: brown;
+.normalOpBody {
+  .opBody();
+}
+
+.emptyOpBody {
+  .opBody();
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
 }

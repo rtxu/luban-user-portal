@@ -120,21 +120,26 @@ export default {
           }
         }
       } else {
-        console.log(`widgetId('${widgetId}') not found in updateContent`);
+        logger.warn(`widgetId('${widgetId}') not found in updateContent`);
         return widgets;
       }
     },
     changeWidgetId(widgets, action) {
       const { oldWidgetId, newWidgetId } = action.payload;
       logger.debug(`changeWidgetId(oldWidgetId=${oldWidgetId}, newWidgetId=${newWidgetId})`);
-      if (oldWidgetId in widgets) {
-        const widget = widgets[oldWidgetId];
-        widget.id = newWidgetId;
-        const newWidgets = _deleteOne(widgets, oldWidgetId)
-        return _addOrUpdate(newWidgets, widget)
-      } else {
-        console.log(`widgetId('${widgetId}') not found in changeWidgetId`);
+      if (newWidgetId in widgets) {
+        // CAN NOT rename to an already-existed name
         return widgets;
+      } else {
+        if (oldWidgetId in widgets) {
+          const widget = widgets[oldWidgetId];
+          widget.id = newWidgetId;
+          const newWidgets = _deleteOne(widgets, oldWidgetId)
+          return _addOrUpdate(newWidgets, widget)
+        } else {
+          logger.warn(`widgetId('${widgetId}') not found in changeWidgetId`);
+          return widgets;
+        }
       }
     },
   },

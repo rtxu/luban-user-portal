@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import { Typography } from 'antd';
+import { Typography, message } from 'antd';
 import { connect } from 'dva';
 
 import WidgetBox from './WidgetBox';
@@ -54,7 +54,7 @@ Header.propTypes = {
 Header.defaultProps = {
 }
 
-function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, notifyWidgetIdChanged}) {
+function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, notifyWidgetIdChanged, widgets}) {
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
     {
@@ -66,8 +66,12 @@ function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, notifyWidget
   );
 
   function onChange(newWidgetId) {
-    changeWidgetId(widget.id, newWidgetId)
-    notifyWidgetIdChanged(newWidgetId);
+    if (newWidgetId in widgets) {
+      message.error(`${newWidgetId} 已经存在`);
+    } else {
+      changeWidgetId(widget.id, newWidgetId)
+      notifyWidgetIdChanged(newWidgetId);
+    }
   }
   return (
     <div className={styles.widgetConfigPanel}>
@@ -83,7 +87,8 @@ WidgetConfigPanel.propTypes = {
   changeWidgetId: PropTypes.func.isRequired,
 
   // from pages/editor/$app
-  widget: PropTypes.shape(WidgetBox.propTypes),
+  widget: PropTypes.shape(WidgetBox.propTypes).isRequired,
+  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
   notifyWidgetIdChanged: PropTypes.func.isRequired,
 }
 

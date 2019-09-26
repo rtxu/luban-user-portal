@@ -8,7 +8,6 @@ import 'codemirror/theme/neo.css';
 import './codemirror2.less';
 import Config from '../../components/widgets/Config';
 import CmInput from '../../components/widgets/CmInput';
-import requireContext from 'require-context.macro';
 
 function CodeMirrorPlayGround({}) {
   return (
