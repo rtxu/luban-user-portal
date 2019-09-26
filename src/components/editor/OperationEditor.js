@@ -9,6 +9,7 @@ import {
   Input,
   Drawer,
   Table,
+  notification,
 } from 'antd';
 
 import myStyles from './OperationEditor.less';
@@ -20,22 +21,12 @@ const { TextArea } = Input;
 
 function runSql(statement) {
   console.log('run sql: ', statement)
-  try {
-    const data = alasql(statement);
-    console.log(`data returned from sql(${statement}): `, data);
-    return {
-      code: 0,
-      msg: '',
-      data,
-    }
-  } catch(e) {
-    console.log(`error happens when run sql(${statement}): `, e.name, e.message)
-    return {
-      code: -1,
-      msg: `${e.name}: ${e.message}`,
-      data: null,
-    }
-  }
+  return alasql(statement);
+}
+
+function asyncRunSql(statement) {
+  console.log('async run sql: ', statement)
+  return alasql.promise(statement);
 }
 
 function OpTabBar({ ops, activeOp, dispatch }) {
@@ -73,7 +64,7 @@ function TargetDetail({ target, visible, setVisible }) {
   }
 
   function listLocalStorageTable() {
-    const { data: tables } = runSql('show tables;');
+    const tables = runSql('show tables;');
     if (tables) {
       return tables.map((table) => table.tableid)
     } else {
@@ -85,7 +76,7 @@ function TargetDetail({ target, visible, setVisible }) {
     // FIXME(ruitao.xu): I DONOT know why, but it works
     // if no select statement, show columns statement return empty list
     runSql(`select * from ${table};`);
-    const { data: columns } = runSql(`show columns from ${table};`);
+    const columns = runSql(`show columns from ${table};`);
     if (columns) {
       //console.log(`show columns from ${table}`, columns);
       return columns.map((col) => ({
@@ -207,12 +198,23 @@ function NormalOpHeader({op, dispatch}) {
       {/* <Button>复制</Button> */}
       <Button disabled>保存</Button>
       <Button type='primary' onClick={() => {
-        const { data } = runSql(op.template);
-        if (data) {
-          dispatch({type: 'operations/setData', payload: {
-            id: op.id,
-            data,
-          }})
+        if (op.template) {
+          asyncRunSql(op.template)
+            .then((data) => {
+              dispatch({type: 'operations/setData', payload: {
+                id: op.id,
+                data,
+              }})
+            }).catch((e) => {
+              notification.error({
+                message: e.name,
+                description: e.message,
+              });
+            });
+        } else {
+          notification.info({
+            message: '输入为空',
+          });
         }
       }}>运行</Button>
     </div>

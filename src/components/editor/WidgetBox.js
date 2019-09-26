@@ -74,7 +74,7 @@ const WidgetBox = React.memo((props) => {
     preview(getEmptyImage());
   }, [])
 
-  console.log('WigetBox', gridLeft, gridTop, gridHeight, gridWidth, id );
+  // console.log('WigetBox', gridLeft, gridTop, gridHeight, gridWidth, id );
   const top = gridTop * CANVAS.rowHeight;
   const left = gridLeft * canvasColumnWidth;
   const style = {

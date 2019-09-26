@@ -2,6 +2,7 @@ import React from 'react';
 import alasql from 'alasql';
 import JSONTree from 'react-json-tree';
 
+
 function Playground() {
 
   alasql(`
@@ -32,7 +33,16 @@ function Playground() {
   console.log('show databases', alasql('show databases;'));
   console.log('show tables', alasql('show tables;'));
   console.log('show columns from todo', alasql('show columns from todo;'));
-  console.log('select * error sql', alasql('select * erro sql;'));
+  // 同步调用不报错！
+  console.log('error sql', alasql('error sql;'));
+  // 异步调用可以
+  alasql.promise('error sql')
+    .then((res) => {
+      console.log('res', res);
+    }).catch((e) => {
+      console.log('caught error, name:', e.name);
+      console.log('caught error, msg:', e.message);
+    })
 
   //alasql('DELETE FROM todo;');
 
