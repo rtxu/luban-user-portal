@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Controlled as CodeMirror } from 'react-codemirror2'
 import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/sql/sql';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/neo.css';
 import 'codemirror/addon/display/placeholder';

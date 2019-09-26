@@ -6,7 +6,6 @@ import {
   Tabs, 
   Icon, 
   Button, 
-  Input,
   Drawer,
   Table,
   notification,
@@ -16,8 +15,7 @@ import myStyles from './OperationEditor.less';
 import alasql from 'alasql';
 alasql.options.errorlog = true;
 import { assert } from '../../util';
-
-const { TextArea } = Input;
+import CmEvalInput from '../CmEvalInput';
 
 function runSql(statement) {
   console.log('run sql: ', statement)
@@ -59,10 +57,6 @@ function OpTabBar({ ops, activeOp, dispatch }) {
 }
 
 function TargetDetail({ target, visible, setVisible }) {
-  if (!target) {
-    return null;
-  }
-
   function listLocalStorageTable() {
     const tables = runSql('show tables;');
     if (tables) {
@@ -188,7 +182,13 @@ function NormalOpHeader({op, dispatch}) {
           }
         }}>详情</Button>
       ): null}
-      <TargetDetail target={target} visible={targetDetailVisible} setVisible={setTargetDetailVisible} />
+      {
+        target ? (
+          <TargetDetail target={target} 
+            visible={targetDetailVisible} 
+            setVisible={setTargetDetailVisible} />
+        ) : null
+      }
     </div>
     <div className={myStyles.right}>
       <Button type='danger' onClick={() => {
@@ -238,17 +238,25 @@ function NormalOpBody({op, dispatch}) {
   return (
     <div className={myStyles.normalOpBody}>
       <section>
-        {/* TODO(ruitao.xu): embed a code editor */}
-        <TextArea rows={4} defaultValue={op.template} onPressEnter={(e) => {
-          dispatch({
-            type: 'operations/setTemplate', 
-            payload: {
-              id: op.id,
-              template: e.target.value,
-            }
-          })
-        }} />
-        <hr/>
+        <CmEvalInput
+          value={op.template}
+          options={{
+            mode: 'sql',
+            theme: 'neo',
+            lineWrapping: true,
+            lineNumbers: true,
+            viewportMargin: Infinity,
+          }}
+          onChange={(newValue) => {
+            dispatch({
+              type: 'operations/setTemplate', 
+              payload: {
+                id: op.id,
+                template: newValue,
+              }
+            })
+          }}
+        />
       </section>
       {/* 
       <section>

@@ -8,6 +8,19 @@ const getWidgets = (state) => {
   return state.widgets
 };
 
+/**
+ * 共有两类模板: widget template 和 operation template
+ * 共有三类依赖：
+ * 1. raw exported field: 其本身有值，不依赖任何其他 widget/operation
+ * 2. derived exported field: 依赖其他 widget/operation 的 exported field
+ * 3. executed exported field: operation 的模板渲染好后，执行 operation 获得的结果
+ * 模板渲染步骤（假设无循环依赖）:
+ * 1. 首轮模板渲染
+ *    所有依赖于 raw/derived exported field 的模板结果计算完成
+ *    仅有依赖于 operation executed exported field 的结果仍处于 「依赖未满足」状态
+ * 2. 按拓扑序执行 operation，获得 executed 结果
+ * 3. 二轮模板渲染
+ */
 const getTemplateMapAndExportedContext = createSelector(
   [getWidgets],
   (widgets) => {
