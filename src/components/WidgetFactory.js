@@ -2,14 +2,14 @@ import lodash from 'lodash';
 import { Text, TextInput, Button, Table } from './widgets';
 
 // NOTICE: `Type` must be a unique description string, when drop it will be used to generate widgetId(= type + instanceId)
-export const Type = {
+export const Type = Object.freeze({
   TEXT: 'text',
   BUTTON: 'button',
   TABLE: 'table',
   TEXTINPUT: 'text_input',
 
   ONE_LINE_OVERFLOW_TEXT: 'one_line_overflow_text',
-}
+})
 
 function createState(type) {
   switch (type) {

@@ -6,7 +6,7 @@ import { connect } from 'dva';
 import classNames from 'classnames';
 
 import WidgetBox from './WidgetBox';
-import { CSS, CANVAS } from './Constant';
+import { CSS, CANVAS } from './constant';
 import styles from './EditorCanvas.less';
 import DndItemTypes, {isResizeHandle} from './DndItemTypes';
 import { createLogger, wrapDispatchToFire } from '@/util';

@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { connect } from 'dva';
 import { Tag, Modal } from 'antd'
 
-import { CSS, CANVAS } from './Constant';
+import { CSS, CANVAS } from './constant';
 import DndItemTypes from './DndItemTypes';
 import styles from './EditorCanvas.less';
 import WidgetFactory from '../WidgetFactory';
