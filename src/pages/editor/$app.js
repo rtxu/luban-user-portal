@@ -30,15 +30,15 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, acti
   return (
     <Layout>
       <Layout>
-        <Content className={styles.defaultBg}>
+        <Content className={styles.EditorCanvasContainer}>
           <EditorCanvas 
             selectedWidgetId={selectedWidgetId} 
             setSelectedWidgetId={setSelectedWidgetId}
             widgets={widgets} />
         </Content>
-        <Layout className={styles.defaulBg} >
+        <Content className={styles.OperationEditorContainer} >
           <OperationEditor opMap={opMap} activeOp={activeOp} dispatch={dispatch} />
-        </Layout>
+        </Content>
       </Layout>
       <Sider className={styles.defaultBg} width={275} >
         {rightSider}
