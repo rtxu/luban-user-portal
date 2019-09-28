@@ -118,7 +118,7 @@ function TargetDetail({ target, visible, setVisible }) {
         {
           tbls.map((table) => (
             <div key={table} style={{marginBottom: 16}}>
-              <h4>{table}</h4>
+              <h4>表名: {table}</h4>
               <Table dataSource={listLocalStorageTableColumn(table)} columns={columns} pagination={false} />
             </div>
           ))
