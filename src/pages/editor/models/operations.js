@@ -4,7 +4,7 @@ const logger = createLogger('/pages/editor/models/operations');
 
 const initialState = {
   opMap: { },
-  activeOp: null,
+  activeOpId: null,
 };
 const defaultOpType = 'SQL_readonly';
 
@@ -30,14 +30,14 @@ export default {
           ...state.opMap,
           [newOp.id]: newOp,
         },
-        activeOp: newOp,
+        activeOpId: newOp.id,
       }
     },
     setActive(state, action) {
       logger.debug(action.type, action.payload);
       return {
         opMap: state.opMap,
-        activeOp: state.opMap[action.payload],
+        activeOpId: action.payload,
       }
     },
     delete(state, action) {
@@ -50,7 +50,7 @@ export default {
       }, {});
       return {
         opMap: newOpMap,
-        activeOp: state.activeOp.id === toDeleteOpKey ? null : state.activeOp,
+        activeOpId: null,
       }
     },
     setTemplate(state, action) {
@@ -66,7 +66,7 @@ export default {
           ...state.opMap,
           [activeOp.id]: activeOp, 
         },
-        activeOp,
+        activeOpId: activeOp.id,
       }
     },
     setData(state, action) {
@@ -82,7 +82,7 @@ export default {
           ...state.opMap,
           [activeOp.id]: activeOp,
         },
-        activeOp,
+        activeOpId: activeOp.id,
       }
     },
   },

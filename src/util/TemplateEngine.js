@@ -59,6 +59,34 @@ function parse(tmpl) {
   }
 }
 
+function parseSql(tmpl) {
+  let preparedSqlStatement = '';
+  let cursor = 0;
+  const codeSnippetRE = /{{(.*?)}}/g;
+  const codeSnippets = [];
+  let match;
+  while (match = codeSnippetRE.exec(tmpl)) {
+    preparedSqlStatement += tmpl.slice(cursor, match.index) + '?';
+    cursor = match.index + match[0].length;
+    codeSnippets.push(match[0]);
+  }
+  preparedSqlStatement += tmpl.substring(cursor);
+  const depsMap = {};
+  for (const code of codeSnippets) {
+    const match = code.match(EvalNodeIdRE);
+    if (match) {
+      for (const dep of match) {
+        depsMap[dep] = true;
+      }
+    }
+  }
+  return {
+    preparedSqlStatement,
+    params: codeSnippets,
+  }
+
+}
+
 // TODO(ruitao.xu): unsafe，这里的 functionBody 并没有做过多限制，用户可能注入恶意代码，要非常小心！
 function callFn(functionBody, ctx) {
   const paramNames = [];
@@ -70,6 +98,7 @@ function callFn(functionBody, ctx) {
     }
   }
 
+  // console.log(paramNames, paramValues, functionBody);
   const fn = new Function(...paramNames, functionBody);
   const result = fn.apply(null, paramValues);
   return result;
@@ -150,5 +179,6 @@ function render(tmpl, ctx) {
 const _ = {};
 _.TmplType = TmplType;
 _.parse = parse;
+_.parseSql = parseSql;
 _.render = render;
 export default _;

@@ -10,9 +10,9 @@ import {
   Table,
   notification,
 } from 'antd';
+import alasql from 'alasql';
 
 import myStyles from './OperationEditor.less';
-import alasql from 'alasql';
 alasql.options.errorlog = true;
 import { assert } from '../../util';
 import CmEvalInput from '../CmEvalInput';
@@ -27,12 +27,12 @@ function asyncRunSql(statement) {
   return alasql.promise(statement);
 }
 
-function OpTabBar({ ops, activeOp, dispatch }) {
+function OpTabBar({ ops, activeOpId, dispatch }) {
   return (
     <div className={myStyles.opNaviBar}>
       <div className={myStyles.tabContainer}>
         <div className={myStyles.override}>
-          <Tabs activeKey={activeOp} type='card' 
+          <Tabs activeKey={activeOpId} type='card' 
             onChange={(activeKey) => {
               dispatch({type: 'operations/setActive', payload: activeKey})
             }}>
@@ -309,16 +309,16 @@ function OpBody({op, dispatch}) {
   )
 }
 
-function OperationEditor({ opMap, activeOp, dispatch }) {
+function OperationEditor({ opMap, activeOpId, dispatch }) {
   return (
     <div className={myStyles.opEditor}>
       <OpTabBar 
         ops={Object.keys(opMap)} 
-        activeOp={activeOp === null ? '' : activeOp.id}
+        activeOpId={activeOpId}
         dispatch={dispatch}
       />
-      <OpHeader op={activeOp} dispatch={dispatch} />
-      <OpBody op={activeOp} dispatch={dispatch} />
+      <OpHeader op={opMap[activeOpId]} dispatch={dispatch} />
+      <OpBody op={opMap[activeOpId]} dispatch={dispatch} />
     </div>
   )
 }
@@ -330,7 +330,7 @@ op.propTypes = {
 
 OperationEditor.propTypes = {
   opMap: PropTypes.objectOf(PropTypes.shape(op.propTypes)).isRequired,
-  activeOp: PropTypes.shape(op.propTypes),
+  activeOpId: PropTypes.string,
 
   dispatch: PropTypes.func.isRequired,
 }

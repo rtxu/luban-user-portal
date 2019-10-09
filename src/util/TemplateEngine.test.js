@@ -28,6 +28,27 @@ test('parse template', () => {
   }
 })
 
+test('parse sql template', () => {
+  {
+    let { preparedSqlStatement, params } = TemplateEngine.parseSql('select * from todo;');
+    expect(preparedSqlStatement).toBe('select * from todo;');
+    expect(params.length).toBe(0);
+  }
+  {
+    let { preparedSqlStatement, params } = TemplateEngine.parseSql('select * from {{query1.data}};');
+    expect(preparedSqlStatement).toBe('select * from ?;');
+    expect(params.length).toBe(1);
+    expect(params[0]).toBe('{{query1.data}}');
+  }
+  {
+    let { preparedSqlStatement, params } = TemplateEngine.parseSql('select * from {{query1.data}} where id = {{widget1.value}};');
+    expect(preparedSqlStatement).toBe('select * from ? where id = ?;');
+    expect(params.length).toBe(2);
+    expect(params[0]).toBe('{{query1.data}}');
+    expect(params[1]).toBe('{{widget1.value}}');
+  }
+})
+
 test('parse template for deps', () => {
   {
     let { depsMap } = TemplateEngine.parse(' {{a.b.c}} {{aa.bb.cc}} {{aaa.b.ccc}}');

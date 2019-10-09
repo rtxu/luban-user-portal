@@ -1,3 +1,5 @@
+import alasql from 'alasql';
+
 import TemplateEngine from "./TemplateEngine";
 import { TemplateEntryState } from '@/components/widgets/TemplateEntry';
 import { assert } from './index';
@@ -6,6 +8,11 @@ const EvalState = {
   PENDING: TemplateEntryState.PENDING,
   EVALUATED: TemplateEntryState.EVALUATED,
   ERROR: TemplateEntryState.ERROR,
+}
+
+function asyncRunSql(statement, params) {
+  // console.log('async run sql: ', statement, 'params: ', params)
+  return alasql.promise(statement, params);
 }
 
 /**
@@ -20,9 +27,10 @@ const EvalState = {
  * 用户输入不变，处于 EVALUATED 和 ERROR 状态的节点不会更新，因此被称为终止态
  */
 export class EvalNode {
-  constructor(id, tmpl) {
+  constructor(id, tmpl, type) {
     this.id = id;
     this.tmpl = tmpl;
+    this.type = type;
 
     // I denpend on my parents
     this.parents = {};
@@ -43,19 +51,51 @@ export class EvalNode {
   }
 
   setEvaluated(value) {
+    // console.log('evaluated: ', this.id, 'value: ', value);
     this.tmpl.value = value;
     this.tmpl.state = EvalState.EVALUATED;
     this.tmpl.error = null;
   }
 
   setError(error) {
+    // console.log('error happened: ', this.id, 'error: ', error);
     this.tmpl.value = undefined;
     this.tmpl.state = EvalState.ERROR;
     this.tmpl.error = error;
   }
 
-  // 由 EvalTopologyGraph 准备 ctx，并在所有依赖处于 EVALUATED 后调用
   evaluate(ctx, depCtx) {
+    /*
+    console.log('to evaluate: ', this.id);
+    console.log('template: ', this.tmpl);
+    console.log('ctx: ', ctx);
+    console.log('depCtx: ', depCtx);
+    */
+    if (this.type === 'templateString') {
+      return this._evaluateTemplateString(ctx, depCtx);
+    } else if (this.type === 'sql') {
+      return this._evaluateSql(depCtx)
+    }
+  }
+
+  _evaluateSql(depCtx) {
+    const params = [];
+    const paramCnt = Object.keys(this.parents).length;
+    const sqlId = this.id.substring(0, this.id.length - '.data'.length);
+    for (let i = 0; i < paramCnt ; i++) {
+      const param = depCtx[sqlId + `.param[${i}]`]
+      params.push(param);
+    }
+    asyncRunSql(this.tmpl.template, params)
+      .then((data) => {
+        this.setEvaluated(data);
+      }).catch((e) => {
+        this.setError(e);
+      })
+  }
+
+  // 由 EvalTopologyGraph 准备 ctx，并在所有依赖处于 EVALUATED 后调用
+  _evaluateTemplateString(ctx, depCtx) {
     assert(this.tmpl.state === EvalState.PENDING);
 
     function createOrSetDescendantProp(obj, desc, value) {
@@ -85,14 +125,9 @@ export class EvalNode {
     }
   }
 
-  setParents(newParents) {
-    // old parent remove old child
-    for (const parent of Object.values(this.parents)) {
-      delete parent.children[this.id];
-    }
-    this.parents = newParents;
-    // new parent add new child
-    for (const parent of Object.values(this.parents)) {
+  appendParents(newParents) {
+    for (const parent of Object.values(newParents)) {
+      this.parents[parent.id] = parent;
       parent.children[this.id] = this;
     }
   }
@@ -153,20 +188,38 @@ export class DependencyNotMeetError extends Error {
 }
 
 class EvalTopologyGraph {
-  constructor(templateMap) {
+  constructor(templateMap, sqlTemplateMap) {
     // 假设所有的节点都有一个唯一的 id，id 可以分很多级，如：a.b.c.d
     // 该 id 如果在 this.evalNodeMap 中，则表示该节点是一个 EvalNode
     // 否则，id 是一个对 Context 的引用
     this.evalNodeMap = {}
 
     for (const [tmplId, tmplEntry] of Object.entries(templateMap)) {
-      const node = new EvalNode(tmplId, tmplEntry);
+      const node = new EvalNode(tmplId, tmplEntry, 'templateString');
       this.evalNodeMap[node.id] = node;
     }
 
+    if (sqlTemplateMap) {
+      for (const [sqlId, sqlTmpl] of Object.entries(sqlTemplateMap)) {
+        const {preparedSqlStatement, params } = TemplateEngine.parseSql(sqlTmpl.template);
+        const node = new EvalNode(sqlId + '.data', {template: preparedSqlStatement}, 'sql');
+        this.evalNodeMap[node.id] = node;
+        const parents = {};
+        for (let i = 0; i < params.length; i++) {
+          const node = new EvalNode(sqlId + `.param[${i}]`, { template: params[i] }, 'templateString');
+          this.evalNodeMap[node.id] = node;
+          parents[node.id] = node;
+        }
+        // to run sql, all params need be evaluated
+        node.appendParents(parents);
+      }
+    }
+
+    // console.log('dump evalNodeMap')
     // build dependency
     for (const child of Object.values(this.evalNodeMap)) {
       this._buildNodeDependency(child);
+      // console.log('id: ', child.id, 'tmpl: ', child.tmpl.template, 'parents: ', Object.keys(child.parents));
     }
   }
 
@@ -179,7 +232,7 @@ class EvalTopologyGraph {
         parents[parent.id] = parent;
       }
     }
-    node.setParents(parents);
+    node.appendParents(parents);
   }
 
   checkCyclicDependency(nodes) {

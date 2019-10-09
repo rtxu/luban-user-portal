@@ -1,12 +1,23 @@
+import produce from 'immer';
 import { createSelector } from 'reselect';
 import WidgetFactory from '../../components/WidgetFactory';
-import { createDeepEqualSelector } from '@/util/selector';
-import EvalTopologyGraph from '@/util/EvalTopologyGraph';
-import produce from 'immer';
+import EvalTopologyGraph from '../../util/EvalTopologyGraph';
+import { createDeepEqualSelector } from '../../util/selector';
 
 const getWidgets = (state) => {
   return state.widgets
 };
+
+const getOperations = (state) => {
+  return state.operations.opMap
+}
+
+function templateToSqlTemplate(template) {
+  return {
+    preparedSqlStatement,
+    params,
+  }
+}
 
 /**
  * 共有两类模板: widget template 和 operation template
@@ -22,8 +33,8 @@ const getWidgets = (state) => {
  * 3. 二轮模板渲染
  */
 const getTemplateMapAndExportedContext = createSelector(
-  [getWidgets],
-  (widgets) => {
+  [getWidgets, getOperations],
+  (widgets, operations) => {
     console.log(`all widgets in getTemplateMapAndExportedContext: ${Object.keys(widgets)}`);
     const templateMap = {};
     const exportedContext = {};

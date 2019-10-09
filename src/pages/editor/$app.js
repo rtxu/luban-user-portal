@@ -16,7 +16,7 @@ import { getEvaluatedWidgets } from './selectors';
 
 const { Header, Sider, Content } = Layout;
 
-function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, activeOp, dispatch }) {
+function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, activeOpId, dispatch }) {
   let rightSider;
   if (selectedWidgetId) {
     rightSider = <WidgetConfigPanel 
@@ -37,7 +37,7 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, acti
             widgets={widgets} />
         </Content>
         <Content className={styles.OperationEditorContainer} >
-          <OperationEditor opMap={opMap} activeOp={activeOp} dispatch={dispatch} />
+          <OperationEditor opMap={opMap} activeOpId={activeOpId} dispatch={dispatch} />
         </Content>
       </Layout>
       <Sider className={styles.defaultBg} width={275} >
@@ -59,11 +59,11 @@ const mapStateToProps = (state) => {
   return {
     widgets: getEvaluatedWidgets(state),
     opMap: state.operations.opMap,
-    activeOp: state.operations.activeOp,
+    activeOpId: state.operations.activeOpId,
   };
 };
 
-function EditorLayout({ match, widgets, opMap, activeOp, dispatch }) {
+function EditorLayout({ match, widgets, opMap, activeOpId, dispatch }) {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ function EditorLayout({ match, widgets, opMap, activeOp, dispatch }) {
           setSelectedWidgetId={setSelectedWidgetId} 
           widgets={widgets}
           opMap={opMap}
-          activeOp={activeOp}
+          activeOpId={activeOpId}
           dispatch={dispatch}
         />
       </Layout>

@@ -81,3 +81,22 @@ test('onError:DependencyNotMeetError', () => {
   expect(templateMap['widget1.value'].error).toBeInstanceOf(CyclicDependencyError);
   expect(templateMap['widget2.value'].error).toBeInstanceOf(DependencyNotMeetError);
 })
+
+test('sql basic', async () => {
+  const ctx = {
+    'op1': {
+      data: [{id: 1}, {id: 2}],
+    },
+  }
+  const templateMap = {
+  }
+  const sqlMap = {
+    'op2': {
+      template: 'select * from {{op1.data}}',
+    },
+  }
+  const graph = new EvalTopologyGraph(templateMap, sqlMap);
+  await graph.evaluate(ctx);
+  expect(graph.evalNodeMap['op2.param[0]'].tmpl.value).toEqual([{id: 1}, {id: 2}]);
+  expect(graph.evalNodeMap['op2.data'].tmpl.value).toEqual([{id: 1}, {id: 2}]);
+})
