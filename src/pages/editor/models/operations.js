@@ -1,89 +1,85 @@
+import { createAction, handleActions } from 'redux-actions';
+
 import { createLogger } from '@/util';
 
 const logger = createLogger('/pages/editor/models/operations');
 
-const initialState = {
-  opMap: { },
-  activeOpId: null,
-};
-const defaultOpType = 'SQL_readonly';
+const OP_TYPE = Object.freeze({
+  SQLReadonly: 'SQLReadonly',
+});
 
-export const NS = 'operations';
+//- Actions
+export const addOperation = createAction('OPERATION_ADD');
+export const deleteOperation = createAction('OPERATION_DELETE');
+export const setOperationInput = createAction('OPERATION_INPUT_SET');
+export const setOperationData = createAction('OPERATION_DATA_SET');
 
+//- initial state
+const initialState = {};
+const defaultOpType = OP_TYPE.SQLReadonly;
+
+//- Reducers
+// single operation
+const NS = 'operations';
+const operation = handleActions({
+  [`${NS}/${addOperation}`]: (state, action) => {
+    console.log('add action in single reducer', action);
+    return {
+      id: action.payload.id,
+      type: defaultOpType,
+    }
+  },
+  [`${NS}/${setOperationInput}`]: (state, action) => {
+    return {
+      ...state,
+      input: action.payload.input,
+    }
+  },
+  [`${NS}/${setOperationData}`]: (state, action) => {
+    return {
+      ...state,
+      data: action.payload.data,
+    }
+  },
+}, {})
+
+// operation map
 export default {
   state: initialState,
   effects: {
   },
   reducers: {
-    add(state, action) {
-      logger.debug(action.type, action.payload);
-      let instanceId = Object.keys(state.opMap).length + 1;
-      while (`op${instanceId}` in state.opMap) {
-        instanceId += 1;
-      }
-      const newOp = {
-        id: `op${instanceId}`,
-        type: defaultOpType,
-      }
-      return {
-        opMap: {
-          ...state.opMap,
-          [newOp.id]: newOp,
-        },
-        activeOpId: newOp.id,
-      }
-    },
-    setActive(state, action) {
-      logger.debug(action.type, action.payload);
-      return {
-        opMap: state.opMap,
-        activeOpId: action.payload,
-      }
-    },
-    delete(state, action) {
-      logger.debug(action.type, action.payload);
-      const toDeleteOpKey = action.payload;
-      const newOpKeys = Object.keys(state.opMap).filter((opKey) => opKey !== toDeleteOpKey)
-      const newOpMap = newOpKeys.reduce((newOpMap, opKey) => {
-        newOpMap[opKey] = state.opMap[opKey];
-        return newOpMap;
-      }, {});
-      return {
-        opMap: newOpMap,
-        activeOpId: null,
-      }
-    },
-    setTemplate(state, action) {
-      logger.debug(action);
-      const { id, template } = action.payload;
-      const activeOp = {
-        ...state.opMap[id],
-        template,
-      }
+    [addOperation]: (state, action) => {
+      console.log('in operations reducer', action);
+      const { id } = action.payload;
       return {
         ...state,
-        opMap: {
-          ...state.opMap,
-          [activeOp.id]: activeOp, 
-        },
-        activeOpId: activeOp.id,
+        [id]: operation(undefined, action),
       }
     },
-    setData(state, action) {
-      logger.debug('setData', action);
-      const { id, data }  = action.payload;
-      const activeOp = {
-        ...state.opMap[id],
-        data,
-      }
+    [deleteOperation]: (state, action) => {
+      const toDeleteId = action.payload;
+      return Object.keys(state).filter((id) => id !== toDeleteId)
+        .reduce((newOperations, id) => {
+          newOperations[id] = state[id]
+          return newOperations
+        }, {})
+    },
+    [setOperationInput]: (state, action) => {
+      const { id } = action.payload;
       return {
         ...state,
-        opMap: {
-          ...state.opMap,
-          [activeOp.id]: activeOp,
-        },
-        activeOpId: activeOp.id,
+        [id]: operation(state[id], action),
+      }
+    },
+    [setOperationData]: (state, action) => {
+      const { id } = action.payload;
+      return {
+        ...state,
+        [id]: operation(state[id], action),
       }
     },
   },
 };
+
+//- Selectors

@@ -27,14 +27,14 @@ function asyncRunSql(statement) {
   return alasql.promise(statement);
 }
 
-function OpTabBar({ ops, activeOpId, dispatch }) {
+function OpTabBar({ ops, activeOpId, onSetActiveOpId, onAddOperation}) {
   return (
     <div className={myStyles.opNaviBar}>
       <div className={myStyles.tabContainer}>
         <div className={myStyles.override}>
           <Tabs activeKey={activeOpId} type='card' 
             onChange={(activeKey) => {
-              dispatch({type: 'operations/setActive', payload: activeKey})
+              onSetActiveOpId(activeKey);
             }}>
             {ops.map((i) => (
               <Tabs.TabPane tab={i} key={i} />
@@ -44,8 +44,8 @@ function OpTabBar({ ops, activeOpId, dispatch }) {
       </div>
       <div className={myStyles.actions}>
           <Button onClick={() => {
-              dispatch({type: 'operations/add'})
-            }}>
+            onAddOperation();
+          }}>
             <Icon type="plus" />新建
           </Button>
           {/* TODO: better to have
@@ -127,7 +127,7 @@ function TargetDetail({ target, visible, setVisible }) {
   )
 }
 
-function NormalOpHeader({op, dispatch}) {
+function NormalOpHeader({op, onDeleteOperation, onSetOperationData}) {
   console.log('current op in header: ', op);
   const [target, setTarget] = useState();
   const [targetDetailVisible, setTargetDetailVisible] = useState(false);
@@ -192,19 +192,16 @@ function NormalOpHeader({op, dispatch}) {
     </div>
     <div className={myStyles.right}>
       <Button type='danger' onClick={() => {
-        dispatch({type: 'operations/delete', payload: op.id});
+        onDeleteOperation(op.id);
       }}>删除</Button>
       {/* <Button>格式化</Button> */}
       {/* <Button>复制</Button> */}
       {/* <Button disabled>保存</Button> */}
       <Button type='primary' onClick={() => {
-        if (op.template) {
-          asyncRunSql(op.template)
+        if (op.input) {
+          asyncRunSql(op.input)
             .then((data) => {
-              dispatch({type: 'operations/setData', payload: {
-                id: op.id,
-                data,
-              }})
+              onSetOperationData(op.id, data);
             }).catch((e) => {
               notification.error({
                 message: e.name,
@@ -226,20 +223,29 @@ function EmptyOpHeader() {
   return null;
 }
 
-function OpHeader({op, dispatch}) {
+function OpHeader({op, onDeleteOperation, onSetOperationData}) {
   return (
     <div className={myStyles.opHeader}>
-      {op ? <NormalOpHeader op={op} dispatch={dispatch} /> : <EmptyOpHeader />}
+      {
+        op ? (
+          <NormalOpHeader op={op} 
+            onDeleteOperation={onDeleteOperation} 
+            onSetOperationData={onSetOperationData}
+          />
+        ) : (
+          <EmptyOpHeader />
+        )
+      }
     </div>
   )
 }
 
-function NormalOpBody({op, dispatch}) {
+function NormalOpBody({op, onSetOperationInput}) {
   return (
     <div className={myStyles.normalOpBody}>
       <section>
         <CmEvalInput
-          value={op.template}
+          value={op.input}
           options={{
             mode: 'sql',
             theme: 'neo',
@@ -248,13 +254,7 @@ function NormalOpBody({op, dispatch}) {
             viewportMargin: Infinity,
           }}
           onChange={(newValue) => {
-            dispatch({
-              type: 'operations/setTemplate', 
-              payload: {
-                id: op.id,
-                template: newValue,
-              }
-            })
+            onSetOperationInput(op.id, newValue);
           }}
         />
       </section>
@@ -284,7 +284,7 @@ function NormalOpBody({op, dispatch}) {
   )
 }
 
-function EmptyOpBody({ dispatch }) {
+function EmptyOpBody({ onAddOperation }) {
   return (
     <div className={myStyles.emptyOpBody}>
       <div className={myStyles.icon}>
@@ -292,9 +292,7 @@ function EmptyOpBody({ dispatch }) {
       </div>
       <h4>未选中任何操作</h4>
       <div className={myStyles.description}>
-          <Button onClick={() => {
-              dispatch({type: 'operations/add'})
-            }}>
+          <Button onClick={onAddOperation}>
             <Icon type="plus" />新建
           </Button>
         一个操作 或 选择已有操作
@@ -303,36 +301,74 @@ function EmptyOpBody({ dispatch }) {
   )
 }
 
-function OpBody({op, dispatch}) {
+function OpBody({op, onSetOperationInput, onAddOperation}) {
   return (
-    <> {op ? <NormalOpBody op={op} dispatch={dispatch} /> : <EmptyOpBody dispatch={dispatch} />} </>
+    <>
+    {
+      op ? (
+        <NormalOpBody op={op} onSetOperationInput={onSetOperationInput} />
+      ) : (
+        <EmptyOpBody onAddOperation={onAddOperation} />
+      )
+    }
+    </>
   )
 }
 
-function OperationEditor({ opMap, activeOpId, dispatch }) {
+function OperationEditor({ 
+  opNames, 
+  activeOp, 
+  onAddOperation, 
+  onDeleteOperation, 
+  onSetActiveOpId,
+  onSetOperationData,
+  onSetOperationInput,
+}) {
+  function generateNewOpId(ops) {
+    let instanceId = ops.length + 1;
+    while (ops.includes(`op${instanceId}`)) {
+      instanceId++;
+    }
+    return `op${instanceId}`;
+  }
+  const myOnAddOperation = () => {
+    const newOpId = generateNewOpId(opNames);
+    onAddOperation(newOpId);
+    onSetActiveOpId(newOpId);
+  }
+  const myOnDeleteOperation = (id) => {
+    onDeleteOperation(id);
+    onSetActiveOpId(null);
+  }
   return (
     <div className={myStyles.opEditor}>
       <OpTabBar 
-        ops={Object.keys(opMap)} 
-        activeOpId={activeOpId}
-        dispatch={dispatch}
+        ops={opNames} 
+        activeOpId={activeOp ? activeOp.id: null}
+        onSetActiveOpId={onSetActiveOpId}
+        onAddOperation={myOnAddOperation}
       />
-      <OpHeader op={opMap[activeOpId]} dispatch={dispatch} />
-      <OpBody op={opMap[activeOpId]} dispatch={dispatch} />
+      <OpHeader op={activeOp} 
+        onDeleteOperation={myOnDeleteOperation} 
+        onSetOperationData={onSetOperationData}
+      />
+      <OpBody op={activeOp} 
+        onAddOperation={myOnAddOperation}
+        onSetOperationInput={onSetOperationInput}
+      />
     </div>
   )
 }
 
-const op = {};
-op.propTypes = {
-  id: PropTypes.string.isRequired,
-}
-
 OperationEditor.propTypes = {
-  opMap: PropTypes.objectOf(PropTypes.shape(op.propTypes)).isRequired,
-  activeOpId: PropTypes.string,
+  opNames: PropTypes.array,
+  activeOp: PropTypes.object,
 
-  dispatch: PropTypes.func.isRequired,
+  onAddOperation: PropTypes.func.isRequired,
+  onDeleteOperation: PropTypes.func.isRequired,
+  onSetActiveOpId: PropTypes.func.isRequired,
+  onSetOperationInput: PropTypes.func.isRequired,
+  onSetOperationData: PropTypes.func.isRequired,
 }
 
 export default OperationEditor;

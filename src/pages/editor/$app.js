@@ -4,6 +4,7 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
 import { connect } from 'dva';
+import isEqual from 'lodash.isequal';
 
 import ControPanel from '../../components/editor/ControlPanel';
 import ModelBrowser from '../../components/editor/ModelBrowser';
@@ -12,9 +13,56 @@ import OperationEditor from '../../components/editor/OperationEditor';
 import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
-import { getEvaluatedWidgets } from './selectors';
+import { addOperation, deleteOperation, setOperationData, setOperationInput } from './models/operations';
+import { setActiveOpId } from './models/editorCtx';
 
 const { Header, Sider, Content } = Layout;
+
+const mapStateToOperationEditorProps = (state) => {
+  return {
+    opNames: Object.keys(state.operations),
+    activeOp: state.operations[state.editorCtx.activeOpId],
+  }
+}
+const mapDispatchToOperationEditorProps = (dispatch) => {
+  return {
+    onAddOperation: (id) => {
+      dispatch({
+        type: `operations/${addOperation}`,
+        payload: {id},
+      });
+    },
+    onDeleteOperation: (id) => {
+      console.log('to delete ', id);
+      dispatch({
+        type: `operations/${deleteOperation}`,
+        payload: id,
+      });
+    },
+    onSetOperationData: (id, data) => {
+      dispatch({
+        type: `operations/${setOperationData}`,
+        payload: {id, data},
+      });
+    },
+    onSetOperationInput: (id, input) => {
+      dispatch({
+        type: `operations/${setOperationInput}`,
+        payload: {id, input},
+      });
+    },
+    onSetActiveOpId: (id) => {
+      dispatch({
+        type: `editorCtx/${setActiveOpId}`,
+        payload: id,
+      });
+    },
+  }
+}
+const OperationEditorC = connect(
+  mapStateToOperationEditorProps, 
+  mapDispatchToOperationEditorProps,
+)(OperationEditor);
 
 function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, activeOpId, dispatch }) {
   let rightSider;
@@ -37,7 +85,7 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, acti
             widgets={widgets} />
         </Content>
         <Content className={styles.OperationEditorContainer} >
-          <OperationEditor opMap={opMap} activeOpId={activeOpId} dispatch={dispatch} />
+          <OperationEditorC />
         </Content>
       </Layout>
       <Sider className={styles.defaultBg} width={275} >
@@ -55,23 +103,9 @@ SubLayout.defaultProps = { }
 
 const EditorDndLayout = DragDropContext(HTML5Backend)(SubLayout);
 
-const mapStateToProps = (state) => {
-  return {
-    widgets: getEvaluatedWidgets(state),
-    opMap: state.operations.opMap,
-    activeOpId: state.operations.activeOpId,
-  };
-};
-
-function EditorLayout({ match, widgets, opMap, activeOpId, dispatch }) {
+function EditorLayout({ widgets, opMap, activeOpId, dispatch }) {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null);
 
-  useEffect(() => {
-    console.log(`app initializing: ${match.params.app}`)
-    return function cleanup() {
-      console.log(`app un-initializing: ${match.params.app}`)
-    }
-  }, []);
   return (
     <Layout style={{ height: '100vh' }}>
       <Header className={styles.defaultBg}>
@@ -94,4 +128,57 @@ function EditorLayout({ match, widgets, opMap, activeOpId, dispatch }) {
   )
 }
 
-export default connect(mapStateToProps)(EditorLayout);
+const getAllUserInputs = (state) => {
+  const allUserInputs = [];
+  for (const widget of Object.values(state.widgets)) {
+    if (widget.content.templateMap) {
+      for (const [propId, templateObj] of Object.entries(widget.content.templateMap)) {
+        allUserInputs.push({
+          id: `${widget.id}.${propId}`,
+          type: 'normal',
+          input: templateObj.template,
+        });
+      }
+    }
+  }
+  return allUserInputs; 
+}
+
+const mapStateToProps = (state) => {
+  return {
+    widgets: state.widgets,
+    opMap: state.operations.opMap,
+    activeOpId: state.operations.activeOpId,
+    allUserInputs: getAllUserInputs(state),
+  };
+};
+
+const EditorApp = ({ match, allUserInputs, widgets, opMap, activeOpId, dispatch}) => {
+  const [lastAllUserInputs, setLastAllUserInputs] = useState([]);
+
+  useEffect(() => {
+    console.log(`app initializing: ${match.params.app}`)
+    return function cleanup() {
+      console.log(`app un-initializing: ${match.params.app}`)
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isEqual(allUserInputs, lastAllUserInputs)) {
+    } else {
+      console.log('trigger re-evaluate');
+      setLastAllUserInputs(allUserInputs);
+    }
+  });
+
+  return (
+    <EditorLayout
+      widgets={widgets}
+      opMap={opMap}
+      activeOpId={activeOpId}
+      dispatch={dispatch}
+     />
+  )
+}
+
+export default connect(mapStateToProps)(EditorApp);
