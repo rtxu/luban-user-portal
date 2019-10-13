@@ -86,16 +86,16 @@ function getExportedState(type) {
   }
 }
 
-function getExportedStateNoTemplate(type) {
+function getRawExportedState(type) {
   switch (type) {
     case Type.TEXT:
-      return Text.getExportedStateNoTemplate;
+      return Text.getRawExportedState;
     case Type.BUTTON:
-      return Button.getExportedStateNoTemplate;
+      return Button.getRawExportedState;
     case Type.TABLE:
-      return Table.getExportedStateNoTemplate;
+      return Table.getRawExportedState;
     case Type.TEXTINPUT:
-      return TextInput.getExportedStateNoTemplate;
+      return TextInput.getRawExportedState;
     default:
       throw new Error(`in getExporter: unexpected widget type: ${type}`);
   }
@@ -109,6 +109,6 @@ WidgetFactory.createElement = createElement;
 WidgetFactory.createConfigPanelElement = createConfigPanelElement;
 WidgetFactory.getReducer = getReducer;
 WidgetFactory.getExportedState = getExportedState;
-WidgetFactory.getExportedStateNoTemplate = getExportedStateNoTemplate;
+WidgetFactory.getRawExportedState = getRawExportedState;
 
 export default WidgetFactory;
