@@ -1,91 +1,76 @@
-const TmplType = {
-  Literal: Symbol(),
-  Expression: Symbol(),
-  TemplateString: Symbol(),
+import { ICtx } from './common';
+import EvalNode from './EvalNode';
+
+enum DefaultTemplateTypeEnum {
+  /** 该模板不包含任何 code snippet(代码片段) */
+  Literal,
+  /** 该模板仅包含唯一 code snippet 且无任何其他字面量 */
+  Expression,
+  /** 该模板由 >=1 个 code snippet 和字面量共同组成 */
+  TemplateString,
 }
-
-// 匹配规则：任何出现在 {{ 和 }} 之间的内容
-// 注意：? 使得表达式进入 non-greedy mode，greedy mode 会将多个表达式匹配成一个，非预期效果
-const JSCodeSnippetRE = /{{(.*?)}}/g;
-// 匹配规则：a.b.c
-// \b 代表 word boundary, ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Boundaries
-const EvalNodeIdRE =/(\w+[.])*\w+\b/g;
-
-function parse(tmpl) {
+function parse(input: string) {
+  // 匹配规则：a.b.c
+  // \b 代表 word boundary, ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Boundaries
+  const EvalNodeIdRE =/(\w+[.])*\w+\b/g;
   const codeSnippetRE = /{{(.*?)}}/g;
-  const codeSnippets = [];
+  const codeSnippets: string[] = [];
   let match;
-  while (match = codeSnippetRE.exec(tmpl)) {
+  while (match = codeSnippetRE.exec(input)) {
     codeSnippets.push(match[1]);
   }
-  const depsMap = {};
+  /** 
+   * 在每一个 code snippet 里用正则表达式匹配可能的 id，这并不是一个精确的做法，只是一个保证不遗漏的做法。
+   * 只要在该模板内引用数据（如：{{w1.data}}），就能匹配到
+   */
+  const possibleDepIds: string[] = [];
   for (const code of codeSnippets) {
-    const match = code.match(EvalNodeIdRE);
-    if (match) {
-      for (const dep of match) {
-        depsMap[dep] = true;
+    const idMatch = code.match(EvalNodeIdRE);
+    if (idMatch) {
+      for (const depId of idMatch) {
+        if (possibleDepIds.includes(depId)) {
+          // already exist
+        } else {
+          possibleDepIds.push(depId);
+        }
       }
     }
   }
 
   const rtnValue = {
     codeSnippets,
-    depsMap,
+    possibleDepIds,
   }
 
   if (codeSnippets.length === 0) {
     return {
       ...rtnValue,
-      type: TmplType.Literal,
+      type: DefaultTemplateTypeEnum.Literal,
     };
   } else if (codeSnippets.length === 1) {
-    if (tmpl.trim().length == codeSnippets[0].length + '{{}}'.length) {
+    if (input.trim().length === codeSnippets[0].length + '{{}}'.length) {
       // nothing outside the {{}}
       return {
         ...rtnValue,
-        type: TmplType.Expression,
+        type: DefaultTemplateTypeEnum.Expression,
       }
     } else {
       return {
         ...rtnValue,
-        type: TmplType.TemplateString,
+        type: DefaultTemplateTypeEnum.TemplateString,
       }
     }
   } else {
     return {
       ...rtnValue,
-      type: TmplType.TemplateString,
+      type: DefaultTemplateTypeEnum.TemplateString,
     }
   }
 }
 
-function parseSql(tmpl) {
-  let preparedSqlStatement = '';
-  let cursor = 0;
-  const codeSnippetRE = /{{(.*?)}}/g;
-  const codeSnippets = [];
-  let match;
-  while (match = codeSnippetRE.exec(tmpl)) {
-    preparedSqlStatement += tmpl.slice(cursor, match.index) + '?';
-    cursor = match.index + match[0].length;
-    codeSnippets.push(match[0]);
-  }
-  preparedSqlStatement += tmpl.substring(cursor);
-  const depsMap = {};
-  for (const code of codeSnippets) {
-    const match = code.match(EvalNodeIdRE);
-    if (match) {
-      for (const dep of match) {
-        depsMap[dep] = true;
-      }
-    }
-  }
-  return {
-    preparedSqlStatement,
-    params: codeSnippets,
-  }
-
-}
+// 匹配规则：任何出现在 {{ 和 }} 之间的内容
+// 注意：? 使得表达式进入 non-greedy mode，greedy mode 会将多个表达式匹配成一个，非预期效果
+const JSCodeSnippetRE = /{{(.*?)}}/g;
 
 // TODO(ruitao.xu): unsafe，这里的 functionBody 并没有做过多限制，用户可能注入恶意代码，要非常小心！
 function callFn(functionBody, ctx) {
@@ -148,9 +133,9 @@ function renderTemplateString(tmpl, ctx) {
   let code = '\'use strict\'; const r=[];\n';
   let cursor = 0;
   let match;
-  const add = function(line, js) {
+  const add = (line: string, js?: boolean) => {
       js? (code += 'r.push(' + line + ');\n') :
-          (code += line != '' ? 'r.push("' + line.replace(/"/g, '\\\\"') + '");\n' : '');
+          (code += line !== '' ? 'r.push("' + line.replace(/"/g, '\\\\"') + '");\n' : '');
       return add;
   }
   while(match = codeSnippetRE.exec(tmpl)) {
@@ -167,18 +152,47 @@ function renderTemplateString(tmpl, ctx) {
 function render(tmpl, ctx) {
   const { type, codeSnippets } = parse(tmpl);
   switch (type) {
-    case TmplType.Literal:
+    case DefaultTemplateTypeEnum.Literal:
       return tmpl;
-    case TmplType.Expression:
+    case DefaultTemplateTypeEnum.Expression:
       return evaluateExpression(codeSnippets[0], ctx);
-    case TmplType.TemplateString:
+    case DefaultTemplateTypeEnum.TemplateString:
       return renderTemplateString(tmpl, ctx);
   }
 }
 
-const _ = {};
-_.TmplType = TmplType;
-_.parse = parse;
-_.parseSql = parseSql;
-_.render = render;
-export default _;
+export default {
+  listPossibleDepId: (node: EvalNode) => {
+    const { possibleDepIds } = parse(node.input);
+    return possibleDepIds;
+  },
+  evaluate(node: EvalNode, ctx: ICtx) {
+    function createOrSetDescendantProp(obj, desc: string, value) {
+      const arr = desc.split('.');
+      while (arr.length > 1) {
+        const id = arr.shift();
+        if (id in obj) {
+          // already exist
+        } else {
+          obj[id] = {};
+        }
+        obj = obj[id];
+      }
+      obj[arr[0]] = value;
+    }
+
+    const appendCtx = createOrSetDescendantProp;
+    const myCtx = {...ctx};
+    const depCtx = node.getDepCtx();
+    for (const [depId, depValue] of Object.entries(depCtx)) {
+      appendCtx(myCtx, depId, depValue);
+    }
+
+    try {
+      const value = render(node.input, myCtx);
+      node.setEvaluated(value);
+    } catch (e) {
+      node.setError(e);
+    }
+  },
+}
