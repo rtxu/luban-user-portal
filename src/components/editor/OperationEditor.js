@@ -27,7 +27,7 @@ function asyncRunSql(statement) {
   return alasql.promise(statement);
 }
 
-function OpTabBar({ ops, activeOpId, onSetActiveOpId, onAddOperation}) {
+function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton}) {
   return (
     <div className={myStyles.opNaviBar}>
       <div className={myStyles.tabContainer}>
@@ -43,14 +43,10 @@ function OpTabBar({ ops, activeOpId, onSetActiveOpId, onAddOperation}) {
         </div>
       </div>
       <div className={myStyles.actions}>
-          <Button onClick={() => {
-            onAddOperation();
-          }}>
-            <Icon type="plus" />新建
-          </Button>
-          {/* TODO: better to have
-          <Input placeholder="快速打开" />
-          */}
+        {newOperationButton}
+        {/* TODO: better to have
+        <Input placeholder="快速打开" />
+        */}
       </div>
     </div>
   )
@@ -284,7 +280,7 @@ function NormalOpBody({op, onSetOperationInput}) {
   )
 }
 
-function EmptyOpBody({ onAddOperation }) {
+function EmptyOpBody({ newOperationButton}) {
   return (
     <div className={myStyles.emptyOpBody}>
       <div className={myStyles.icon}>
@@ -292,23 +288,21 @@ function EmptyOpBody({ onAddOperation }) {
       </div>
       <h4>未选中任何操作</h4>
       <div className={myStyles.description}>
-          <Button onClick={onAddOperation}>
-            <Icon type="plus" />新建
-          </Button>
+        {newOperationButton}
         一个操作 或 选择已有操作
       </div>
     </div>
   )
 }
 
-function OpBody({op, onSetOperationInput, onAddOperation}) {
+function OpBody({op, onSetOperationInput, newOperationButton}) {
   return (
     <>
     {
       op ? (
         <NormalOpBody op={op} onSetOperationInput={onSetOperationInput} />
       ) : (
-        <EmptyOpBody onAddOperation={onAddOperation} />
+        <EmptyOpBody newOperationButton={newOperationButton} />
       )
     }
     </>
@@ -340,21 +334,26 @@ function OperationEditor({
     onDeleteOperation(id);
     onSetActiveOpId(null);
   }
+  const newOperationButton = (
+    <Button onClick={myOnAddOperation}>
+      <Icon type="plus" />新建
+    </Button>
+  )
   return (
     <div className={myStyles.opEditor}>
       <OpTabBar 
         ops={opNames} 
         activeOpId={activeOp ? activeOp.id: null}
         onSetActiveOpId={onSetActiveOpId}
-        onAddOperation={myOnAddOperation}
+        newOperationButton={newOperationButton}
       />
       <OpHeader op={activeOp} 
         onDeleteOperation={myOnDeleteOperation} 
         onSetOperationData={onSetOperationData}
       />
       <OpBody op={activeOp} 
-        onAddOperation={myOnAddOperation}
         onSetOperationInput={onSetOperationInput}
+        newOperationButton={newOperationButton}
       />
     </div>
   )
