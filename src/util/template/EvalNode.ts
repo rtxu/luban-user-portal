@@ -58,7 +58,7 @@ class EvalNode {
     return this.state === EvalNodeStateEnum.Pending;
   }
 
-  public getDepState() {
+  public getDepState(): [EvalNodeStateEnum, string[]] {
     const errDeps: string[] = [];
     for (const depNode of Object.values(this.parents)) {
       switch(depNode.state) {
@@ -82,7 +82,7 @@ class EvalNode {
     return Object.keys(this.parents).length;
   }
 
-  public getDepCtx() {
+  public getDepCtx(): {[key: string]: any} {
     return Object.keys(this.parents).reduce((ctx, id) => {
       ctx[id] = this.parents[id].value;
       return ctx;
