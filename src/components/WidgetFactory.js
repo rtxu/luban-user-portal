@@ -101,6 +101,21 @@ function getRawExportedState(type) {
   }
 }
 
+function getToEvalTemplates(type) {
+  switch (type) {
+    case Type.TEXT:
+      return Text.getToEvalTemplates;
+    case Type.BUTTON:
+      return Button.getToEvalTemplates;
+    case Type.TABLE:
+      return Table.getToEvalTemplates;
+    case Type.TEXTINPUT:
+      return TextInput.getToEvalTemplates;
+    default:
+      throw new Error(`in getExporter: unexpected widget type: ${type}`);
+  }
+}
+
 
 const WidgetFactory = {};
 WidgetFactory.Type = Type;
@@ -110,5 +125,6 @@ WidgetFactory.createConfigPanelElement = createConfigPanelElement;
 WidgetFactory.getReducer = getReducer;
 WidgetFactory.getExportedState = getExportedState;
 WidgetFactory.getRawExportedState = getRawExportedState;
+WidgetFactory.getToEvalTemplates = getToEvalTemplates;
 
 export default WidgetFactory;

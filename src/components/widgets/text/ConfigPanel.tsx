@@ -1,10 +1,11 @@
 import { Collapse, } from "antd";
+import React from "react";
 
+import { toEvalResult } from '../common';
 import Config from '../Config';
-import { setIsExpandWhenHover, setIsScrollWhenOverflow, setTemplateOfValue, } from './reducer';
-import TemplateEntry from '../TemplateEntry';
+import { setIsExpandWhenHover, setIsScrollWhenOverflow, setValueTemplateInput, } from './reducer';
 
-function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, dispatch}) {
+function ConfigPanel({valueTemplate, isScrollWhenOverflow, isExpandWhenHover, dispatch}) {
   function onIsScrollChange(checked) {
     dispatch(setIsScrollWhenOverflow(checked));
   }
@@ -13,7 +14,7 @@ function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, disp
   }
   // better to debounce
   function onTextChange(newValue) {
-    dispatch(setTemplateOfValue(newValue));
+    dispatch(setValueTemplateInput(newValue));
   }
 
   const { Panel } = Collapse;
@@ -27,8 +28,8 @@ function ConfigPanel({templateMap, isScrollWhenOverflow, isExpandWhenHover, disp
         <Config.LabelCmEvalInput
           label={{ value:'文本' }}
           input={{ 
-            value: templateMap.value.template, 
-            evalResult: TemplateEntry.toEvalResult(templateMap.value),
+            value: valueTemplate.input, 
+            evalResult: toEvalResult(valueTemplate),
             onChange: onTextChange, 
           }}
         />

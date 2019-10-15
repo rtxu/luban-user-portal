@@ -180,3 +180,7 @@ export const getExportedState = (state) => (
     ...getRawExportedState(state),
   }
 )
+
+export const getToEvalTemplates = (state) => {
+  return [ ];
+};

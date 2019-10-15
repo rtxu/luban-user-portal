@@ -1,6 +1,6 @@
-import Widget from './Widget';
 import ConfigPanel from './ConfigPanel';
-import reducer, { initialState, getExportedState, getExportedStateNoTemplate } from './reducer';
+import reducer, { getExportedState, getRawExportedState, getToEvalTemplates, initialState } from './reducer';
+import Widget from './Widget';
 
 // View: <Widget> and <Widget.ConfigPanel>
 Widget.ConfigPanel = ConfigPanel;
@@ -11,8 +11,9 @@ Widget.reducer = reducer;
 
 // determine which properties other component could reference
 Widget.getExportedState = getExportedState;
-
 // determine which properties other component could reference when evaluating template
-Widget.getExportedStateNoTemplate = getExportedStateNoTemplate;
+Widget.getRawExportedState = getRawExportedState;
+
+Widget.getToEvalTemplates = getToEvalTemplates;
 
 export default Widget;

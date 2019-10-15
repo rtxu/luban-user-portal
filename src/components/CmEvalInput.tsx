@@ -1,14 +1,15 @@
-import { useState } from 'react';
-import { Controlled as CodeMirror } from 'react-codemirror2'
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/sql/sql';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/neo.css';
-import 'codemirror/addon/display/placeholder';
-import PropTypes from 'prop-types';
 import { Alert } from 'antd';
 import classNames from 'classnames';
+import 'codemirror/addon/display/placeholder';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/sql/sql';
+import 'codemirror/theme/neo.css';
+import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import { Controlled as CodeMirror } from 'react-codemirror2'
 
+// @ts-ignore
 import styles from './CmEvalInput.less';
 
 // CodeMirror Evalation Input
@@ -47,10 +48,15 @@ function CmEvalInput({ value, options, evalResult, onChange}) {
   )
 }
 
-export const EvalResult = {};
+export const EvalResult: any = {};
 EvalResult.propTypes = {
   code: PropTypes.number.isRequired,
   msg: PropTypes.string.isRequired,
+}
+
+export interface IEvalResult {
+  code: number;
+  msg: string;
 }
 
 CmEvalInput.propTypes = {

@@ -15,6 +15,8 @@ import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
 import { addOperation, deleteOperation, setOperationData, setOperationInput } from './models/operations';
 import { setActiveOpId } from './models/editorCtx';
+import { getToEvalTemplates, getEvalContext } from './models/widgets';
+import { evaluate } from '../../util/template';
 
 const { Header, Sider, Content } = Layout;
 
@@ -144,17 +146,8 @@ const getAllUserInputs = (state) => {
   return allUserInputs; 
 }
 
-const mapStateToProps = (state) => {
-  return {
-    widgets: state.widgets,
-    opMap: state.operations.opMap,
-    activeOpId: state.operations.activeOpId,
-    allUserInputs: getAllUserInputs(state),
-  };
-};
-
-const EditorApp = ({ match, allUserInputs, widgets, opMap, activeOpId, dispatch}) => {
-  const [lastAllUserInputs, setLastAllUserInputs] = useState([]);
+const EditorApp = ({ match, toEvalTemplates, evalContext, widgets, opMap, activeOpId, dispatch}) => {
+  const [lastEvalEnv, setLastEvalEnv] = useState([]);
 
   useEffect(() => {
     console.log(`app initializing: ${match.params.app}`)
@@ -164,10 +157,33 @@ const EditorApp = ({ match, allUserInputs, widgets, opMap, activeOpId, dispatch}
   }, []);
 
   useEffect(() => {
-    if (isEqual(allUserInputs, lastAllUserInputs)) {
+    const evalEnv = {
+      plainObjTemplates: toEvalTemplates.map((tmpl) => ({
+        id: tmpl.id,
+        type: tmpl.type,
+        input: tmpl.input,
+      })),
+      evalContext,
+    }
+
+    if (isEqual(evalEnv, lastEvalEnv)) {
     } else {
       console.log('trigger re-evaluate');
-      setLastAllUserInputs(allUserInputs);
+      console.log('to eval templates: ', toEvalTemplates)
+      console.log('eval context: ', evalContext)
+      const templates = toEvalTemplates.map((tmpl) => ({
+        id: tmpl.id,
+        type: tmpl.type,
+        input: tmpl.input,
+        onEval: (value, extra, error) => {
+          console.log('evaluated', value, extra, error);
+          const action = tmpl.onEvalActionCreator(value, extra, error);
+          console.log('action', action);
+          dispatch(action);
+        }
+      }))
+      evaluate(templates, evalContext);
+      setLastEvalEnv(evalEnv);
     }
   });
 
@@ -181,4 +197,13 @@ const EditorApp = ({ match, allUserInputs, widgets, opMap, activeOpId, dispatch}
   )
 }
 
+const mapStateToProps = (state) => {
+  return {
+    widgets: state.widgets,
+    opMap: state.operations,
+    activeOpId: state.editorCtx.activeOpId,
+    toEvalTemplates: getToEvalTemplates(state.widgets),
+    evalContext: getEvalContext(state.widgets),
+  };
+};
 export default connect(mapStateToProps)(EditorApp);

@@ -61,10 +61,11 @@ function _deleteOne(widgets, widgetIdToDelete) {
   return newWidgets;
 } 
 
-/*
-  一个 Widget 的状态由两部分组成：
-  1. WidgetBox：负责维护 Widget 在 canvas 上的位置、大小（height & width）等
-  2. content：负责维护 Widget 内的 UI(包括 View 和 交互) 和 数据
+// Reducers
+/** 
+ * 一个 Widget 的状态由两部分组成：
+ * 1. WidgetBox：负责维护 Widget 在 canvas 上的位置、大小（height & width）等
+ * 2. content：负责维护 Widget 内的 UI(包括 View 和 交互) 和 数据
 */
 export default {
   state: initialWidgets,
@@ -144,3 +145,34 @@ export default {
     },
   },
 };
+
+// Selectors
+export const getToEvalTemplates = (widgets) => {
+  const widgetTemplates = Object.keys(widgets).map((widgetId) => {
+    const widget = widgets[widgetId];
+    const tmpls = WidgetFactory.getToEvalTemplates(widget.type)(widget.content);
+    return tmpls.map((tmpl) => ({
+      id: `${widgetId}.${tmpl.id}`,
+      type: tmpl.type,
+      input: tmpl.input,
+      onEvalActionCreator: (value, extra, error) => ({
+        type: `${NS}/updateContent`,
+        payload: {
+          widgetId: widgetId,
+          widgetAction: tmpl.onEvalActionCreator(value, extra, error),
+        },
+      }),
+    }))
+  })
+
+  return widgetTemplates.flat()
+}
+
+export const getEvalContext = (widgets) => {
+  const exportedContext = {};
+  for (const [widgetId, widget] of Object.entries(widgets)) {
+    const getExportedState = WidgetFactory.getRawExportedState(widget.type);
+    exportedContext[widgetId] = getExportedState(widget.content);
+  }
+  return exportedContext;
+}

@@ -1,6 +1,6 @@
 import { createAction, handleActions } from 'redux-actions';
 
-//- Actions
+// Actions
 export const setLabel = createAction('LABEL_SET');
 export const setLabelMaxWidth = createAction('LABEL_MAX_WIDTH_SET');
 export const setInputValue = createAction('INPUT_VALUE_SET');
@@ -17,7 +17,7 @@ export const initialState = {
   }
 };
 
-//- Reducers
+// Reducers
 export default handleActions({
   [setLabel]: (state, action) => {
     return {
@@ -60,9 +60,9 @@ export default handleActions({
   }
 }, initialState);
 
-//- Selectors
+// Selectors
 // 用于构造计算模板结果时使用的 context，不包含模板项
-export const getRawExported= (state) => (
+export const getRawExportedState = (state) => (
   {
     value: state.input.value,
     label: state.label,
@@ -75,3 +75,7 @@ export const getExportedState = (state) => (
     ...getRawExportedState(state),
   }
 )
+
+export const getToEvalTemplates = (state) => {
+  return [ ];
+};

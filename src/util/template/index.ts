@@ -36,6 +36,8 @@
 import { ICtx, ITemplate } from './common';
 import EvalTopologyGraph from './EvalTopologyGraph_v2';
 
+export { TemplateTypeEnum, ErrorT, ITemplate } from './common';
+
 export function evaluate(templates: ITemplate[], ctx: ICtx) {
   const graph = new EvalTopologyGraph(templates);
   return graph.evaluate(ctx);
