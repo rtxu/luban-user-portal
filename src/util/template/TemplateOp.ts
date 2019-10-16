@@ -11,7 +11,7 @@ export default {
       case TemplateTypeEnum.Alasql:
         return AlasqlOp.buildEvalNodes(template as IAlasqlTemplate);
       default:
-        throw new Error(`unexpected tempalte type: ${template.type}`);
+        throw new Error(`unexpected template type: ${template.type}`);
     }
   }
 }
