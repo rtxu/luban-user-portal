@@ -10,7 +10,7 @@ function expectMock(mock: jest.MockContext<any, any[]>, callCnt: number, callArg
   }
 }
 
-test('simple', async () => {
+test('simple', () => {
   const mockOnEval = jest.fn();
   const templates: ITemplate[] = [];
   templates.push({
@@ -20,12 +20,12 @@ test('simple', async () => {
     onEval: mockOnEval,
   });
   const graph = new EvalTopologyGraph(templates);
-  await graph.evaluate({});
+  graph.evaluate({});
 
   expectMock(mockOnEval.mock, 1, [['literal template', null, null]]);
 })
 
-test('no_cyclic_dependency', async () => {
+test('no_cyclic_dependency', () => {
   const mockOnEval = jest.fn();
   const templates: ITemplate[] = [];
   templates.push({
@@ -41,12 +41,12 @@ test('no_cyclic_dependency', async () => {
     onEval: mockOnEval,
   });
   const graph = new EvalTopologyGraph(templates);
-  await graph.evaluate({});
+  graph.evaluate({});
 
   expectMock(mockOnEval.mock, 2, [['literal template', null, null], ['literal template', null, null]]);
 })
 
-test('onError:CyclicDependencyError', async () => {
+test('onError:CyclicDependencyError', () => {
   const mockOnEval = jest.fn();
   const templates: ITemplate[] = [];
   templates.push({
@@ -62,7 +62,7 @@ test('onError:CyclicDependencyError', async () => {
     onEval: mockOnEval,
   });
   const graph = new EvalTopologyGraph(templates);
-  await graph.evaluate({});
+  graph.evaluate({});
 
   expect(mockOnEval.mock.calls.length).toBe(2);
   {
@@ -79,7 +79,7 @@ test('onError:CyclicDependencyError', async () => {
   }
 })
 
-test('onError:DependencyNotMeetError', async () => {
+test('onError:DependencyNotMeetError', () => {
   const mockOnEval = jest.fn();
   const templates: ITemplate[] = [];
   templates.push({
@@ -101,7 +101,7 @@ test('onError:DependencyNotMeetError', async () => {
     onEval: mockOnEval,
   });
   const graph = new EvalTopologyGraph(templates);
-  await graph.evaluate({});
+  graph.evaluate({});
 
   expect(mockOnEval.mock.calls.length).toBe(3);
   {
@@ -124,7 +124,7 @@ test('onError:DependencyNotMeetError', async () => {
   }
 })
 
-test('sql basic', async () => {
+test('sql basic', () => {
   const ctx = {
     'op1': {
       data: [{id: 1}, {id: 2}],
@@ -138,32 +138,17 @@ test('sql basic', async () => {
     input: 'select * from {{op1.data}}',
     onEval: mockOnEval,
   });
-  templates.push({
-    id: 'op3',
-    type: TemplateTypeEnum.Alasql,
-    input: 'select * from {{op2}}',
-    onEval: mockOnEval,
-  });
   const graph = new EvalTopologyGraph(templates);
-  await graph.evaluate(ctx);
+  graph.evaluate(ctx);
 
-  expect(mockOnEval.mock.calls.length).toBe(2);
+  expect(mockOnEval.mock.calls.length).toBe(1);
   {
     const [value, extra, error] = mockOnEval.mock.calls[0];
-    expect(value).toEqual(ctx.op1.data);
-    expect(extra).toEqual({
-      preparedSql: 'select * from ?',
+    expect(value).toEqual({
+      sqlTemplate: 'select * from ?',
       params: [ctx.op1.data],
     });
-    expect(error).toBeNull();
-  }
-  {
-    const [value, extra, error] = mockOnEval.mock.calls[1];
-    expect(value).toEqual(ctx.op1.data);
-    expect(extra).toEqual({
-      preparedSql: 'select * from ?',
-      params: [ctx.op1.data],
-    });
+    expect(extra).toBeNull();
     expect(error).toBeNull();
   }
 })

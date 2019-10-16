@@ -16,7 +16,7 @@ export default {
         throw new Error(`unexpected eval note type: ${node.type}`);
     }
   },
-  async evaluate(node: EvalNode, ctx: ICtx) {
+  evaluate(node: EvalNode, ctx: ICtx) {
     switch(node.type) {
       case EvalNodeTypeEnum.Default:
         return DefaultOp.evaluate(node, ctx);

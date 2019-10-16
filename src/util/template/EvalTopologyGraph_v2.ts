@@ -35,7 +35,7 @@ class EvalTopologyGraph {
   }
 
   // 前提：节点的状态和依赖关系设置正确
-  public async evaluate(ctx) {
+  public evaluate(ctx) {
     let pendingNodes = Object.values(this.evalNodeMap).filter((node) => node.isPending() );
 
     this.checkCyclicDependency(pendingNodes);
@@ -51,7 +51,7 @@ class EvalTopologyGraph {
           pendingNodes.push(node);
           break;
         case EvalNodeStateEnum.Evaluated:
-          await node.evaluate(ctx);
+          node.evaluate(ctx);
           break;
         case EvalNodeStateEnum.Error:
           node.setError(new DependencyNotMeetError(`所依赖节点存在错误: [${(errDeps as string[]).join(', ')}]`));
