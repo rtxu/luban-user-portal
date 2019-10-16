@@ -123,7 +123,7 @@ function TargetDetail({ target, visible, setVisible }) {
   )
 }
 
-function NormalOpHeader({op, onDeleteOperation, onSetOperationData}) {
+function NormalOpHeader({op, onDeleteOperation, onExecOperation}) {
   console.log('current op in header: ', op);
   const [target, setTarget] = useState();
   const [targetDetailVisible, setTargetDetailVisible] = useState(false);
@@ -194,20 +194,16 @@ function NormalOpHeader({op, onDeleteOperation, onSetOperationData}) {
       {/* <Button>复制</Button> */}
       {/* <Button disabled>保存</Button> */}
       <Button type='primary' onClick={() => {
-        if (op.input) {
-          asyncRunSql(op.input)
-            .then((data) => {
-              onSetOperationData(op.id, data);
-            }).catch((e) => {
-              notification.error({
-                message: e.name,
-                description: e.message,
-              });
-            });
-        } else {
+        if (op.preparedSqlTemplate.error) {
+          notification.error({
+            message: '输入不合法',
+          });
+        } else if (op.preparedSqlTemplate.input === '') {
           notification.info({
             message: '输入为空',
           });
+        } else {
+          onExecOperation(op.id);
         }
       }}>运行</Button>
     </div>
@@ -219,14 +215,14 @@ function EmptyOpHeader() {
   return null;
 }
 
-function OpHeader({op, onDeleteOperation, onSetOperationData}) {
+function OpHeader({op, onDeleteOperation, onExecOperation}) {
   return (
     <div className={myStyles.opHeader}>
       {
         op ? (
           <NormalOpHeader op={op} 
             onDeleteOperation={onDeleteOperation} 
-            onSetOperationData={onSetOperationData}
+            onExecOperation={onExecOperation}
           />
         ) : (
           <EmptyOpHeader />
@@ -241,7 +237,7 @@ function NormalOpBody({op, onSetOperationInput}) {
     <div className={myStyles.normalOpBody}>
       <section>
         <CmEvalInput
-          value={op.input}
+          value={op.preparedSqlTemplate.input}
           options={{
             mode: 'sql',
             theme: 'neo',
@@ -315,7 +311,7 @@ function OperationEditor({
   onAddOperation, 
   onDeleteOperation, 
   onSetActiveOpId,
-  onSetOperationData,
+  onExecOperation,
   onSetOperationInput,
 }) {
   function generateNewOpId(ops) {
@@ -349,7 +345,7 @@ function OperationEditor({
       />
       <OpHeader op={activeOp} 
         onDeleteOperation={myOnDeleteOperation} 
-        onSetOperationData={onSetOperationData}
+        onExecOperation={onExecOperation}
       />
       <OpBody op={activeOp} 
         onSetOperationInput={onSetOperationInput}
@@ -367,7 +363,7 @@ OperationEditor.propTypes = {
   onDeleteOperation: PropTypes.func.isRequired,
   onSetActiveOpId: PropTypes.func.isRequired,
   onSetOperationInput: PropTypes.func.isRequired,
-  onSetOperationData: PropTypes.func.isRequired,
+  onExecOperation: PropTypes.func.isRequired,
 }
 
 export default OperationEditor;

@@ -13,9 +13,10 @@ import OperationEditor from '../../components/editor/OperationEditor';
 import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
-import { addOperation, deleteOperation, setOperationData, setOperationInput } from './models/operations';
+import { addOperation, deleteOperation, setPreparedSqlTemplateInput, execOperation } from './models/operations';
 import { setActiveOpId } from './models/editorCtx';
 import { getToEvalTemplates, getEvalContext } from './models/widgets';
+import { getToEvalTemplates as opGetToEvalTemplates, getEvalContext as opGetEvalContext } from './models/operations';
 import { evaluate } from '../../util/template';
 
 const { Header, Sider, Content } = Layout;
@@ -41,15 +42,15 @@ const mapDispatchToOperationEditorProps = (dispatch) => {
         payload: id,
       });
     },
-    onSetOperationData: (id, data) => {
+    onExecOperation: (id, data) => {
       dispatch({
-        type: `operations/${setOperationData}`,
+        type: `operations/${execOperation}`,
         payload: {id, data},
       });
     },
     onSetOperationInput: (id, input) => {
       dispatch({
-        type: `operations/${setOperationInput}`,
+        type: `operations/${setPreparedSqlTemplateInput}`,
         payload: {id, input},
       });
     },
@@ -130,23 +131,7 @@ function EditorLayout({ widgets, opMap, activeOpId, dispatch }) {
   )
 }
 
-const getAllUserInputs = (state) => {
-  const allUserInputs = [];
-  for (const widget of Object.values(state.widgets)) {
-    if (widget.content.templateMap) {
-      for (const [propId, templateObj] of Object.entries(widget.content.templateMap)) {
-        allUserInputs.push({
-          id: `${widget.id}.${propId}`,
-          type: 'normal',
-          input: templateObj.template,
-        });
-      }
-    }
-  }
-  return allUserInputs; 
-}
-
-const EditorApp = ({ match, toEvalTemplates, evalContext, widgets, opMap, activeOpId, dispatch}) => {
+const EditorApp = ({ match, widgets, opMap, activeOpId, dispatch}) => {
   const [lastEvalEnv, setLastEvalEnv] = useState([]);
 
   useEffect(() => {
@@ -157,6 +142,12 @@ const EditorApp = ({ match, toEvalTemplates, evalContext, widgets, opMap, active
   }, []);
 
   useEffect(() => {
+    const widgetTemplates = getToEvalTemplates(widgets);
+    const widgetContext = getEvalContext(widgets);
+    const opTemplates = opGetToEvalTemplates(opMap);
+    const opContext = opGetEvalContext(opMap);
+    const toEvalTemplates = [...widgetTemplates, ...opTemplates];
+    const evalContext = {...widgetContext, ...opContext};
     const evalEnv = {
       plainObjTemplates: toEvalTemplates.map((tmpl) => ({
         id: tmpl.id,
@@ -202,8 +193,6 @@ const mapStateToProps = (state) => {
     widgets: state.widgets,
     opMap: state.operations,
     activeOpId: state.editorCtx.activeOpId,
-    toEvalTemplates: getToEvalTemplates(state.widgets),
-    evalContext: getEvalContext(state.widgets),
   };
 };
 export default connect(mapStateToProps)(EditorApp);
