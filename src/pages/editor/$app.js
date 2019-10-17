@@ -1,6 +1,6 @@
 import React, { useState, useEffect, } from 'react';
 import { Layout} from 'antd';
-import { DragDropContext } from 'react-dnd';
+import { DragDropContext, DndContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
 import { connect } from 'dva';
@@ -14,9 +14,13 @@ import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
 import { addOperation, deleteOperation, setPreparedSqlTemplateInput, execOperation } from './models/operations';
-import { setActiveOpId } from './models/editorCtx';
-import { getToEvalTemplates, getEvalContext } from './models/widgets';
-import { getToEvalTemplates as opGetToEvalTemplates, getEvalContext as opGetEvalContext } from './models/operations';
+import { setActiveOpId, setActiveWidgetId } from './models/editorCtx';
+import { getToEvalTemplates, getEvalContext, getExportedState } from './models/widgets';
+import { 
+  getToEvalTemplates as opGetToEvalTemplates, 
+  getEvalContext as opGetEvalContext,
+  getExportedState as opGetExportedState,
+} from './models/operations';
 import { evaluate } from '../../util/template';
 
 const { Header, Sider, Content } = Layout;
@@ -62,17 +66,64 @@ const mapDispatchToOperationEditorProps = (dispatch) => {
     },
   }
 }
-const OperationEditorC = connect(
+/** 
+ * app container component: bind app data and behavior with OperationEditor
+ * ref: https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0
+ */
+const AppOperationEditor = connect(
   mapStateToOperationEditorProps, 
   mapDispatchToOperationEditorProps,
 )(OperationEditor);
 
-function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, activeOpId, dispatch }) {
+const mapStateToModelBrownerProps = (state) => {
+  const exportedWidgets = getExportedState(state.widgets);
+  const exportedOps = opGetExportedState(state.operations);
+
+  return {
+    modelGroups: [
+      {
+        name: '组件',
+        json: exportedWidgets,
+        activeKey: state.editorCtx.activeWidgetId,
+      },
+      {
+        name: '操作',
+        json: exportedOps,
+        activeKey: state.editorCtx.activeOpId,
+      },
+    ],
+  }
+}
+const AppModelBrowner = connect(
+  mapStateToModelBrownerProps, 
+)(ModelBrowser);
+
+const mapStateToEditorCanvasProps = (state) => {
+  return {
+    widgets: state.widgets,
+    activeWidgetId: state.editorCtx.activeWidgetId,
+  }
+}
+const mapDispatchToEditorCanvasProps = (dispatch) => {
+  return {
+    onSetActiveWidgetId: (id) => {
+      dispatch({
+        type: `editorCtx/${setActiveWidgetId}`,
+        payload: id,
+      });
+    },
+  }
+}
+const AppEditorCanvas = connect(
+  mapStateToEditorCanvasProps, 
+  mapDispatchToEditorCanvasProps,
+)(EditorCanvas);
+
+let DnDLayout = ({ activeWidgetId, widgets }) => {
   let rightSider;
-  if (selectedWidgetId) {
+  if (activeWidgetId) {
     rightSider = <WidgetConfigPanel 
-      widget={widgets[selectedWidgetId]} 
-      notifyWidgetIdChanged={setSelectedWidgetId}
+      widget={widgets[activeWidgetId]} 
       widgets={widgets}
     />
   } else {
@@ -82,13 +133,10 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, acti
     <Layout>
       <Layout>
         <Content className={styles.EditorCanvasContainer}>
-          <EditorCanvas 
-            selectedWidgetId={selectedWidgetId} 
-            setSelectedWidgetId={setSelectedWidgetId}
-            widgets={widgets} />
+          <AppEditorCanvas />
         </Content>
         <Content className={styles.OperationEditorContainer} >
-          <OperationEditorC />
+          <AppOperationEditor />
         </Content>
       </Layout>
       <Sider className={styles.defaultBg} width={275} >
@@ -97,18 +145,9 @@ function SubLayout({ selectedWidgetId, setSelectedWidgetId, widgets, opMap, acti
     </Layout>
   )
 }
+DnDLayout = DragDropContext(HTML5Backend)(DnDLayout);
 
-SubLayout.propTypes = {
-  selectedWidgetId: PropTypes.string,
-  setSelectedWidgetId: PropTypes.func,
-}
-SubLayout.defaultProps = { }
-
-const EditorDndLayout = DragDropContext(HTML5Backend)(SubLayout);
-
-function EditorLayout({ widgets, opMap, activeOpId, dispatch }) {
-  const [selectedWidgetId, setSelectedWidgetId] = useState(null);
-
+function EditorLayout({ widgets, activeWidgetId }) {
   return (
     <Layout style={{ height: '100vh' }}>
       <Header className={styles.defaultBg}>
@@ -116,22 +155,18 @@ function EditorLayout({ widgets, opMap, activeOpId, dispatch }) {
       </Header>
       <Layout style={{ height: '100%' }}>
         <Sider className={styles.defaultBg} width={275}>
-          <ModelBrowser selectedWidgetId={selectedWidgetId} widgets={widgets} />
+          <AppModelBrowner />
         </Sider>
-        <EditorDndLayout 
-          selectedWidgetId={selectedWidgetId} 
-          setSelectedWidgetId={setSelectedWidgetId} 
+        <DnDLayout
+          activeWidgetId={activeWidgetId} 
           widgets={widgets}
-          opMap={opMap}
-          activeOpId={activeOpId}
-          dispatch={dispatch}
         />
       </Layout>
     </Layout>
   )
 }
 
-const EditorApp = ({ match, widgets, opMap, activeOpId, dispatch}) => {
+const EditorApp = ({ match, widgets, activeWidgetId, operations, dispatch}) => {
   const [lastEvalEnv, setLastEvalEnv] = useState([]);
 
   useEffect(() => {
@@ -144,8 +179,8 @@ const EditorApp = ({ match, widgets, opMap, activeOpId, dispatch}) => {
   useEffect(() => {
     const widgetTemplates = getToEvalTemplates(widgets);
     const widgetContext = getEvalContext(widgets);
-    const opTemplates = opGetToEvalTemplates(opMap);
-    const opContext = opGetEvalContext(opMap);
+    const opTemplates = opGetToEvalTemplates(operations);
+    const opContext = opGetEvalContext(operations);
     const toEvalTemplates = [...widgetTemplates, ...opTemplates];
     const evalContext = {...widgetContext, ...opContext};
     const evalEnv = {
@@ -178,21 +213,19 @@ const EditorApp = ({ match, widgets, opMap, activeOpId, dispatch}) => {
     }
   });
 
-  return (
-    <EditorLayout
-      widgets={widgets}
-      opMap={opMap}
-      activeOpId={activeOpId}
-      dispatch={dispatch}
-     />
+  return ( 
+    <EditorLayout 
+      widgets={widgets} 
+      activeWidgetId={activeWidgetId}
+    />
   )
 }
 
 const mapStateToProps = (state) => {
   return {
     widgets: state.widgets,
-    opMap: state.operations,
-    activeOpId: state.editorCtx.activeOpId,
+    operations: state.operations,
+    activeWidgetId: state.editorCtx.activeWidgetId,
   };
 };
 export default connect(mapStateToProps)(EditorApp);

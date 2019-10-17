@@ -234,23 +234,6 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
   setter(newHeight);
 }
 
-const mapDispatchToProps = (dispatch) => {
-  const fire = wrapDispatchToFire(dispatch);
-  return {
-    addOrUpdate: (newWidget) => {
-      fire(`${NS}/addOrUpdate`, {
-        widget: newWidget,
-      }, withAfterSave)
-    },
-    deleteOne: (widgetId) => {
-      fire(`${NS}/deleteOne`, { widgetId, }, withAfterSave) 
-    },
-    loadWidgets: () => {
-      fire(`${NS}/loadWidgets`, { })
-    },
-  };
-};
-
 // BETTER(user experience) TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid
 // BETTER(user experience) TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
@@ -352,15 +335,18 @@ function EditorCanvas(props) {
     [styles.lift]: isOver,
   });
 
-  const {selectedWidgetId, setSelectedWidgetId} = props;
+  const {activeWidgetId, onSetActiveWidgetId} = props;
   function widgetOnClick(widgetId, e) {
-    setSelectedWidgetId(widgetId);
+    onSetActiveWidgetId(widgetId);
     // DO NOT bubble up, which will clear the selected state
     e.stopPropagation();
   }
 
+  // when to remove the current active state
+  // 1. click non-widget area on the canvas
+  // 2. delete the current active widget
   return (
-    <div className={styles.root} onClick={() => setSelectedWidgetId(null)}>
+    <div className={styles.root} onClick={() => onSetActiveWidgetId(null)}>
       <div className={styles.container}>
         <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
           { mounted && isOver && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
@@ -371,10 +357,10 @@ function EditorCanvas(props) {
               canvasColumnWidth={canvasColumnWidth} 
               showBorder={hoverWidget !== null}
               onClick={(e) => widgetOnClick(widgetId, e)}
-              selected={widgetId === selectedWidgetId}
+              selected={widgetId === activeWidgetId}
               deleteOne={(widgetId) => {
                 props.deleteOne(widgetId);
-                setSelectedWidgetId(null);
+                onSetActiveWidgetId(null);
               }}
             />
           )) }
@@ -392,10 +378,26 @@ EditorCanvas.propTypes = {
 
   // from pages/editor/:app
   widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-  selectedWidgetId: PropTypes.string,   // may be null
-  setSelectedWidgetId: PropTypes.func.isRequired,
+  activeWidgetId: PropTypes.string,   // may be null
+  onSetActiveWidgetId: PropTypes.func.isRequired,
 }
 
 EditorCanvas.defaultProps = { }
 
+const mapDispatchToProps = (dispatch) => {
+  const fire = wrapDispatchToFire(dispatch);
+  return {
+    addOrUpdate: (newWidget) => {
+      fire(`${NS}/addOrUpdate`, {
+        widget: newWidget,
+      }, withAfterSave)
+    },
+    deleteOne: (widgetId) => {
+      fire(`${NS}/deleteOne`, { widgetId, }, withAfterSave) 
+    },
+    loadWidgets: () => {
+      fire(`${NS}/loadWidgets`, { })
+    },
+  };
+};
 export default connect(undefined, mapDispatchToProps)(EditorCanvas);

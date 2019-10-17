@@ -96,6 +96,16 @@ export default {
       // make effect 'takeLatest' or debounce widgetService.saveWidgets.
       // when to use 'takeLatest'?
     }, 'takeLatest'],
+    *changeWidgetId(action, { put }) {
+      yield put({
+        type: '_changeWidgetId',
+        payload: action.payload,
+      });
+      yield put({
+        type: 'editorCtx/setActiveWidgetId',
+        payload: action.payload.newWidgetId,
+      });
+    },
   },
   reducers: {
     initWidgets(widgets, action) {
@@ -125,7 +135,7 @@ export default {
         return widgets;
       }
     },
-    changeWidgetId(widgets, action) {
+    _changeWidgetId(widgets, action) {
       const { oldWidgetId, newWidgetId } = action.payload;
       logger.debug(`changeWidgetId(oldWidgetId=${oldWidgetId}, newWidgetId=${newWidgetId})`);
       if (newWidgetId in widgets) {
@@ -169,10 +179,19 @@ export const getToEvalTemplates = (widgets) => {
 }
 
 export const getEvalContext = (widgets) => {
-  const exportedContext = {};
+  const exported = {};
   for (const [widgetId, widget] of Object.entries(widgets)) {
     const getExportedState = WidgetFactory.getRawExportedState(widget.type);
-    exportedContext[widgetId] = getExportedState(widget.content);
+    exported[widgetId] = getExportedState(widget.content);
   }
-  return exportedContext;
+  return exported;
+}
+
+export const getExportedState = (widgets) => {
+  const exported = {};
+  for (const [widgetId, widget] of Object.entries(widgets)) {
+    const getExportedState = WidgetFactory.getExportedState(widget.type);
+    exported[widgetId] = getExportedState(widget.content);
+  }
+  return exported;
 }

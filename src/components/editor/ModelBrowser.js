@@ -3,17 +3,50 @@ import { Collapse } from 'antd';
 import PropTypes from 'prop-types';
 import JSONTree from 'react-json-tree';
 
-import WidgetBox from './WidgetBox';
-import WidgetFactory from '../WidgetFactory';
+function MyJsonTree({json, activeKey}) {
+  return (
+    <div style={{margin: -16}}>
+      <JSONTree data={json} 
+        theme={{
+          extend: 'default',
+          tree: {
+            backgroundColor: '#fff',
+          },
+          // 配置 root 的一级节点样式
+          nestedNode: ({ style }, keyPath, nodeType, expanded, expandable) => {
+            // console.log({ style, keyPath, nodeType, expanded, expandable, })
+            return ({
+              style: {
+                ...style,
+                // keyPath[0] 为 json 的一级子节点的 key
+                backgroundColor: keyPath[0] === activeKey? 'rgba(80, 127, 255, 0.1)': style.backgroundColor,
+              }
+            })
+          },
+          // 配置 root 的一级节点的 children 的样式
+          nestedNodeChildren: ({ style }, keyPath, nodeType, expanded, expandable) => {
+            // console.log({ style, keyPath, nodeType, expanded, expandable, })
+            return ({
+              style: {
+                ...style,
+                backgroundColor: keyPath[0] === activeKey? 'rgba(80, 127, 255, 0.12)': style.backgroundColor,
+              },
+            })
+          }
+        }}
+        hideRoot={true} 
+      />
+    </div>
+  )
+}
 
-function ModelBrowser({ widgets, selectedWidgetId }) {
-  const { Panel } = Collapse;
-  const widgetsJson = {};
-  Object.keys(widgets).map((widgetId) => {
-    const widget = widgets[widgetId];
-    const exporter = WidgetFactory.getExportedState(widget.type);
-    widgetsJson[widgetId] = exporter(widget.content);
-  })
+function ModelGroup({json, activeKey}) {
+  const node = Object.keys(json).length === 0 ?
+    (<div>当前无数据</div>) : (<MyJsonTree json={json} activeKey={activeKey} />)
+  return node;
+}
+
+function ModelBrowser({ modelGroups }) {
   const themes = [
     'apathy',
     'ashes',
@@ -57,15 +90,22 @@ function ModelBrowser({ widgets, selectedWidgetId }) {
     'tube',
     'twilight',
   ]
+  const defaultActiveKey = [];
+  for (let i = 0; i < modelGroups.length; i++) {
+    if (Object.keys(modelGroups[i].json).length === 0) {
+      // ignore
+    } else {
+    }
+    defaultActiveKey.push(`${i}`);
+  }
   return (
     <Collapse
-      defaultActiveKey={['1']}
+      defaultActiveKey={defaultActiveKey}
       expandIconPosition='right'
       style={{height: '100%', overflow: 'auto'}}
     >
+      {/* 选主题时临时使用
       <Panel header='组件' key='1' >
-        {
-          /* 选主题时临时使用
           themes.map((name) => {
             console.log(name);
             return (
@@ -75,48 +115,28 @@ function ModelBrowser({ widgets, selectedWidgetId }) {
               </div>
             )
           })
-          */
         }
-        <div style={{margin: -16}}>
-          <JSONTree data={widgetsJson} 
-            theme={{
-              extend: 'default',
-              tree: {
-                backgroundColor: '#fff',
-              },
-              // 配置 root 的一级节点样式
-              nestedNode: ({ style }, keyPath, nodeType, expanded, expandable) => {
-                // console.log({ style, keyPath, nodeType, expanded, expandable, })
-                return ({
-                  style: {
-                    ...style,
-                    backgroundColor: keyPath[0] === selectedWidgetId ? 'rgba(80, 127, 255, 0.1)': style.backgroundColor,
-                  }
-                })
-              },
-              // 配置 root 的一级节点的 children 的样式
-              nestedNodeChildren: ({ style }, keyPath, nodeType, expanded, expandable) => {
-                // console.log({ style, keyPath, nodeType, expanded, expandable, })
-                return ({
-                  style: {
-                    ...style,
-                    backgroundColor: keyPath[0] === selectedWidgetId ? 'rgba(80, 127, 255, 0.12)': style.backgroundColor,
-                  },
-                })
-              }
-            }}
-            hideRoot={true} 
-          />
-        </div>
       </Panel>
+      */}
+
+      {
+        modelGroups.map((group, index) => (
+          <Collapse.Panel header={group.name} key={index} >
+            <ModelGroup {...group} />
+          </Collapse.Panel>
+        ))
+      }
     </Collapse>
   )
 }
 
 ModelBrowser.propTypes = {
-  // fron editor
-  selectedWidgetId: PropTypes.string,
-  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
+  // {name, json, activeKey}
+  modelGroups: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    json: PropTypes.object.isRequired,
+    activeKey: PropTypes.string.isRequired,
+  })),
 }
 
 export default ModelBrowser;

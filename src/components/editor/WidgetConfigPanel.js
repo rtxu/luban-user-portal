@@ -54,7 +54,7 @@ Header.propTypes = {
 Header.defaultProps = {
 }
 
-function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, notifyWidgetIdChanged, widgets}) {
+function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, widgets}) {
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
     {
@@ -70,7 +70,6 @@ function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, notifyWidget
       message.error(`${newWidgetId} 已经存在`);
     } else {
       changeWidgetId(widget.id, newWidgetId)
-      notifyWidgetIdChanged(newWidgetId);
     }
   }
   return (
@@ -89,7 +88,6 @@ WidgetConfigPanel.propTypes = {
   // from pages/editor/$app
   widget: PropTypes.shape(WidgetBox.propTypes).isRequired,
   widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-  notifyWidgetIdChanged: PropTypes.func.isRequired,
 }
 
 WidgetConfigPanel.defaultProps = {

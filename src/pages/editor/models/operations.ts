@@ -55,7 +55,6 @@ const operation = handleActions({
     }
   },
   [`${NS}/${evalPreparedSqlTemplate}`]: (state, action) => {
-    console.log(state, action);
     const { value, error } = action.payload;
     return {
       ...state,
@@ -142,7 +141,6 @@ export default {
 export const getToEvalTemplates = (operations) => {
   const opTemplates = Object.keys(operations).map((opId) => {
     const op = operations[opId];
-    console.log(op);
     return {
       /** templateId */
       id: `${opId}.preparedSql`,
@@ -168,9 +166,22 @@ const getRawExportedState = (op) => ({
 })
 
 export const getEvalContext = (operations) => {
-  const exportedContext = {};
+  const exported = {};
   for (const [opId, op] of Object.entries(operations)) {
-    exportedContext[opId] = getRawExportedState(op);
+    exported[opId] = getRawExportedState(op);
   }
-  return exportedContext;
+  return exported;
+}
+
+const getOpExportedState = (op) => ({
+  data: op.data,
+  preparedSql: op.preparedSqlTemplate.value,
+})
+
+export const getExportedState = (operations) => {
+  const exported = {};
+  for (const [opId, op] of Object.entries(operations)) {
+    exported[opId] = getOpExportedState(op);
+  }
+  return exported;
 }
