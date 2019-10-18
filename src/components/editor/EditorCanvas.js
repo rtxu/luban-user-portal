@@ -2,15 +2,13 @@ import React, { useState, useEffect, useLayoutEffect, } from 'react';
 import { useDrop } from 'react-dnd'
 import PropTypes from 'prop-types';
 import throttle from 'lodash.throttle';
-import { connect } from 'dva';
 import classNames from 'classnames';
 
 import WidgetBox from './WidgetBox';
 import { CSS, CANVAS } from './constant';
 import styles from './EditorCanvas.less';
 import DndItemTypes, {isResizeHandle} from './DndItemTypes';
-import { createLogger, wrapDispatchToFire } from '@/util';
-import { NS, withAfterSave } from '@/pages/editor/models/widgets';
+import { createLogger } from '@/util';
 
 const logger = createLogger('/components/editor/EditorCanvas');
 
@@ -257,7 +255,7 @@ function EditorCanvas(props) {
     drop(item, monitor) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
       console.log('dropItem:', newWidget);
-      props.addOrUpdate(newWidget);
+      props.onAddOrUpdate(newWidget);
       return undefined
     },
     canDrop(item, monitor) {
@@ -322,7 +320,6 @@ function EditorCanvas(props) {
     //  method: add 500ms delay to the first update
     setTimeout(() => {
       updateCanvasColumnWidth();
-      props.loadWidgets();
     }, 500);
     window.addEventListener('resize', updateCanvasColumnWidth);
     return () => {
@@ -335,7 +332,7 @@ function EditorCanvas(props) {
     [styles.lift]: isOver,
   });
 
-  const {activeWidgetId, onSetActiveWidgetId} = props;
+  const { activeWidgetId, onSetActiveWidgetId } = props;
   function widgetOnClick(widgetId, e) {
     onSetActiveWidgetId(widgetId);
     // DO NOT bubble up, which will clear the selected state
@@ -356,12 +353,13 @@ function EditorCanvas(props) {
               {...widgets[widgetId]} 
               canvasColumnWidth={canvasColumnWidth} 
               showBorder={hoverWidget !== null}
-              onClick={(e) => widgetOnClick(widgetId, e)}
               selected={widgetId === activeWidgetId}
-              deleteOne={(widgetId) => {
-                props.deleteOne(widgetId);
+              onClick={(e) => widgetOnClick(widgetId, e)}
+              onDeleteOne={(widgetId) => {
+                props.onDeleteOne(widgetId);
                 onSetActiveWidgetId(null);
               }}
+              onWidgetDispatch={props.onWidgetDispatch}
             />
           )) }
         </div>
@@ -371,33 +369,13 @@ function EditorCanvas(props) {
 }
 
 EditorCanvas.propTypes = {
-  // from `widgets` model
-  loadWidgets: PropTypes.func.isRequired,
-  addOrUpdate: PropTypes.func.isRequired,
-  deleteOne: PropTypes.func.isRequired,
-
-  // from pages/editor/:app
   widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
   activeWidgetId: PropTypes.string,   // may be null
+
   onSetActiveWidgetId: PropTypes.func.isRequired,
+  onAddOrUpdate: PropTypes.func.isRequired,
+  onDeleteOne: PropTypes.func.isRequired,
+  onWidgetDispatch: PropTypes.func.isRequired,
 }
 
-EditorCanvas.defaultProps = { }
-
-const mapDispatchToProps = (dispatch) => {
-  const fire = wrapDispatchToFire(dispatch);
-  return {
-    addOrUpdate: (newWidget) => {
-      fire(`${NS}/addOrUpdate`, {
-        widget: newWidget,
-      }, withAfterSave)
-    },
-    deleteOne: (widgetId) => {
-      fire(`${NS}/deleteOne`, { widgetId, }, withAfterSave) 
-    },
-    loadWidgets: () => {
-      fire(`${NS}/loadWidgets`, { })
-    },
-  };
-};
-export default connect(undefined, mapDispatchToProps)(EditorCanvas);
+export default EditorCanvas;

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, } from 'react';
 import { Layout} from 'antd';
-import { DragDropContext, DndContext } from 'react-dnd';
+import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import PropTypes from 'prop-types';
 import { connect } from 'dva';
 import isEqual from 'lodash.isequal';
 
@@ -22,6 +21,8 @@ import {
   getExportedState as opGetExportedState,
 } from './models/operations';
 import { evaluate } from '../../util/template';
+import { wrapDispatchToFire } from '../../util';
+import { NS } from './common';
 
 const { Header, Sider, Content } = Layout;
 
@@ -35,32 +36,31 @@ const mapDispatchToOperationEditorProps = (dispatch) => {
   return {
     onAddOperation: (id) => {
       dispatch({
-        type: `operations/${addOperation}`,
+        type: `${NS.operations}/${addOperation}`,
         payload: {id},
       });
     },
     onDeleteOperation: (id) => {
-      console.log('to delete ', id);
       dispatch({
-        type: `operations/${deleteOperation}`,
+        type: `${NS.operations}/${deleteOperation}`,
         payload: id,
       });
     },
     onExecOperation: (id, data) => {
       dispatch({
-        type: `operations/${execOperation}`,
+        type: `${NS.operations}/${execOperation}`,
         payload: {id, data},
       });
     },
     onSetOperationInput: (id, input) => {
       dispatch({
-        type: `operations/${setPreparedSqlTemplateInput}`,
+        type: `${NS.operations}/${setPreparedSqlTemplateInput}`,
         payload: {id, input},
       });
     },
     onSetActiveOpId: (id) => {
       dispatch({
-        type: `editorCtx/${setActiveOpId}`,
+        type: `${NS.editorCtx}/${setActiveOpId}`,
         payload: id,
       });
     },
@@ -105,10 +105,25 @@ const mapStateToEditorCanvasProps = (state) => {
   }
 }
 const mapDispatchToEditorCanvasProps = (dispatch) => {
+  const fire = wrapDispatchToFire(dispatch);
   return {
+    onAddOrUpdate: (newWidget) => {
+      fire(`${NS.widgets}/addOrUpdate`, {
+        widget: newWidget,
+      })
+    },
+    onDeleteOne: (widgetId) => {
+      fire(`${NS.widgets}/deleteOne`, { widgetId, }) 
+    },
+    onWidgetDispatch: (widgetId, widgetAction) => {
+      fire(`${NS.widgets}/updateContent`, {
+        widgetId,
+        widgetAction,
+      })
+    },
     onSetActiveWidgetId: (id) => {
       dispatch({
-        type: `editorCtx/${setActiveWidgetId}`,
+        type: `${NS.editorCtx}/${setActiveWidgetId}`,
         payload: id,
       });
     },
@@ -119,13 +134,38 @@ const AppEditorCanvas = connect(
   mapDispatchToEditorCanvasProps,
 )(EditorCanvas);
 
-let DnDLayout = ({ activeWidgetId, widgets }) => {
+const mapStateToWidgetConfigPanelProps = (state) => {
+  return {
+    widget: state.widgets[state.editorCtx.activeWidgetId],
+    widgets: state.widgets,
+  }
+}
+const mapDispatchToWidgetConfigPanelProps = (dispatch) => {
+  const fire = wrapDispatchToFire(dispatch);
+  return {
+    onWidgetDispatch: (widgetId, widgetAction) => {
+      fire(`${NS.widgets}/updateContent`, {
+        widgetId,
+        widgetAction,
+      })
+    },
+    onChangeWidgetId: (oldWidgetId, newWidgetId) => {
+      fire(`${NS.widgets}/changeWidgetId`, {
+        oldWidgetId,
+        newWidgetId,
+      })
+    },
+  };
+};
+const AppWidgetConfigPanel = connect(
+  mapStateToWidgetConfigPanelProps, 
+  mapDispatchToWidgetConfigPanelProps,
+)(WidgetConfigPanel);
+
+let DnDLayout = ({ activeWidgetId }) => {
   let rightSider;
   if (activeWidgetId) {
-    rightSider = <WidgetConfigPanel 
-      widget={widgets[activeWidgetId]} 
-      widgets={widgets}
-    />
+    rightSider = <AppWidgetConfigPanel /> 
   } else {
     rightSider = <WidgetPicker />
   }
@@ -147,7 +187,7 @@ let DnDLayout = ({ activeWidgetId, widgets }) => {
 }
 DnDLayout = DragDropContext(HTML5Backend)(DnDLayout);
 
-function EditorLayout({ widgets, activeWidgetId }) {
+function EditorLayout({ activeWidgetId }) {
   return (
     <Layout style={{ height: '100vh' }}>
       <Header className={styles.defaultBg}>
@@ -157,24 +197,14 @@ function EditorLayout({ widgets, activeWidgetId }) {
         <Sider className={styles.defaultBg} width={275}>
           <AppModelBrowner />
         </Sider>
-        <DnDLayout
-          activeWidgetId={activeWidgetId} 
-          widgets={widgets}
-        />
+        <DnDLayout activeWidgetId={activeWidgetId} />
       </Layout>
     </Layout>
   )
 }
 
-const EditorApp = ({ match, widgets, activeWidgetId, operations, dispatch}) => {
+const Editor = ({ widgets, activeWidgetId, operations, dispatch}) => {
   const [lastEvalEnv, setLastEvalEnv] = useState([]);
-
-  useEffect(() => {
-    console.log(`app initializing: ${match.params.app}`)
-    return function cleanup() {
-      console.log(`app un-initializing: ${match.params.app}`)
-    };
-  }, []);
 
   useEffect(() => {
     const widgetTemplates = getToEvalTemplates(widgets);
@@ -213,12 +243,7 @@ const EditorApp = ({ match, widgets, activeWidgetId, operations, dispatch}) => {
     }
   });
 
-  return ( 
-    <EditorLayout 
-      widgets={widgets} 
-      activeWidgetId={activeWidgetId}
-    />
-  )
+  return ( <EditorLayout activeWidgetId={activeWidgetId} />)
 }
 
 const mapStateToProps = (state) => {
@@ -228,4 +253,25 @@ const mapStateToProps = (state) => {
     activeWidgetId: state.editorCtx.activeWidgetId,
   };
 };
-export default connect(mapStateToProps)(EditorApp);
+const AppEditor = connect(mapStateToProps)(Editor);
+
+import * as demoApp  from './demoApp';
+const App = ({ match, dispatch }) => {
+  useEffect(() => {
+    const { app } = match.params;
+    console.log(`app initializing: ${app}`)
+    if (app === 'demo') {
+      demoApp.setUp(dispatch);
+    }
+
+    return function cleanup() {
+      console.log(`app un-initializing: ${app}`)
+      if (app === 'demo') {
+        demoApp.cleanUp(dispatch);
+      }
+    };
+  }, []);
+
+  return ( <AppEditor />)
+}
+export default connect()(App);

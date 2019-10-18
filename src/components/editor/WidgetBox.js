@@ -3,15 +3,12 @@ import { useDrag, } from 'react-dnd'
 import { getEmptyImage } from "react-dnd-html5-backend";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { connect } from 'dva';
 import { Tag, Modal } from 'antd'
 
 import { CSS, CANVAS } from './constant';
 import DndItemTypes from './DndItemTypes';
 import styles from './EditorCanvas.less';
 import WidgetFactory from '../WidgetFactory';
-import { NS, withAfterSave } from '@/pages/editor/models/widgets';
-import { wrapDispatchToFire } from '@/util'
 import { createLogger } from '../../util';
 
 const logger = createLogger('/components/editor/WidgetBox');
@@ -47,18 +44,6 @@ const ResizeHandle = React.memo(({type, position, widget, setIsDragging}) => {
     </div>
   )
 });
-
-const mapDispatchToProps = (dispatch) => {
-  const fire = wrapDispatchToFire(dispatch);
-  return {
-    widgetDispatch: (widgetId, widgetAction) => {
-      fire(`${NS}/updateContent`, {
-        widgetId,
-        widgetAction,
-      }, withAfterSave)
-    },
-  };
-};
 
 const WidgetBox = React.memo((props) => {
   const [isResizing, setIsResizing] = useState(false);
@@ -119,7 +104,7 @@ const WidgetBox = React.memo((props) => {
         okType: 'danger',
         cancelText: '取消',
         onOk() {
-          props.deleteOne(props.id);
+          props.onDeleteOne(props.id);
         },
         onCancel() { },
       });
@@ -140,7 +125,7 @@ const WidgetBox = React.memo((props) => {
           ...props.content, 
           dispatch: (action) => {
             logger.debug(`widget(${props.id}) dispatch action(${action})`);
-            props.widgetDispatch(props.id, action)
+            props.onWidgetDispatch(props.id, action)
           }
         }) 
       }
@@ -187,16 +172,14 @@ WidgetBox.propTypes = {
   // from EditorCanvas
   canvasColumnWidth: PropTypes.number.isRequired,
   showBorder: PropTypes.bool,
-  onClick: PropTypes.func,
   selected: PropTypes.bool,
-  deleteOne: PropTypes.func,
-
-  // from `widgets` model
-  widgetDispatch: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
+  onDeleteOne: PropTypes.func,
+  onWidgetDispatch: PropTypes.func.isRequired,
 };
 
 WidgetBox.defaultProps = {
   showBorder: false,
 };
 
-export default connect(undefined, mapDispatchToProps)(WidgetBox);
+export default WidgetBox;

@@ -10,8 +10,12 @@ const logger = createLogger('/pages/editor/models/operations');
 const OP_TYPE = Object.freeze({
   SQLReadonly: 'SQLReadonly',
 });
+const EXEC_MODE = Object.freeze({
+  Manual: 'Manual',
+});
 
 // Actions
+export const initOperations = createAction('OPERATIONS_INIT');
 export const addOperation = createAction('OPERATION_ADD');
 export const deleteOperation = createAction('OPERATION_DELETE');
 export const setPreparedSqlTemplateInput = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_SET');
@@ -29,6 +33,7 @@ const singleOperationInitialState = {
     value: null,
     error: null,
   },
+  execMode: EXEC_MODE.Manual,
   /** exec result */
   data: null,
   lastExecSql: null,
@@ -103,7 +108,9 @@ export default {
         // nothing to do
       } else {
         try {
+          console.log('===> exec', sql.sqlTemplate, sql.params);
           const data = yield call(alasql.promise, sql.sqlTemplate, sql.params);
+          console.log('===> exec result', data);
           yield put({
             type: execOperationSuccess.toString(),
             payload: { id, data, sql },
@@ -121,6 +128,9 @@ export default {
     },
   },
   reducers: {
+    [initOperations]: (state, action) => {
+      return action.payload;
+    },
     [addOperation]: defaultActionHandler,
     [deleteOperation]: (state, action) => {
       const toDeleteId = action.payload;

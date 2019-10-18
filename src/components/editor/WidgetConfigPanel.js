@@ -1,31 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import { Typography, message } from 'antd';
-import { connect } from 'dva';
 
 import WidgetBox from './WidgetBox';
-import { NS, withAfterSave } from '@/pages/editor/models/widgets';
-import { wrapDispatchToFire } from '@/util'
 import WidgetFactory from '../WidgetFactory';
 import styles from './WidgetConfigPanel.less';
-
-const mapDispatchToProps = (dispatch) => {
-  const fire = wrapDispatchToFire(dispatch);
-  return {
-    widgetDispatch: (widgetId, widgetAction) => {
-      fire(`${NS}/updateContent`, {
-        widgetId,
-        widgetAction,
-      }, withAfterSave)
-    },
-    changeWidgetId: (oldWidgetId, newWidgetId) => {
-      fire(`${NS}/changeWidgetId`, {
-        oldWidgetId,
-        newWidgetId,
-      }, withAfterSave)
-    },
-  };
-};
 
 function Header(props) {
   const { widgetId } = props;
@@ -54,13 +33,13 @@ Header.propTypes = {
 Header.defaultProps = {
 }
 
-function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, widgets}) {
+function WidgetConfigPanel({widget, onWidgetDispatch, onChangeWidgetId, widgets}) {
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
     {
       ...widget.content,
       dispatch: (action) => {
-        widgetDispatch(widget.id, action)
+        onWidgetDispatch(widget.id, action)
       },
     },
   );
@@ -69,7 +48,7 @@ function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, widgets}) {
     if (newWidgetId in widgets) {
       message.error(`${newWidgetId} 已经存在`);
     } else {
-      changeWidgetId(widget.id, newWidgetId)
+      onChangeWidgetId(widget.id, newWidgetId)
     }
   }
   return (
@@ -81,17 +60,13 @@ function WidgetConfigPanel({widget, widgetDispatch, changeWidgetId, widgets}) {
 }
 
 WidgetConfigPanel.propTypes = {
-  // from `widgets` model
-  widgetDispatch: PropTypes.func.isRequired,
-  changeWidgetId: PropTypes.func.isRequired,
-
-  // from pages/editor/$app
   widget: PropTypes.shape(WidgetBox.propTypes).isRequired,
   widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-}
 
-WidgetConfigPanel.defaultProps = {
+  onWidgetDispatch: PropTypes.func.isRequired,
+  onChangeWidgetId: PropTypes.func.isRequired,
 }
 
 WidgetConfigPanel.Header = Header;
-export default connect(undefined, mapDispatchToProps)(WidgetConfigPanel);
+
+export default WidgetConfigPanel;
