@@ -135,7 +135,7 @@ ModelBrowser.propTypes = {
   modelGroups: PropTypes.arrayOf(PropTypes.shape({
     name: PropTypes.string.isRequired,
     json: PropTypes.object.isRequired,
-    activeKey: PropTypes.string.isRequired,
+    activeKey: PropTypes.string,
   })),
 }
 

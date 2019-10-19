@@ -4,7 +4,7 @@ import { createLogger } from '@/util';
 
 const logger = createLogger('/pages/editor/models/widgets');
 
-const initialWidgets = {};
+export const initialState = {};
 export const NS = 'widgets';
 
 function removePrefix(str, prefix) {
@@ -68,7 +68,7 @@ function _deleteOne(widgets, widgetIdToDelete) {
  * 2. content：负责维护 Widget 内的 UI(包括 View 和 交互) 和 数据
 */
 export default {
-  state: initialWidgets,
+  state: initialState,
   effects: {
     *loadWidgets(action, sagaEffects) {
       const { call, put } = sagaEffects;

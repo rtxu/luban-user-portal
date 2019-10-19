@@ -2,8 +2,9 @@ import alasql from 'alasql';
 import moment from 'moment';
 
 import { NS } from './common';
-import { initEditorCtx } from './models/editorCtx';
-import { initOperations } from './models/operations';
+import { initEditorCtx, initialState as editorCtxInitialState } from './models/editorCtx';
+import { initialState as operationsInitialState, initOperations } from './models/operations';
+import { initialState as widgetsInitialState } from './models/widgets';
 
 const demoInitialState = {
   widgets: {
@@ -20,7 +21,7 @@ const demoInitialState = {
         isExpandWhenHover: false,
         valueTemplate: {
           input: '客户表',
-          value: '客户表',
+          value: null,
           error: null
         }
       }
@@ -112,7 +113,7 @@ const demoInitialState = {
     },
     text_input1: {
       type: 'text_input',
-      gridWidth: 2,
+      gridWidth: 3,
       gridHeight: 1,
       gridTop: 2,
       gridLeft: 7,
@@ -125,27 +126,6 @@ const demoInitialState = {
           type: 'text',
           value: '',
           placeholder: '请输入客户姓名'
-        }
-      },
-      canvasColumnWidth: 89.41666666666667,
-      showBorder: false,
-      selected: true
-    },
-    button1: {
-      type: 'button',
-      gridWidth: 1,
-      gridHeight: 1,
-      gridTop: 2,
-      gridLeft: 9,
-      instanceId: 1,
-      id: 'button1',
-      content: {
-        text: '搜索',
-        color: '#1EA9FB',
-        actionType: '触发 Action',
-        actionTriggerAnAction: {},
-        actionOpenAnyWebPage: {
-          isOpenInNewTab: false
         }
       },
       canvasColumnWidth: 89.41666666666667,
@@ -185,8 +165,8 @@ const demoInitialState = {
         isScrollWhenOverflow: false,
         isExpandWhenHover: false,
         valueTemplate: {
-          input: '客户 {{}} 的消费记录',
-          value: '客户  的消费记录',
+          input: '客户 {{table1.selectedRow.data.name}} 的消费记录',
+          value: null,
           error: null
         }
       },
@@ -319,7 +299,7 @@ const demoInitialState = {
       id: 'op2',
       type: 'SQLReadonly',
       preparedSqlTemplate: {
-        input: 'select * from {{op1.data}} where name like \'{{text_input1.value}}%\'',
+        input: 'select * from {{op1.data}} where name like {{text_input1.value+\'%\'}}',
         value: null,
         error: null
       },
@@ -493,15 +473,15 @@ export const setUp = (dispatch) => {
 export const cleanUp = (dispatch) => {
   dispatch({
     type: `${NS.editorCtx}/initEditorCtx`,
-    payload: {},
+    payload: editorCtxInitialState,
   });
   dispatch({
     type: `${NS.widgets}/initWidgets`,
-    payload: {},
+    payload: widgetsInitialState,
   });
   dispatch({
     type: `${NS.operations}/initOperations`,
-    payload: {},
+    payload: operationsInitialState,
   });
   cleanUpLocalStrorage();
 }

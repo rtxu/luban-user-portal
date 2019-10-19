@@ -7,12 +7,14 @@ import { TemplateTypeEnum } from '../../../util/template';
 
 const logger = createLogger('/pages/editor/models/operations');
 
-const OP_TYPE = Object.freeze({
-  SQLReadonly: 'SQLReadonly',
-});
-const EXEC_MODE = Object.freeze({
-  Manual: 'Manual',
-});
+enum OpTypeEnum {
+  SQLReadonly = 'SQLReadonly',
+}
+enum ExecModeEnum {
+  Manual = 'Manual',
+  // auto exec when prepared sql tempalte changed
+  Auto = 'Auto',
+}
 
 // Actions
 export const initOperations = createAction('OPERATIONS_INIT');
@@ -20,20 +22,23 @@ export const addOperation = createAction('OPERATION_ADD');
 export const deleteOperation = createAction('OPERATION_DELETE');
 export const setPreparedSqlTemplateInput = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_SET');
 export const evalPreparedSqlTemplate = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_EVAL');
+const execOperationFail = createAction('OPERATION_EXEC_FAIL');
+const execOperationSuccess = createAction('OPERATION_EXEC_SUCCESS');
+
+// Effects
 export const execOperation = createAction('OPERATION_EXEC');
-export const execOperationFail = createAction('OPERATION_EXEC_FAIL');
-export const execOperationSuccess = createAction('OPERATION_EXEC_SUCCESS');
+export const evalAndExecIfNeeded = createAction('OPERATION_EVAL_AND_EXEC_IF_NEEDED');
 
 // initial state
-const initialState = {};
+export const initialState = {};
 const singleOperationInitialState = {
-  type: OP_TYPE.SQLReadonly,
+  type: OpTypeEnum.SQLReadonly,
   preparedSqlTemplate: {
     input: '',
     value: null,
     error: null,
   },
-  execMode: EXEC_MODE.Manual,
+  execMode: ExecModeEnum.Manual,
   /** exec result */
   data: null,
   lastExecSql: null,
@@ -108,9 +113,9 @@ export default {
         // nothing to do
       } else {
         try {
-          console.log('===> exec', sql.sqlTemplate, sql.params);
+          // console.log('===> exec', sql.sqlTemplate, sql.params);
           const data = yield call(alasql.promise, sql.sqlTemplate, sql.params);
-          console.log('===> exec result', data);
+          // console.log('===> exec result', data);
           yield put({
             type: execOperationSuccess.toString(),
             payload: { id, data, sql },
@@ -125,6 +130,30 @@ export default {
           });
         }
       }
+    },
+    *[evalAndExecIfNeeded](action, sagaEffects) {
+      const { put, select } = sagaEffects;
+      const { id, value, error } = action.payload;
+      yield put({
+        type: evalPreparedSqlTemplate.toString(),
+        payload: action.payload, 
+      });
+      
+      if (error) {
+        // do nothing
+      } else {
+        const op = yield select(state => state.operations[id]);
+        if (isEqual(op.lastExecSql, value)) {
+          // do nothing
+        } else {
+          // auto exec when sql changed
+          yield put({
+            type: execOperation.toString(),
+            payload: { id: op.id, },
+          });
+        }
+      }
+
     },
   },
   reducers: {
@@ -157,7 +186,7 @@ export const getToEvalTemplates = (operations) => {
       type: TemplateTypeEnum.Alasql, 
       input: op.preparedSqlTemplate.input,
       onEvalActionCreator: (value, extra, error) => ({
-        type: `${NS}/${evalPreparedSqlTemplate}`,
+        type: `${NS}/${evalAndExecIfNeeded}`,
         payload: {
           /** id used to locate op in `operations` */
           id: opId,

@@ -6,7 +6,7 @@ export const setActiveOpId = createAction('ACTIVE_OP_ID_SET');
 export const setActiveWidgetId = createAction('ACTIVE_WIDGET_ID_SET');
 
 //- initial state
-const initialState = {
+export const initialState = {
   activeOpId: null,
   activeWidgetId: null,
 }
