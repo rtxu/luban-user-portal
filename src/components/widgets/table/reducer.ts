@@ -1,9 +1,9 @@
-import { createAction, handleActions } from 'redux-actions';
 import produce from 'immer';
+import { createAction, handleActions } from 'redux-actions';
 
 import { logger } from './common';
 
-//- Actions
+// Actions
 export const toggleColumnVisibility = createAction('COLUMN_VISIBILITY_TOGGLE');
 export const moveColumn = createAction('COLUMN_MOVE');
 export const setColumnWidth = createAction('COLUMN_WIDTH_SET');
@@ -35,7 +35,7 @@ function replaceObjectArr(memberArr, replaceArr, getObjId) {
 
 export function genColumnsByFirstRow(firstRow) {
   const columns = [];
-  for (let key of Object.keys(firstRow)) {
+  for (const key of Object.keys(firstRow)) {
     columns.push({
       meta: {
         visible: true,
@@ -75,28 +75,48 @@ export const initialState = {
   selectedRowIndex: 0,
 };
 
-//- Reducers
+// Reducers
+const defaultEvalResult = Object.freeze({
+  code: 0,
+  msg: 'ok',
+  visible: true,
+});
+const convertToTableData = (input: any): [object[], number, string] => {
+  const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
+  let tableData: object[] = [];
+  let errCode = defaultEvalResult.code;
+  let errMsg =  defaultEvalResult.msg;
+  let objInput = input;
+  if (typeof(input) === 'string') {
+    try {
+      objInput = JSON.parse(input);
+    } catch (e) {
+      errCode = 101;
+      errMsg = INVALID_RAW_INPUT_ERR_MSG;
+    }
+  }
+
+  if (typeof(objInput) === 'object') {
+    if (Array.isArray(objInput)) {
+      tableData = objInput;
+    } else {
+      errCode = 102;
+      errMsg = INVALID_RAW_INPUT_ERR_MSG;
+    }
+  } else {
+    errCode = 103;
+    errMsg = INVALID_RAW_INPUT_ERR_MSG;
+  }
+
+  return [tableData, errCode, errMsg]
+}
 export default handleActions({
   [setTemplateOfData]: (state, action) => {
-    const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
     const evalResult = {
-      code: 0,
-      msg: 'ok',
-      visible: true,
+      ...defaultEvalResult,
     }
-    let newData = [];
-    try {
-      const obj = JSON.parse(action.payload);
-      if (Array.isArray(obj)) {
-        newData = obj;
-      } else {
-        evalResult.code = 101;
-        evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
-      }
-    } catch (e) {
-      evalResult.code = 102;
-      evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
-    }
+    let newData: object[] = [];
+    [newData, evalResult.code, evalResult.msg] = convertToTableData(action.payload);
     if (evalResult.code === 0) {
       let newColumns = [];
       if (newData.length > 0) {
@@ -158,7 +178,7 @@ export default handleActions({
   },
 }, initialState);
 
-//- Selectors
+// Selectors
 // 用于构造计算模板结果时使用的 context，不包含模板项
 export const getRawExportedState = (state) => {
   const selectedRow = {

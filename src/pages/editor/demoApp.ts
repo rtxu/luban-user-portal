@@ -19,11 +19,9 @@ const demoInitialState = {
       content: {
         isScrollWhenOverflow: false,
         isExpandWhenHover: false,
-        valueTemplate: {
-          input: '客户表',
-          value: null,
-          error: null
-        }
+        valueInput: '客户表',
+        value: null,
+        valueError: null,
       }
     },
     table1: {
@@ -164,11 +162,9 @@ const demoInitialState = {
       content: {
         isScrollWhenOverflow: false,
         isExpandWhenHover: false,
-        valueTemplate: {
-          input: '客户 {{table1.selectedRow.data.name}} 的消费记录',
-          value: null,
-          error: null
-        }
+        valueInput: '客户 {{table1.selectedRow.data.name}} 的消费记录',
+        value: null,
+        valueError: null,
       },
       canvasColumnWidth: 89.41666666666667,
       showBorder: false,
@@ -264,11 +260,9 @@ const demoInitialState = {
     op1: {
       id: 'op1',
       type: 'SQLReadonly',
-      preparedSqlTemplate: {
-        input: 'select * from customer;',
-        value: null,
-        error: null
-      },
+      preparedSqlInput: 'select * from customer;',
+      preparedSql: null,
+      preparedSqlError: null,
       execMode: 'Manual',
       data: [
         {
@@ -298,11 +292,9 @@ const demoInitialState = {
     op2: {
       id: 'op2',
       type: 'SQLReadonly',
-      preparedSqlTemplate: {
-        input: 'select * from {{op1.data}} where name like {{text_input1.value+\'%\'}}',
-        value: null,
-        error: null
-      },
+      preparedSqlInput: 'select * from {{op1.data}} where name like {{text_input1.value+\'%\'}}',
+      preparedSql: null,
+      preparedSqlError: null,
       execMode: 'Manual',
       data: null,
       lastExecSql: null,

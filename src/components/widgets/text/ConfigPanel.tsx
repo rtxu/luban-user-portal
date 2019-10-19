@@ -5,7 +5,7 @@ import { toEvalResult } from '../common';
 import Config from '../Config';
 import { setIsExpandWhenHover, setIsScrollWhenOverflow, setValueTemplateInput, } from './reducer';
 
-function ConfigPanel({valueTemplate, isScrollWhenOverflow, isExpandWhenHover, dispatch}) {
+function ConfigPanel({valueInput, value, valueError, isScrollWhenOverflow, isExpandWhenHover, dispatch}) {
   function onIsScrollChange(checked) {
     dispatch(setIsScrollWhenOverflow(checked));
   }
@@ -28,8 +28,8 @@ function ConfigPanel({valueTemplate, isScrollWhenOverflow, isExpandWhenHover, di
         <Config.LabelCmEvalInput
           label={{ value:'文本' }}
           input={{ 
-            value: valueTemplate.input, 
-            evalResult: toEvalResult(valueTemplate),
+            value: valueInput, 
+            evalResult: toEvalResult(value, valueError),
             onChange: onTextChange, 
           }}
         />

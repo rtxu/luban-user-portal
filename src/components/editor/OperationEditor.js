@@ -194,11 +194,11 @@ function NormalOpHeader({op, onDeleteOperation, onExecOperation}) {
       {/* <Button>复制</Button> */}
       {/* <Button disabled>保存</Button> */}
       <Button type='primary' onClick={() => {
-        if (op.preparedSqlTemplate.error) {
+        if (op.preparedSqlError) {
           notification.error({
             message: '输入不合法',
           });
-        } else if (op.preparedSqlTemplate.input === '') {
+        } else if (op.preparedSqlInput === '') {
           notification.info({
             message: '输入为空',
           });
@@ -237,7 +237,7 @@ function NormalOpBody({op, onSetOperationInput}) {
     <div className={myStyles.normalOpBody}>
       <section>
         <CmEvalInput
-          value={op.preparedSqlTemplate.input}
+          value={op.preparedSqlInput}
           options={{
             mode: 'sql',
             theme: 'neo',

@@ -42,10 +42,10 @@ export interface IEvaluatedTemplate {
   error: string;
 }
 
-export function toEvalResult(tmpl: IEvaluatedTemplate): IEvalResult {
-  if (tmpl.error) {
-    return { code: 1, msg: tmpl.error, }
+export function toEvalResult(value: any, error: string): IEvalResult {
+  if (error) {
+    return { code: 1, msg: error, }
   } else {
-    return { code: 0, msg: `= ${tmpl.value}`, }
+    return { code: 0, msg: `= ${value}`, }
   }
 }

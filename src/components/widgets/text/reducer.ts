@@ -1,4 +1,3 @@
-import produce from 'immer';
 import { createAction, handleActions } from 'redux-actions';
 
 import { createDefaultToEvalTemplate } from '../common';
@@ -12,11 +11,10 @@ export const evalValueTemplate = createAction('VALUE_TEMPLATE_EVAL');
 export const initialState = {
   isScrollWhenOverflow: false,
   isExpandWhenHover: false,
-  valueTemplate: {
-    input: '这里填被展示的文本 😃',
-    value: null,
-    error: null,
-  },
+  // valueTemplate
+  valueInput: '这里填被展示的文本 😃',
+  value: null,
+  valueError: null,
 };
 
 // Reducers
@@ -34,16 +32,18 @@ export default handleActions({
     }
   },
   [setValueTemplateInput]: (state, action) => {
-    return produce(state, draft => {
-      draft.valueTemplate.input = action.payload;
-    })
+    return {
+      ...state,
+      valueInput: action.payload,
+    }
   },
   [evalValueTemplate]: (state, action) => {
-    return produce(state, draft => {
-      const { value, error } = action.payload;
-      draft.valueTemplate.value = value;
-      draft.valueTemplate.error = error ? `${error.name}: ${error.message}`: null;
-    })
+    const { value, error } = action.payload;
+    return {
+      ...state,
+      value,
+      valueError: error ? `${error.name}: ${error.message}`: null,
+    }
   },
 }, initialState);
 
@@ -58,7 +58,7 @@ export const getRawExportedState = (state) => (
 export const getExportedState = (state) => (
   {
     ...getRawExportedState(state),
-    value: state.valueTemplate.value,
+    value: state.value,
   }
 )
 
@@ -66,7 +66,7 @@ export const getToEvalTemplates = (state) => {
   return [
     createDefaultToEvalTemplate(
       'value',
-      state.valueTemplate.input, 
+      state.valueInput, 
       evalValueTemplate.toString()
     ),
   ];

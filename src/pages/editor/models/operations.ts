@@ -33,11 +33,11 @@ export const evalAndExecIfNeeded = createAction('OPERATION_EVAL_AND_EXEC_IF_NEED
 export const initialState = {};
 const singleOperationInitialState = {
   type: OpTypeEnum.SQLReadonly,
-  preparedSqlTemplate: {
-    input: '',
-    value: null,
-    error: null,
-  },
+  // preparedSqlTemplate
+  preparedSqlInput: '',
+  preparedSql: null,
+  preparedSqlError: null,
+
   execMode: ExecModeEnum.Manual,
   /** exec result */
   data: null,
@@ -58,21 +58,15 @@ const operation = handleActions({
   [`${NS}/${setPreparedSqlTemplateInput}`]: (state, action) => {
     return {
       ...state,
-      preparedSqlTemplate: {
-        ...state.preparedSqlTemplate,
-        input: action.payload.input,
-      },
+      preparedSqlInput: action.payload.input,
     }
   },
   [`${NS}/${evalPreparedSqlTemplate}`]: (state, action) => {
     const { value, error } = action.payload;
     return {
       ...state,
-      preparedSqlTemplate: {
-        ...state.preparedSqlTemplate,
-        value,
-        error: error ? `${error.name}: ${error.message}`: null,
-      },
+      preparedSql: value,
+      preparedError: error ? `${error.name}: ${error.message}`: null,
     }
   },
   [`${NS}/${execOperationFail}`]: (state, action) => {
@@ -107,9 +101,8 @@ export default {
       const { call, put, select } = sagaEffects;
       const { id } = action.payload;
       const op = yield select(state => state.operations[id]);
-      const tmpl = op.preparedSqlTemplate;
-      const sql = tmpl.value;
-      if (tmpl.error || tmpl.input === '' || isEqual(sql, op.lastExecSql)) {
+      const sql = op.preparedSql;
+      if (op.preparedError || op.preparedSqlInput === '' || isEqual(sql, op.lastExecSql)) {
         // nothing to do
       } else {
         try {
@@ -184,7 +177,7 @@ export const getToEvalTemplates = (operations) => {
       /** templateId */
       id: `${opId}.preparedSql`,
       type: TemplateTypeEnum.Alasql, 
-      input: op.preparedSqlTemplate.input,
+      input: op.preparedSqlInput,
       onEvalActionCreator: (value, extra, error) => ({
         type: `${NS}/${evalAndExecIfNeeded}`,
         payload: {
@@ -214,7 +207,7 @@ export const getEvalContext = (operations) => {
 
 const getOpExportedState = (op) => ({
   data: op.data,
-  preparedSql: op.preparedSqlTemplate.value,
+  preparedSql: op.preparedSql,
 })
 
 export const getExportedState = (operations) => {
