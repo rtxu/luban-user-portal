@@ -33,77 +33,10 @@ const demoInitialState = {
       instanceId: 1,
       id: 'table1',
       content: {
-        rawInput: '[\n  {\n    "name": "胡彦斌",\n    "age": 32,\n    "address": "西湖区湖底公园1号"\n  },\n  {\n    "name": "胡彦祖",\n    "age": 42,\n    "address": "西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号"\n  }\n]',
-        data: [
-          {
-            name: '胡彦斌',
-            age: 32,
-            address: '西湖区湖底公园1号'
-          },
-          {
-            name: '胡彦祖',
-            age: 42,
-            address: '西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号'
-          }
-        ],
-        columns: [
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'name',
-              dataIndex: 'name'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'age',
-              dataIndex: 'age'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'address',
-              dataIndex: 'address'
-            }
-          }
-        ],
-        lastValidColumns: [
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'name',
-              dataIndex: 'name'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'age',
-              dataIndex: 'age'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'address',
-              dataIndex: 'address'
-            }
-          }
-        ],
+        dataInput: '{{op2.data}}',
+        data: [],
+        columns: [],
+        lastValidColumns: [],
         height: 320,
         isCompact: false,
         selectedRowIndex: 0
@@ -179,77 +112,10 @@ const demoInitialState = {
       instanceId: 2,
       id: 'table2',
       content: {
-        rawInput: '[\n  {\n    "name": "胡彦斌",\n    "age": 32,\n    "address": "西湖区湖底公园1号"\n  },\n  {\n    "name": "胡彦祖",\n    "age": 42,\n    "address": "西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号"\n  }\n]',
-        data: [
-          {
-            name: '胡彦斌',
-            age: 32,
-            address: '西湖区湖底公园1号'
-          },
-          {
-            name: '胡彦祖',
-            age: 42,
-            address: '西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号'
-          }
-        ],
-        columns: [
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'name',
-              dataIndex: 'name'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'age',
-              dataIndex: 'age'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'address',
-              dataIndex: 'address'
-            }
-          }
-        ],
-        lastValidColumns: [
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'name',
-              dataIndex: 'name'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'age',
-              dataIndex: 'age'
-            }
-          },
-          {
-            meta: {
-              visible: true
-            },
-            config: {
-              title: 'address',
-              dataIndex: 'address'
-            }
-          }
-        ],
+        dataInput: '{{op3.data}}',
+        data: [],
+        columns: [],
+        lastValidColumns: [],
         height: 320,
         isCompact: false,
         selectedRowIndex: 0
@@ -263,7 +129,7 @@ const demoInitialState = {
       preparedSqlInput: 'select * from customer;',
       preparedSql: null,
       preparedSqlError: null,
-      execMode: 'Manual',
+      execMode: 'Auto',
       data: [
         {
           name: '张经理',
@@ -295,11 +161,22 @@ const demoInitialState = {
       preparedSqlInput: 'select * from {{op1.data}} where name like {{text_input1.value+\'%\'}}',
       preparedSql: null,
       preparedSqlError: null,
-      execMode: 'Manual',
+      execMode: 'Auto',
       data: null,
       lastExecSql: null,
       error: null
-    }
+    },
+    op3: {
+      id: 'op3',
+      type: 'SQLReadonly',
+      preparedSqlInput: 'select * from trading_record where name = {{table1.selectedRow.data.name}}',
+      preparedSql: null,
+      preparedSqlError: null,
+      execMode: 'Auto',
+      data: null,
+      lastExecSql: null,
+      error: null,
+    },
   },
   editorCtx: {
     activeOpId: 'op2',

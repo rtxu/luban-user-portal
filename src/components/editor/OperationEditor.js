@@ -124,7 +124,7 @@ function TargetDetail({ target, visible, setVisible }) {
 }
 
 function NormalOpHeader({op, onDeleteOperation, onExecOperation}) {
-  console.log('current op in header: ', op);
+  // console.log('current op in header: ', op);
   const [target, setTarget] = useState();
   const [targetDetailVisible, setTargetDetailVisible] = useState(false);
   function listLocalStorageDb() {

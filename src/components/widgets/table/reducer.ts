@@ -1,6 +1,7 @@
 import produce from 'immer';
 import { createAction, handleActions } from 'redux-actions';
 
+import { createDefaultToEvalTemplate } from '../common';
 import { logger } from './common';
 
 // Actions
@@ -9,7 +10,8 @@ export const moveColumn = createAction('COLUMN_MOVE');
 export const setColumnWidth = createAction('COLUMN_WIDTH_SET');
 export const setIsCompact = createAction('IS_COMPACT_SET');
 export const setSelectedRowIndex = createAction('SELECTED_ROW_INDEX_SET');
-export const setTemplateOfData = createAction('TEMPLATE_OF_DATA_SET');
+export const setDataTemplateInput = createAction('DATA_TEMPLATE_INPUT_SET');
+export const evalDataTemplate = createAction('DATA_TEMPLATE_EVAL');
 
 /*
  * memberArr 和 replaceArr 都是 array of object
@@ -62,12 +64,18 @@ const demoData = [
     address: '西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号',
   },
 ];
-const demoRawInput = JSON.stringify(demoData, null, 2);
+const demoDataInput = JSON.stringify(demoData, null, 2);
 const demoColumns = genColumnsByFirstRow(demoData[0]);
-
+const defaultEvalResult = Object.freeze({
+  code: 0,
+  msg: 'ok',
+  visible: true,
+});
 export const initialState = {
-  rawInput: demoRawInput,
+  dataInput: demoDataInput,
+  dataInputEvalResult: {...defaultEvalResult},
   data: demoData,
+  dataError: null,
   columns: demoColumns,
   lastValidColumns: demoColumns,
   height: 320,
@@ -76,13 +84,8 @@ export const initialState = {
 };
 
 // Reducers
-const defaultEvalResult = Object.freeze({
-  code: 0,
-  msg: 'ok',
-  visible: true,
-});
+const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
 const convertToTableData = (input: any): [object[], number, string] => {
-  const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array，其元素是 json object`;
   let tableData: object[] = [];
   let errCode = defaultEvalResult.code;
   let errMsg =  defaultEvalResult.msg;
@@ -111,35 +114,49 @@ const convertToTableData = (input: any): [object[], number, string] => {
   return [tableData, errCode, errMsg]
 }
 export default handleActions({
-  [setTemplateOfData]: (state, action) => {
-    const evalResult = {
-      ...defaultEvalResult,
+  [setDataTemplateInput]: (state, action) => {
+    return {
+      ...state,
+      dataInput: action.payload,
     }
-    let newData: object[] = [];
-    [newData, evalResult.code, evalResult.msg] = convertToTableData(action.payload);
-    if (evalResult.code === 0) {
-      let newColumns = [];
-      if (newData.length > 0) {
-        newColumns = replaceObjectArr(genColumnsByFirstRow(newData[0]), 
-          state.lastValidColumns, 
-          (obj) => obj.config.dataIndex,
-        );
-      }
+  },
+  [evalDataTemplate]: (state, action) => {
+    const { value, error } = action.payload;
+    const evalResult = { ...defaultEvalResult, }
+    if (error) { // eval error
+      evalResult.code = 110;
+      evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
       return {
         ...state,
-        rawInput: action.payload,
-        rawInputEvalResult: evalResult,
-        data: newData,
-        columns: newColumns,
-        lastValidColumns: newColumns,
-      }
-    } else {
-      return {
-        ...state,
-        rawInput: action.payload,
-        rawInputEvalResult: evalResult,
+        dataInputEvalResult: evalResult,
         data: [],
         columns: [],
+      }
+    } else {
+      let newData: object[] = [];
+      [newData, evalResult.code, evalResult.msg] = convertToTableData(value);
+      if (evalResult.code === 0) { 
+        let newColumns = [];
+        if (newData.length > 0) {
+          newColumns = replaceObjectArr(genColumnsByFirstRow(newData[0]), 
+            state.lastValidColumns, 
+            (obj) => obj.config.dataIndex,
+          );
+        }
+        return {
+          ...state,
+          dataInputEvalResult: evalResult,
+          data: newData,
+          columns: newColumns,
+          lastValidColumns: newColumns,
+        }
+      } else { // convert error
+        return {
+          ...state,
+          dataInputEvalResult: evalResult,
+          data: [],
+          columns: [],
+        }
       }
     }
   },
@@ -167,14 +184,16 @@ export default handleActions({
     })
   },
   [setIsCompact]: (state, action) => {
-    return produce(state, draft => {
-      draft.isCompact = action.payload;
-    })
+    return {
+      ...state,
+      isCompact: action.payload,
+    }
   },
   [setSelectedRowIndex]: (state, action) => {
-    return produce(state, draft => {
-      draft.selectedRowIndex = action.payload;
-    })
+    return {
+      ...state,
+      selectedRowIndex: action.payload,
+    }
   },
 }, initialState);
 
@@ -202,5 +221,11 @@ export const getExportedState = (state) => (
 )
 
 export const getToEvalTemplates = (state) => {
-  return [ ];
+  return [
+    createDefaultToEvalTemplate(
+      'data',
+      state.dataInput, 
+      evalDataTemplate.toString()
+    ),
+  ];
 };

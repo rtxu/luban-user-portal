@@ -183,9 +183,10 @@ const Column = {
 }
 
 Table.propTypes = {
-  rawInput: PropTypes.string,
-  rawInputEvalResult: PropTypes.shape(Config.LabelCmEvalInput.EvalResult.propTypes),
+  dataInput: PropTypes.string,
+  dataInputEvalResult: PropTypes.shape(Config.LabelCmEvalInput.EvalResult.propTypes),
   data: PropTypes.arrayOf(PropTypes.object),
+  dataError: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   lastValidColumns: PropTypes.arrayOf(PropTypes.shape(Column.propTypes)),
   height: PropTypes.number.isRequired,

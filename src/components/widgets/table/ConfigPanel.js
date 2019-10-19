@@ -1,7 +1,7 @@
 import React from 'react';
 import { Collapse, } from "antd";
 
-import { setTemplateOfData, toggleColumnVisibility, moveColumn, setIsCompact } from './reducer';
+import { setDataTemplateInput, toggleColumnVisibility, moveColumn, setIsCompact } from './reducer';
 import styles from './Widget.less';
 import ColumnCollapse from './ColumnCollapse';
 import Config from '../Config';
@@ -17,7 +17,7 @@ export function ColumnCollapseContainer({ children }) {
 }
 
 function ConfigPanel(props) {
-  const { rawInput, rawInputEvalResult, columns, dispatch, isCompact } = props;
+  const { dataInput, dataInputEvalResult, columns, dispatch, isCompact } = props;
 
   return (
     <Collapse
@@ -28,10 +28,10 @@ function ConfigPanel(props) {
         <Config.LabelCmEvalInput 
           label={{ value: '数据', }}
           input={{ 
-            value: rawInput, 
-            evalResult: rawInputEvalResult,
+            value: dataInput, 
+            evalResult: dataInputEvalResult,
             onChange: (newValue) => {
-              dispatch(setTemplateOfData(newValue));
+              dispatch(setDataTemplateInput(newValue));
             },
           }}
         />

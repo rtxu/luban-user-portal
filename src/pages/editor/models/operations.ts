@@ -38,7 +38,7 @@ const singleOperationInitialState = {
   preparedSql: null,
   preparedSqlError: null,
 
-  execMode: ExecModeEnum.Manual,
+  execMode: ExecModeEnum.Auto,
   /** exec result */
   data: null,
   lastExecSql: null,
@@ -66,7 +66,7 @@ const operation = handleActions({
     return {
       ...state,
       preparedSql: value,
-      preparedError: error ? `${error.name}: ${error.message}`: null,
+      preparedSqlError: error ? `${error.name}: ${error.message}`: null,
     }
   },
   [`${NS}/${execOperationFail}`]: (state, action) => {
@@ -102,7 +102,7 @@ export default {
       const { id } = action.payload;
       const op = yield select(state => state.operations[id]);
       const sql = op.preparedSql;
-      if (op.preparedError || op.preparedSqlInput === '' || isEqual(sql, op.lastExecSql)) {
+      if (op.preparedSqlError || op.preparedSqlInput === '' || isEqual(sql, op.lastExecSql)) {
         // nothing to do
       } else {
         try {
@@ -136,14 +136,16 @@ export default {
         // do nothing
       } else {
         const op = yield select(state => state.operations[id]);
-        if (isEqual(op.lastExecSql, value)) {
-          // do nothing
-        } else {
-          // auto exec when sql changed
-          yield put({
-            type: execOperation.toString(),
-            payload: { id: op.id, },
-          });
+        if (op.execMode === ExecModeEnum.Auto) {
+          if (isEqual(op.lastExecSql, value)) {
+            // do nothing
+          } else {
+            // auto exec when sql changed
+            yield put({
+              type: execOperation.toString(),
+              payload: { id: op.id, },
+            });
+          }
         }
       }
 
