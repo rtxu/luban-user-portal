@@ -67,14 +67,14 @@ const demoInitialState = {
       type: 'button',
       gridWidth: 2,
       gridHeight: 1,
-      gridTop: 22,
+      gridTop: 11,
       gridLeft: 8,
       instanceId: 2,
       id: 'button2',
       content: {
-        text: '标记为优质客户',
+        text: '标记为 VIP',
         color: '#1EA9FB',
-        actionType: '触发 Action',
+        actionType: '触发<操作>',
         actionTriggerAnAction: {},
         actionOpenAnyWebPage: {
           isOpenInNewTab: false
@@ -130,28 +130,7 @@ const demoInitialState = {
       preparedSql: null,
       preparedSqlError: null,
       execMode: 'Auto',
-      data: [
-        {
-          name: '张经理',
-          lastOrderDate: '2019-06-30T16:00:00.000Z',
-          totalOrderCount: 3
-        },
-        {
-          name: '王工程师',
-          lastOrderDate: '2019-08-06T16:00:00.000Z',
-          totalOrderCount: 5
-        },
-        {
-          name: '李主任',
-          lastOrderDate: '2019-09-04T16:00:00.000Z',
-          totalOrderCount: 8
-        },
-        {
-          name: '赵客服',
-          lastOrderDate: '2019-10-07T16:00:00.000Z',
-          totalOrderCount: 7
-        }
-      ],
+      data: null,
       lastExecSql: null,
       error: null
     },
@@ -177,6 +156,17 @@ const demoInitialState = {
       lastExecSql: null,
       error: null,
     },
+    op4: {
+      id: 'op4',
+      type: 'SQLReadonly',
+      preparedSqlInput: 'update customer set isVIP = true where name = {{table1.selectedRow.data.name}}',
+      preparedSql: null,
+      preparedSqlError: null,
+      execMode: 'Manual',
+      data: null,
+      lastExecSql: null,
+      error: null,
+    },
   },
   editorCtx: {
     activeOpId: 'op2',
@@ -194,101 +184,102 @@ const setUpLocalStorage = () => {
   alasql(`
   CREATE TABLE IF NOT EXISTS customer (
     name STRING PRIMARY KEY, 
-    lastOrderDate Date, 
-    totalOrderCount INT
+    lastOrderDate STRING, 
+    totalOrderCount INT,
+    isVIP BOOL 
   );
   `);
   alasql(`
   CREATE TABLE IF NOT EXISTS trading_record (
     id INT PRIMARY KEY, 
     name STRING, 
-    orderDate Date, 
+    orderDate STRING, 
     orderFee INT
   );
   `);
 
   const customerNames = ['张经理', '王工程师', '李主任', '赵客服'];
-  alasql('INSERT INTO customer VALUES (?, ?, ?), (?, ?, ?), (?, ?, ?), (?, ?, ?)', 
+  alasql('INSERT INTO customer VALUES (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?), (?, ?, ?, ?)', 
     [
-      customerNames[0], moment('2019-07-01', 'YYYY-MM-DD').toDate(), 3,
-      customerNames[1], moment('2019-08-07', 'YYYY-MM-DD').toDate(), 5,
-      customerNames[2], moment('2019-09-05', 'YYYY-MM-DD').toDate(), 8,
-      customerNames[3], moment('2019-10-08', 'YYYY-MM-DD').toDate(), 7,
+      customerNames[0], '2019-07-01', 3, false,
+      customerNames[1], '2019-08-07', 5, false,
+      customerNames[2], '2019-09-05', 8, false,
+      customerNames[3], '2019-10-08', 7, false,
     ]
   );
   
   let tradingRecordId = 0;
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[0], moment('2019-06-01', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[0], '2019-06-01', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[0], moment('2019-06-02', 'YYYY-MM-DD').toDate(), 200, ]
+    [ tradingRecordId++, customerNames[0], '2019-06-02', 200, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[0], moment('2019-07-01', 'YYYY-MM-DD').toDate(), 300, ]
-  );
-
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[1], moment('2019-06-01', 'YYYY-MM-DD').toDate(), 100, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[1], moment('2019-07-01', 'YYYY-MM-DD').toDate(), 200, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[1], moment('2019-08-01', 'YYYY-MM-DD').toDate(), 400, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[1], moment('2019-08-02', 'YYYY-MM-DD').toDate(), 800, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[1], moment('2019-08-07', 'YYYY-MM-DD').toDate(), 1600, ]
+    [ tradingRecordId++, customerNames[0], '2019-07-01', 300, ]
   );
 
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-01-05', 'YYYY-MM-DD').toDate(), 1600, ]
+    [ tradingRecordId++, customerNames[1], '2019-06-01', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-02-05', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[1], '2019-07-01', 200, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-03-05', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[1], '2019-08-01', 400, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-04-05', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[1], '2019-08-02', 800, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-05-05', 'YYYY-MM-DD').toDate(), 100, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-06-05', 'YYYY-MM-DD').toDate(), 100, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-07-05', 'YYYY-MM-DD').toDate(), 100, ]
-  );
-  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[2], moment('2019-09-05', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[1], '2019-08-07', 1600, ]
   );
 
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-01', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-01-05', 1600, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-02', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-02-05', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-03', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-03-05', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-04', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-04-05', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-05', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-05-05', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-06', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-06-05', 100, ]
   );
   alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
-    [ tradingRecordId++, customerNames[3], moment('2019-10-08', 'YYYY-MM-DD').toDate(), 100, ]
+    [ tradingRecordId++, customerNames[2], '2019-07-05', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[2], '2019-09-05', 100, ]
+  );
+
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-01', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-02', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-03', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-04', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-05', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-06', 100, ]
+  );
+  alasql('INSERT INTO trading_record VALUES (?, ?, ?, ?)', 
+    [ tradingRecordId++, customerNames[3], '2019-10-08', 100, ]
   );
 
   /*

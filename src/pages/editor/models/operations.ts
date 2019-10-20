@@ -102,7 +102,7 @@ export default {
       const { id } = action.payload;
       const op = yield select(state => state.operations[id]);
       const sql = op.preparedSql;
-      if (op.preparedSqlError || op.preparedSqlInput === '' || isEqual(sql, op.lastExecSql)) {
+      if (op.preparedSqlError || op.preparedSqlInput === '') {
         // nothing to do
       } else {
         try {

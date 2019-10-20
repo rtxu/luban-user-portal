@@ -52,7 +52,7 @@ function ConfigPanel({ text, color, dispatch, actionType, actionOpenAnyWebPage }
           }}
         />
       </Panel>
-      <Panel header='Action' key='2' >
+      <Panel header='行为' key='2' >
         <Config.LabelSelect
           label={{ value: '点击时(onClick)' }}
           select={{

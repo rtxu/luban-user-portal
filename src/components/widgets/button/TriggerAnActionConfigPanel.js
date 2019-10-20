@@ -2,7 +2,7 @@ import Config from '../Config';
 
 function TriggerAnActionConfigPanel({}) {
   // TODO(ruitao.xu): load already exist action
-  const options = ['新建 Action'];
+  const options = ['新建<操作>'];
 
   // TODO(ruitao.xu): load action and redirect focus to ActionEditor
   function onChange(value) {
@@ -12,7 +12,7 @@ function TriggerAnActionConfigPanel({}) {
   return (
     <Config.LabelSelect
       select={{
-        placeholder: '选择 Action',
+        placeholder: '选择<操作>',
         options: options,
         onChange: onChange,
       }}

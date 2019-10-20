@@ -12,16 +12,16 @@ function Button({ text, color, actionType, actionOpenAnyWebPage }) {
     borderColor: color,
   }
 
-  // WARNING(ruitao.xu): never use `href` and `target` props
+  // WARNING(ruitao.xu): never use `href` and `target` props of <AntButton>
   // If `href` is used, <AntButton> will rendered as <a> instread of <button>,
   // which leads to unnecessary css issues
-  const props = {}
+  const actions = {}
   switch (actionType) {
     case BUTTON_ACTION_OPTION_MAP.TriggerAnAction:
       // throw new Error(`not yet implemented action type: ${actionType}`);
       break;
     case BUTTON_ACTION_OPTION_MAP.OpenAnyWebPage:
-      props.onClick = () => {
+      actions.onClick = () => {
         if (actionOpenAnyWebPage.isOpenInNewTab) {
           window.open(actionOpenAnyWebPage.href);
         } else {
@@ -31,12 +31,12 @@ function Button({ text, color, actionType, actionOpenAnyWebPage }) {
       break;
 
     default:
-      throw new Error(`when buildButtonProps: unexpected action type: ${actionType}`);
+      throw new Error(`when buildButtonActions: unexpected action type: ${actionType}`);
   }
   
   return (
     <div className={styles.widgetButton} >
-      <AntButton type='primary' style={style} {...props} >
+      <AntButton type='primary' style={style} {...actions} >
         {text}
       </AntButton>
     </div>
