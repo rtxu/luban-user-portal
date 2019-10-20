@@ -161,7 +161,7 @@ const demoInitialState = {
     },
     op4: {
       id: 'op4',
-      type: 'SQLReadonly',
+      type: 'SQLReadWrite',
       preparedSqlInput: 'update customer set isVIP = true where name = {{table1.selectedRow.data.name}}',
       preparedSql: null,
       preparedSqlError: null,
@@ -169,10 +169,12 @@ const demoInitialState = {
       data: null,
       lastExecSql: null,
       error: null,
+      opListWhenSuccess: ['op1'],
+      opListWhenFail: [],
     },
   },
   editorCtx: {
-    activeOpId: 'op2',
+    activeOpId: 'op4',
   },
 }
 

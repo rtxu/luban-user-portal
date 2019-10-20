@@ -9,6 +9,7 @@ const logger = createLogger('/pages/editor/models/operations');
 
 enum OpTypeEnum {
   SQLReadonly = 'SQLReadonly',
+  SQLReadWrite = 'SQLReadWrite',
 }
 enum ExecModeEnum {
   Manual = 'Manual',
@@ -22,6 +23,9 @@ export const addOperation = createAction('OPERATION_ADD');
 export const deleteOperation = createAction('OPERATION_DELETE');
 export const setPreparedSqlTemplateInput = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_SET');
 export const evalPreparedSqlTemplate = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_EVAL');
+export const setOperationType = createAction('OPERATION_TYPE_SET');
+export const setOperationOpListWhenSuccess = createAction('OPERATION_OP_LIST_WHEN_SUCCESS_SET');
+export const setOperationOpListWhenFail = createAction('OPERATION_OP_LIST_WHEN_FAIL_SET');
 const execOperationFail = createAction('OPERATION_EXEC_FAIL');
 const execOperationSuccess = createAction('OPERATION_EXEC_SUCCESS');
 
@@ -43,6 +47,9 @@ const singleOperationInitialState = {
   data: null,
   lastExecSql: null,
   error: null,
+
+  opListWhenSuccess: [],
+  opListWhenFail: [],
 }
 
 // Reducers
@@ -84,6 +91,24 @@ const operation = handleActions({
       lastExecSql: sql,
     }
   },
+  [`${NS}/${setOperationType}`]: (state, action) => {
+    return {
+      ...state,
+      type: action.payload.type,
+    }
+  },
+  [`${NS}/${setOperationOpListWhenSuccess}`]: (state, action) => {
+    return {
+      ...state,
+      opListWhenSuccess: action.payload.list,
+    }
+  },
+  [`${NS}/${setOperationOpListWhenFail}`]: (state, action) => {
+    return {
+      ...state,
+      opListWhenFail: action.payload.list,
+    }
+  },
 }, {})
 
 // operation map
@@ -113,6 +138,14 @@ export default {
             type: execOperationSuccess.toString(),
             payload: { id, data, sql },
           });
+          if (op.opListWhenSuccess) {
+            for (const opId of op.opListWhenSuccess) {
+              yield put({
+                type: execOperation.toString(),
+                payload: { id: opId },
+              });
+            }
+          }
         } catch (e) {
           yield put({
             type: execOperationFail.toString(),
@@ -121,6 +154,14 @@ export default {
               error: `${e.name}: ${e.message}`,
             },
           });
+          if (op.opListWhenFail) {
+            for (const opId of op.opListWhenFail) {
+              yield put({
+                type: execOperation.toString(),
+                payload: { id: opId },
+              });
+            }
+          }
         }
       }
     },
@@ -168,6 +209,9 @@ export default {
     [evalPreparedSqlTemplate]: defaultActionHandler,
     [execOperationFail]: defaultActionHandler,
     [execOperationSuccess]: defaultActionHandler,
+    [setOperationType]: defaultActionHandler,
+    [setOperationOpListWhenSuccess]: defaultActionHandler,
+    [setOperationOpListWhenFail]: defaultActionHandler,
   },
 };
 

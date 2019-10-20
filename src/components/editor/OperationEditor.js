@@ -118,7 +118,7 @@ function TargetDetail({ target, visible, setVisible }) {
   )
 }
 
-function NormalOpHeader({op, onDeleteOperation, onExecOperation}) {
+function NormalOpHeader({op, onDeleteOperation, onExecOperation, onSetOperationType}) {
   // console.log('current op in header: ', op);
   const [target, setTarget] = useState();
   const [targetDetailVisible, setTargetDetailVisible] = useState(false);
@@ -149,9 +149,11 @@ function NormalOpHeader({op, onDeleteOperation, onExecOperation}) {
     <>
     <div className={myStyles.left}>
       <label>类型：
-        <Select defaultValue="SQL_readonly" style={{ width: 200 }} >
-          <Select.Option value="SQL_readonly">SQL(只读)</Select.Option>
-          <Select.Option value="SQL_readwrite">SQL(读写)</Select.Option>
+        <Select defaultValue="SQLReadonly" value={op.type} style={{ width: 200 }} 
+          onChange={(value) => onSetOperationType(op.id, value)}
+        >
+          <Select.Option value="SQLReadonly">SQL(只读)</Select.Option>
+          <Select.Option value="SQLReadWrite">SQL(读写)</Select.Option>
         </Select>
       </label>
       <label>数据库：
@@ -210,7 +212,7 @@ function EmptyOpHeader() {
   return null;
 }
 
-function OpHeader({op, onDeleteOperation, onExecOperation}) {
+function OpHeader({op, onDeleteOperation, onExecOperation, onSetOperationType}) {
   return (
     <div className={myStyles.opHeader}>
       {
@@ -218,6 +220,7 @@ function OpHeader({op, onDeleteOperation, onExecOperation}) {
           <NormalOpHeader op={op} 
             onDeleteOperation={onDeleteOperation} 
             onExecOperation={onExecOperation}
+            onSetOperationType={onSetOperationType}
           />
         ) : (
           <EmptyOpHeader />
@@ -227,7 +230,59 @@ function OpHeader({op, onDeleteOperation, onExecOperation}) {
   )
 }
 
-function NormalOpBody({op, onSetOperationInput}) {
+function AfterExecute({
+  op,
+  opNames,
+  onSetOpListWhenSuccess,
+  onSetOpListWhenFail,
+}) {
+  const otherOpNames = opNames.filter((opId) => op.id !== opId);
+  return (
+    <>
+      <h5>执行完成后</h5>
+      <div className={myStyles.afterExec}>
+        <div className={myStyles.left}>
+          <p>如果成功，执行如下操作</p>
+          <Select defaultValue={op.opListWhenSuccess} style={{ width: '100%'}}
+            onChange={(value) => {
+              if (value === '') {
+                // do nothing
+              } else {
+                onSetOpListWhenSuccess(op.id, value.split(','));
+              }
+            }}
+          >
+            {
+              otherOpNames.map((opId) => (
+                <Select.Option value={opId} key={opId}>{opId}</Select.Option>
+              ))
+            }
+          </Select>
+        </div>
+        <div className={myStyles.right}>
+          <p>如果失败，执行如下操作</p>
+          <Select defaultValue={op.opListWhenFail} style={{ width: '100%'}} 
+            onChange={(value) => {
+              if (value === '') {
+                // do nothing
+              } else {
+                onSetOpListWhenFail(op.id, value.split(','));
+              }
+            }}
+          >
+            {
+              otherOpNames.map((opId) => (
+                <Select.Option value={opId} key={opId}>opId</Select.Option>
+              ))
+            }
+          </Select>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function NormalOpBody({op, onSetOperationInput, opNames, onSetOpListWhenSuccess, onSetOpListWhenFail}) {
   return (
     <div className={myStyles.normalOpBody}>
       <section>
@@ -245,19 +300,19 @@ function NormalOpBody({op, onSetOperationInput}) {
           }}
         />
       </section>
-      {/* 
       <section>
-        <h5>执行完成后</h5>
-        <div>
-          <div className={myStyles.left}>
-            <p>如果成功，执行如下操作</p>
-          </div>
-          <div className={myStyles.right}>
-            <p>如果失败，执行如下操作</p>
-          </div>
-        </div>
         <hr/>
+        {
+          op.type === 'SQLReadWrite' ? 
+          (
+            <AfterExecute op={op} 
+              opNames={opNames} 
+              onSetOpListWhenSuccess={onSetOpListWhenSuccess} 
+              onSetOpListWhenFail={onSetOpListWhenFail}
+          />) : null
+        }
       </section>
+      {/* 
       <section>
         <h5>时间配置</h5>
         <hr/>
@@ -286,12 +341,25 @@ function EmptyOpBody({ newOperationButton}) {
   )
 }
 
-function OpBody({op, onSetOperationInput, newOperationButton}) {
+function OpBody({
+  op, 
+  opNames, 
+  newOperationButton, 
+  onSetOperationInput, 
+  onSetOpListWhenSuccess, 
+  onSetOpListWhenFail,
+}) {
   return (
     <>
     {
       op ? (
-        <NormalOpBody op={op} onSetOperationInput={onSetOperationInput} />
+        <NormalOpBody 
+          op={op} 
+          opNames={opNames}
+          onSetOperationInput={onSetOperationInput} 
+          onSetOpListWhenSuccess={onSetOpListWhenSuccess}
+          onSetOpListWhenFail={onSetOpListWhenFail}
+        />
       ) : (
         <EmptyOpBody newOperationButton={newOperationButton} />
       )
@@ -308,6 +376,9 @@ function OperationEditor({
   onSetActiveOpId,
   onExecOperation,
   onSetOperationInput,
+  onSetOperationType,
+  onSetOpListWhenSuccess,
+  onSetOpListWhenFail,
 }) {
   function generateNewOpId(ops) {
     let instanceId = ops.length + 1;
@@ -341,10 +412,14 @@ function OperationEditor({
       <OpHeader op={activeOp} 
         onDeleteOperation={myOnDeleteOperation} 
         onExecOperation={onExecOperation}
+        onSetOperationType={onSetOperationType}
       />
       <OpBody op={activeOp} 
+        opNames={opNames}
         onSetOperationInput={onSetOperationInput}
         newOperationButton={newOperationButton}
+        onSetOpListWhenSuccess={onSetOpListWhenSuccess}
+        onSetOpListWhenFail={onSetOpListWhenFail}
       />
     </div>
   )
@@ -359,6 +434,9 @@ OperationEditor.propTypes = {
   onSetActiveOpId: PropTypes.func.isRequired,
   onSetOperationInput: PropTypes.func.isRequired,
   onExecOperation: PropTypes.func.isRequired,
+  onSetOperationType: PropTypes.func.isRequired,
+  onSetOpListWhenSuccess: PropTypes.func.isRequired,
+  onSetOpListWhenFail: PropTypes.func.isRequired,
 }
 
 export default OperationEditor;

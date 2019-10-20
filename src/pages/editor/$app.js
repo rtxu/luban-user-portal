@@ -12,7 +12,7 @@ import OperationEditor from '../../components/editor/OperationEditor';
 import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
-import { addOperation, deleteOperation, setPreparedSqlTemplateInput, execOperation } from './models/operations';
+import { addOperation, deleteOperation, setPreparedSqlTemplateInput, execOperation, setOperationType, setOperationOpListWhenSuccess } from './models/operations';
 import { setActiveOpId, setActiveWidgetId } from './models/editorCtx';
 import { getToEvalTemplates, getEvalContext, getExportedState } from './models/widgets';
 import { 
@@ -62,6 +62,33 @@ const mapDispatchToOperationEditorProps = (dispatch) => {
       dispatch({
         type: `${NS.editorCtx}/${setActiveOpId}`,
         payload: id,
+      });
+    },
+    onSetOperationType: (id, type) => {
+      dispatch({
+        type: `${NS.operations}/${setOperationType}`,
+        payload: {
+          id,
+          type,
+        },
+      });
+    },
+    onSetOpListWhenSuccess: (id, list) => {
+      dispatch({
+        type: `${NS.operations}/${setOperationOpListWhenSuccess}`,
+        payload: {
+          id,
+          list,
+        },
+      });
+    },
+    onSetOpListWhenFail: (id, list) => {
+      dispatch({
+        type: `${NS.operations}/${setOperationOpListWhenFail}`,
+        payload: {
+          id,
+          list,
+        },
       });
     },
   }
