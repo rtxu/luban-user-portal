@@ -287,15 +287,11 @@ const App = ({ match, dispatch }) => {
   useEffect(() => {
     const { app } = match.params;
     console.log(`app initializing: ${app}`)
-    if (app === 'demo') {
-      demoApp.setUp(dispatch);
-    }
+    demoApp.setUp(dispatch);
 
     return function cleanup() {
       console.log(`app un-initializing: ${app}`)
-      if (app === 'demo') {
-        demoApp.cleanUp(dispatch);
-      }
+      demoApp.cleanUp(dispatch);
     };
   }, []);
 
