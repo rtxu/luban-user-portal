@@ -22,11 +22,6 @@ function runSql(statement) {
   return alasql(statement);
 }
 
-function asyncRunSql(statement) {
-  console.log('async run sql: ', statement)
-  return alasql.promise(statement);
-}
-
 function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton}) {
   return (
     <div className={myStyles.opNaviBar}>

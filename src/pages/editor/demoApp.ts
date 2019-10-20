@@ -75,8 +75,11 @@ const demoInitialState = {
         text: '标记为 VIP',
         color: '#1EA9FB',
         actionType: '触发<操作>',
-        actionTriggerAnAction: {},
+        actionTriggerAnAction: {
+          opId: 'op4',
+        },
         actionOpenAnyWebPage: {
+          href: null,
           isOpenInNewTab: false
         }
       },

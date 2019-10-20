@@ -1,12 +1,24 @@
+import { connect } from 'dva';
+import PropTypes from 'prop-types';
+
 import Config from '../Config';
+import { TriggerAnAction } from './reducer';
 
-function TriggerAnActionConfigPanel({}) {
-  // TODO(ruitao.xu): load already exist action
-  const options = ['新建<操作>'];
+import { addOperation } from '../../../pages/editor/models/operations';
+import { setActiveOpId } from '../../../pages/editor/models/editorCtx';
 
-  // TODO(ruitao.xu): load action and redirect focus to ActionEditor
+function TriggerAnActionConfigPanel({ opId, opNames, activeWidgetId, onAddOperation, dispatch }) {
+  const newOp = '新建<操作>';
+  const options = [newOp, ...opNames];
+
   function onChange(value) {
-    console.log('in TriggerAnActionConfigPanel(), selected: ', value);
+    if (value === newOp) {
+      const newOpId = `${activeWidgetId}Trigger`;
+      onAddOperation(newOpId);
+      dispatch(TriggerAnAction.setOp(newOpId));
+    } else {
+      dispatch(TriggerAnAction.setOp(value));
+    }
   }
 
   return (
@@ -15,12 +27,43 @@ function TriggerAnActionConfigPanel({}) {
         placeholder: '选择<操作>',
         options: options,
         onChange: onChange,
+        value: opId,
       }}
     />
   );
 }
 
 TriggerAnActionConfigPanel.propTypes = {
+  opNames: PropTypes.array,
+  activeWidgetId: PropTypes.string,
+
+  onAddOperation: PropTypes.func,
+
+  // ownProps
+  opId: PropTypes.string,
+  dispatch: PropTypes.func,
 }
 
-export default TriggerAnActionConfigPanel;
+const mapStateToProps = (state) => {
+  return {
+    opNames: Object.keys(state.operations),
+    activeWidgetId: state.editorCtx.activeWidgetId,
+  }
+}
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onAddOperation: (newOpId) => {
+      dispatch({
+        type: `operations/${addOperation}`,
+        payload: {
+          id: newOpId,
+        },
+      })
+      dispatch({
+        type: `editorCtx/${setActiveOpId}`,
+        payload: newOpId,
+      })
+    },
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(TriggerAnActionConfigPanel);

@@ -7,14 +7,21 @@ import TriggerAnActionConfigPanel from './TriggerAnActionConfigPanel';
 import OpenAnotherLocalPageConfigPanel from './OpenAnotherLocalPageConfigPanel';
 import OpenAnyWebPageConfigPanel from './OpenAnyWebPageConfigPanel';
 
-function ConfigPanel({ text, color, dispatch, actionType, actionOpenAnyWebPage }) {
+function ConfigPanel({ 
+  text, 
+  color, 
+  actionType, 
+  actionTriggerAnAction,
+  actionOpenAnyWebPage,
+  dispatch, 
+}) {
 
   const { Panel } = Collapse;
 
   function buildActionBodyConfigNode(actionType) {
     switch (actionType) {
       case BUTTON_ACTION_OPTION_MAP.TriggerAnAction:
-        return <TriggerAnActionConfigPanel dispatch={dispatch} />;
+        return <TriggerAnActionConfigPanel {...actionTriggerAnAction} dispatch={dispatch} />;
       case BUTTON_ACTION_OPTION_MAP.OpenAnotherLocalPage:
         return <OpenAnotherLocalPageConfigPanel dispatch={dispatch} />;
       case BUTTON_ACTION_OPTION_MAP.OpenAnyWebPage:

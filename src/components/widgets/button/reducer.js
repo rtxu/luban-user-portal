@@ -10,13 +10,19 @@ export const OpenAnyWebPage = {
   setHref: createAction('HREF_SET_WHEN_OPNE_ANY_WEB_PAGE'),
   setIsOpenInNewTab: createAction('IS_OPEN_IN_NEW_TAB_SET_WHEN_OPNE_ANY_WEB_PAGE'),
 }
+export const TriggerAnAction = {
+  setOp: createAction('OP_SET_WHEN_TRIGGER_AN_ACTION'),
+}
 
 export const initialState = {
   text: '提交',
   color: '#1EA9FB',
   actionType: defaultAction,
-  actionTriggerAnAction: {},
+  actionTriggerAnAction: {
+    opId: null,
+  },
   actionOpenAnyWebPage: {
+    href: null,
     isOpenInNewTab: false,
   },
 }
@@ -56,6 +62,15 @@ export default handleActions({
       actionOpenAnyWebPage: {
         ...state.actionOpenAnyWebPage,
         isOpenInNewTab: action.payload,
+      },
+    }
+  },
+  [TriggerAnAction.setOp]: (state, action) => {
+    return {
+      ...state,
+      actionTriggerAnAction: {
+        ...state.actionTriggerAnAction,
+        opId: action.payload,
       },
     }
   },

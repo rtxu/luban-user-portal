@@ -103,16 +103,15 @@ LabelCmEvalInput.propTypes = {
 
 
 function LabelSelect({ label, select, }) {
+  const { options, ...rest } = select;
   return (
     <div className={styles.labelEntry}>
       {label && <Label {...label} />}
       <Select 
         style={{display: 'block'}} 
-        defaultValue={select.defaultValue}
-        onChange={select.onChange}
-        placeholder={select.placeholder}
+        {...rest }
       >
-        { select.options.map((option, index) => (
+        { options.map((option, index) => (
           <Select.Option value={option} key={index}>{option}</Select.Option>
         )) }
       </Select>
@@ -124,6 +123,7 @@ LabelSelect.propTypes = {
   label: PropTypes.shape(Label.propTypes),
   select: PropTypes.shape({
     defaultValue: PropTypes.string,
+    value: PropTypes.string,
     options: PropTypes.arrayOf(PropTypes.string).isRequired,
     onChange: PropTypes.func.isRequired,
     placeholder: PropTypes.string,
