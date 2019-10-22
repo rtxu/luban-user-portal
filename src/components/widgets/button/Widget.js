@@ -79,12 +79,7 @@ Button.propTypes = {
 const mapDispatchToProps = (dispatch) => {
   return {
     onExecOperation: (opId) => {
-      dispatch({
-        type: `operations/${execOperation}`,
-        payload: {
-          id: opId,
-        },
-      })
+      dispatch(execOperation({id: opId}));
     },
   }
 }

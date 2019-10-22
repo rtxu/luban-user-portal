@@ -4,7 +4,7 @@ import moment from 'moment';
 import { NS } from './common';
 import { initEditorCtx, initialState as editorCtxInitialState } from './models/editorCtx';
 import { initialState as operationsInitialState, initOperations } from './models/operations';
-import { initialState as widgetsInitialState } from './models/widgets';
+import { initialState as widgetsInitialState, initWidgets } from './models/widgets';
 
 const demoInitialState = {
   widgets: {
@@ -322,31 +322,13 @@ const cleanUpLocalStrorage = () => {
 
 export const setUp = (dispatch) => {
   setUpLocalStorage();
-  dispatch({
-    type: `${NS.widgets}/initWidgets`,
-    payload: demoInitialState.widgets,
-  });
-  dispatch({
-    type: `${NS.operations}/${initOperations}`,
-    payload: demoInitialState.operations,
-  });
-  dispatch({
-    type: `${NS.editorCtx}/${initEditorCtx}`,
-    payload: demoInitialState.editorCtx,
-  });
+  dispatch(initWidgets(demoInitialState.widgets));
+  dispatch(initOperations(demoInitialState.operations));
+  dispatch(initEditorCtx(demoInitialState.editorCtx));
 }
 export const cleanUp = (dispatch) => {
-  dispatch({
-    type: `${NS.editorCtx}/initEditorCtx`,
-    payload: editorCtxInitialState,
-  });
-  dispatch({
-    type: `${NS.widgets}/initWidgets`,
-    payload: widgetsInitialState,
-  });
-  dispatch({
-    type: `${NS.operations}/initOperations`,
-    payload: operationsInitialState,
-  });
+  dispatch(initEditorCtx(editorCtxInitialState));
+  dispatch(initWidgets(widgetsInitialState));
+  dispatch(initOperations(operationsInitialState));
   cleanUpLocalStrorage();
 }

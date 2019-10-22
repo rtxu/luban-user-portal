@@ -1,11 +1,8 @@
 import alasql from 'alasql';
 import isEqual from 'lodash.isequal';
-import { createAction, handleActions } from 'redux-actions';
+import { Action, createAction, handleActions } from 'redux-actions';
 
-import { createLogger } from '../../../util';
-import { TemplateTypeEnum } from '../../../util/template';
-
-const logger = createLogger('/pages/editor/models/operations');
+import { ErrorT, TemplateTypeEnum } from '../../../util/template';
 
 enum OpTypeEnum {
   SQLReadonly = 'SQLReadonly',
@@ -17,21 +14,51 @@ enum ExecModeEnum {
   Auto = 'Auto',
 }
 
+interface IOperation {
+  id: string;
+  [propName: string]: any;
+}
+
 // Actions
-export const initOperations = createAction('OPERATIONS_INIT');
-export const addOperation = createAction('OPERATION_ADD');
-export const deleteOperation = createAction('OPERATION_DELETE');
-export const setPreparedSqlTemplateInput = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_SET');
-export const evalPreparedSqlTemplate = createAction('OPERATION_PREPARED_SQL_TEMPLATE_INPUT_EVAL');
-export const setOperationType = createAction('OPERATION_TYPE_SET');
-export const setOperationOpListWhenSuccess = createAction('OPERATION_OP_LIST_WHEN_SUCCESS_SET');
-export const setOperationOpListWhenFail = createAction('OPERATION_OP_LIST_WHEN_FAIL_SET');
-const execOperationFail = createAction('OPERATION_EXEC_FAIL');
-const execOperationSuccess = createAction('OPERATION_EXEC_SUCCESS');
+const NS = 'operations';
+const addOperationType = 'OPERATION_ADD';
+const addOperationTypeNs = `${NS}/${addOperationType}`;
+export const addOperation = createAction<{id: string}>(addOperationTypeNs);
+const deleteOperationType = 'OPERATION_DELETE';
+const deleteOperationTypeNs = `${NS}/${deleteOperationType}`;
+export const deleteOperation = createAction<string>(deleteOperationTypeNs);
+const initOperationsType = 'OPERATIONS_INIT';
+const initOperationsTypeNS = `${NS}/${initOperationsType}`;
+export const initOperations = createAction<{[key: string]: IOperation}>(initOperationsTypeNS);
+const setPreparedSqlTemplateInputType = 'OPERATION_PREPARED_SQL_TEMPLATE_INPUT_SET';
+const setPreparedSqlTemplateInputTypeNs = `${NS}/${setPreparedSqlTemplateInputType}`;
+export const setPreparedSqlTemplateInput = createAction<{id: string, input: string}>(setPreparedSqlTemplateInputTypeNs);
+const evalPreparedSqlTemplateType = 'OPERATION_PREPARED_SQL_TEMPLATE_INPUT_EVAL';
+const evalPreparedSqlTemplateTypeNs = `${NS}/${evalPreparedSqlTemplateType}`;
+export const evalPreparedSqlTemplate = createAction<{id: string, value: string, error: ErrorT}>(evalPreparedSqlTemplateTypeNs);
+const setOperationTypeType = 'OPERATION_TYPE_SET';
+const setOperationTypeTypeNs = `${NS}/${setOperationTypeType}`;
+export const setOperationType = createAction<{id: string, type: OpTypeEnum}>(setOperationTypeTypeNs);
+const setOperationOpListWhenSuccessType = 'OPERATION_OP_LIST_WHEN_SUCCESS_SET';
+const setOperationOpListWhenSuccessTypeNs = `${NS}/${setOperationOpListWhenSuccessType}`;
+export const setOperationOpListWhenSuccess = createAction<{id: string, list: string[]}>(setOperationOpListWhenSuccessTypeNs);
+const setOperationOpListWhenFailType = 'OPERATION_OP_LIST_WHEN_FAIL_SET';
+const setOperationOpListWhenFailTypeNs = `${NS}/${setOperationOpListWhenFailType}`;
+export const setOperationOpListWhenFail = createAction<{id: string, list: string[]}>(setOperationOpListWhenFailTypeNs);
+const execOperationFailType = 'OPERATION_EXEC_FAIL';
+const execOperationFailTypeNs = `${NS}/${execOperationFailType}`;
+const execOperationFail = createAction<{id: string, error: string}>(execOperationFailTypeNs);
+const execOperationSuccessType = 'OPERATION_EXEC_SUCCESS';
+const execOperationSuccessTypeNs = `${NS}/${execOperationSuccessType}`;
+const execOperationSuccess = createAction<{id: string, data: any, sql: {sqlTempalte: string, params: any[]}}>(execOperationSuccessTypeNs);
 
 // Effects
-export const execOperation = createAction('OPERATION_EXEC');
-export const evalAndExecIfNeeded = createAction('OPERATION_EVAL_AND_EXEC_IF_NEEDED');
+const execOperationType = 'OPERATION_EXEC';
+const execOperationTypeNs = `${NS}/${execOperationType}`;
+export const execOperation = createAction<{id: string}>(execOperationTypeNs);
+const evalAndExecIfNeededType = 'OPERATION_EVAL_AND_EXEC_IF_NEEDED';
+const evalAndExecIfNeededTypeNs = `${NS}/${evalAndExecIfNeededType}`;
+export const evalAndExecIfNeeded = createAction<{id: string, value: any, error: ErrorT}>(evalAndExecIfNeededTypeNs);
 
 // initial state
 export const initialState = {};
@@ -54,21 +81,20 @@ const singleOperationInitialState = {
 
 // Reducers
 // single operation
-const NS = 'operations';
 const operation = handleActions({
-  [`${NS}/${addOperation}`]: (state, action) => {
+  [addOperationTypeNs]: (state, action: Action<{id: string}>) => {
     return {
       id: action.payload.id,
       ...singleOperationInitialState,
     }
   },
-  [`${NS}/${setPreparedSqlTemplateInput}`]: (state, action) => {
+  [setPreparedSqlTemplateInputTypeNs]: (state, action: Action<{input: string}>) => {
     return {
       ...state,
       preparedSqlInput: action.payload.input,
     }
   },
-  [`${NS}/${evalPreparedSqlTemplate}`]: (state, action) => {
+  [evalPreparedSqlTemplateTypeNs]: (state, action: Action<{value: string, error: ErrorT}>) => {
     const { value, error } = action.payload;
     return {
       ...state,
@@ -76,14 +102,14 @@ const operation = handleActions({
       preparedSqlError: error ? `${error.name}: ${error.message}`: null,
     }
   },
-  [`${NS}/${execOperationFail}`]: (state, action) => {
+  [execOperationFailTypeNs]: (state, action: Action<{error: string}>) => {
     const { error } = action.payload;
     return {
       ...state,
       error,
     }
   },
-  [`${NS}/${execOperationSuccess}`]: (state, action) => {
+  [execOperationSuccessTypeNs]: (state, action: Action<{data: any, sql: {sqlTemplate: string, params: any[]}}>) => {
     const { data, sql } = action.payload;
     return {
       ...state,
@@ -91,19 +117,19 @@ const operation = handleActions({
       lastExecSql: sql,
     }
   },
-  [`${NS}/${setOperationType}`]: (state, action) => {
+  [setOperationTypeTypeNs]: (state, action: Action<{type: OpTypeEnum}>) => {
     return {
       ...state,
       type: action.payload.type,
     }
   },
-  [`${NS}/${setOperationOpListWhenSuccess}`]: (state, action) => {
+  [setOperationOpListWhenSuccessTypeNs]: (state, action: Action<{list: string[]}>) => {
     return {
       ...state,
       opListWhenSuccess: action.payload.list,
     }
   },
-  [`${NS}/${setOperationOpListWhenFail}`]: (state, action) => {
+  [setOperationOpListWhenFailTypeNs]: (state, action: Action<{list: string[]}>) => {
     return {
       ...state,
       opListWhenFail: action.payload.list,
@@ -112,7 +138,7 @@ const operation = handleActions({
 }, {})
 
 // operation map
-const defaultActionHandler = (state, action) => {
+const defaultActionHandler = (state, action: Action<{id: string}>) => {
   const { id } = action.payload;
   return {
     ...state,
@@ -122,7 +148,7 @@ const defaultActionHandler = (state, action) => {
 export default {
   state: initialState,
   effects: {
-    *[execOperation](action, sagaEffects) {
+    *[execOperationType](action: Action<{id: string}>, sagaEffects) {
       const { call, put, select } = sagaEffects;
       const { id } = action.payload;
       const op = yield select(state => state.operations[id]);
@@ -134,44 +160,29 @@ export default {
           // console.log('===> exec', sql.sqlTemplate, sql.params);
           const data = yield call(alasql.promise, sql.sqlTemplate, sql.params);
           // console.log('===> exec result', data);
-          yield put({
-            type: execOperationSuccess.toString(),
-            payload: { id, data, sql },
-          });
+          yield put(execOperationSuccess({id, data, sql}));
           if (op.opListWhenSuccess) {
             for (const opId of op.opListWhenSuccess) {
-              yield put({
-                type: execOperation.toString(),
-                payload: { id: opId },
-              });
+              yield put(execOperation({id: opId}));
             }
           }
         } catch (e) {
-          yield put({
-            type: execOperationFail.toString(),
-            payload: {
-              id,
-              error: `${e.name}: ${e.message}`,
-            },
-          });
+          yield put(execOperationFail({
+            id,
+            error: `${e.name}: ${e.message}`,
+          }));
           if (op.opListWhenFail) {
             for (const opId of op.opListWhenFail) {
-              yield put({
-                type: execOperation.toString(),
-                payload: { id: opId },
-              });
+              yield put(execOperation({id: opId}));
             }
           }
         }
       }
     },
-    *[evalAndExecIfNeeded](action, sagaEffects) {
+    *[evalAndExecIfNeededType](action, sagaEffects) {
       const { put, select } = sagaEffects;
       const { id, value, error } = action.payload;
-      yield put({
-        type: evalPreparedSqlTemplate.toString(),
-        payload: action.payload, 
-      });
+      yield put(evalPreparedSqlTemplate(action.payload));
       
       if (error) {
         // do nothing
@@ -182,10 +193,7 @@ export default {
             // do nothing
           } else {
             // auto exec when sql changed
-            yield put({
-              type: execOperation.toString(),
-              payload: { id: op.id, },
-            });
+            yield put(execOperation({id: op.id}));
           }
         }
       }
@@ -193,11 +201,11 @@ export default {
     },
   },
   reducers: {
-    [initOperations]: (state, action) => {
+    [initOperationsType]: (state, action) => {
       return action.payload;
     },
-    [addOperation]: defaultActionHandler,
-    [deleteOperation]: (state, action) => {
+    [addOperationType]: defaultActionHandler,
+    [deleteOperationType]: (state, action: Action<string>) => {
       const toDeleteId = action.payload;
       return Object.keys(state).filter((id) => id !== toDeleteId)
         .reduce((newOperations, id) => {
@@ -205,13 +213,13 @@ export default {
           return newOperations
         }, {})
     },
-    [setPreparedSqlTemplateInput]: defaultActionHandler,
-    [evalPreparedSqlTemplate]: defaultActionHandler,
-    [execOperationFail]: defaultActionHandler,
-    [execOperationSuccess]: defaultActionHandler,
-    [setOperationType]: defaultActionHandler,
-    [setOperationOpListWhenSuccess]: defaultActionHandler,
-    [setOperationOpListWhenFail]: defaultActionHandler,
+    [setPreparedSqlTemplateInputType]: defaultActionHandler,
+    [evalPreparedSqlTemplateType]: defaultActionHandler,
+    [execOperationFailType]: defaultActionHandler,
+    [execOperationSuccessType]: defaultActionHandler,
+    [setOperationTypeType]: defaultActionHandler,
+    [setOperationOpListWhenSuccessType]: defaultActionHandler,
+    [setOperationOpListWhenFailType]: defaultActionHandler,
   },
 };
 
@@ -224,14 +232,11 @@ export const getToEvalTemplates = (operations) => {
       id: `${opId}.preparedSql`,
       type: TemplateTypeEnum.Alasql, 
       input: op.preparedSqlInput,
-      onEvalActionCreator: (value, extra, error) => ({
-        type: `${NS}/${evalAndExecIfNeeded}`,
-        payload: {
-          /** id used to locate op in `operations` */
-          id: opId,
-          value,
-          error,
-        },
+      onEvalActionCreator: (value, extra, error) => evalAndExecIfNeeded({
+        /** id used to locate op in `operations` */
+        id: opId,
+        value,
+        error,
       }),
     }
   })

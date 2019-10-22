@@ -53,16 +53,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onAddOperation: (newOpId) => {
-      dispatch({
-        type: `operations/${addOperation}`,
-        payload: {
-          id: newOpId,
-        },
-      })
-      dispatch({
-        type: `editorCtx/${setActiveOpId}`,
-        payload: newOpId,
-      })
+      dispatch(addOperation({id: newOpId}))
+      dispatch(setActiveOpId(newOpId))
     },
   }
 }

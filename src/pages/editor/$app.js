@@ -12,9 +12,25 @@ import OperationEditor from '../../components/editor/OperationEditor';
 import WidgetPicker from '../../components/editor/WidgetPicker';
 import WidgetConfigPanel from '../../components/editor/WidgetConfigPanel';
 import styles from './index.less';
-import { addOperation, deleteOperation, setPreparedSqlTemplateInput, execOperation, setOperationType, setOperationOpListWhenSuccess } from './models/operations';
+import { 
+  addOperation, 
+  deleteOperation, 
+  setPreparedSqlTemplateInput, 
+  execOperation, 
+  setOperationType, 
+  setOperationOpListWhenSuccess, 
+  setOperationOpListWhenFail,
+} from './models/operations';
 import { setActiveOpId, setActiveWidgetId } from './models/editorCtx';
-import { getToEvalTemplates, getEvalContext, getExportedState } from './models/widgets';
+import { 
+  getToEvalTemplates, 
+  getEvalContext, 
+  getExportedState, 
+  addOrUpdateWidget, 
+  deleteWidget, 
+  updateWidgetContent,
+  changeWidgetIdAndSetActive,
+} from './models/widgets';
 import { 
   getToEvalTemplates as opGetToEvalTemplates, 
   getEvalContext as opGetEvalContext,
@@ -35,61 +51,28 @@ const mapStateToOperationEditorProps = (state) => {
 const mapDispatchToOperationEditorProps = (dispatch) => {
   return {
     onAddOperation: (id) => {
-      dispatch({
-        type: `${NS.operations}/${addOperation}`,
-        payload: {id},
-      });
+      dispatch(addOperation({id}));
     },
     onDeleteOperation: (id) => {
-      dispatch({
-        type: `${NS.operations}/${deleteOperation}`,
-        payload: id,
-      });
+      dispatch(deleteOperation(id));
     },
-    onExecOperation: (id, data) => {
-      dispatch({
-        type: `${NS.operations}/${execOperation}`,
-        payload: {id, data},
-      });
+    onExecOperation: (id) => {
+      dispatch(execOperation(id));
     },
     onSetOperationInput: (id, input) => {
-      dispatch({
-        type: `${NS.operations}/${setPreparedSqlTemplateInput}`,
-        payload: {id, input},
-      });
+      dispatch(setPreparedSqlTemplateInput({id, input}));
     },
     onSetActiveOpId: (id) => {
-      dispatch({
-        type: `${NS.editorCtx}/${setActiveOpId}`,
-        payload: id,
-      });
+      dispatch(setActiveOpId(id));
     },
     onSetOperationType: (id, type) => {
-      dispatch({
-        type: `${NS.operations}/${setOperationType}`,
-        payload: {
-          id,
-          type,
-        },
-      });
+      dispatch(setOperationType({id, type}));
     },
     onSetOpListWhenSuccess: (id, list) => {
-      dispatch({
-        type: `${NS.operations}/${setOperationOpListWhenSuccess}`,
-        payload: {
-          id,
-          list,
-        },
-      });
+      dispatch(setOperationOpListWhenSuccess({id, list}));
     },
     onSetOpListWhenFail: (id, list) => {
-      dispatch({
-        type: `${NS.operations}/${setOperationOpListWhenFail}`,
-        payload: {
-          id,
-          list,
-        },
-      });
+      dispatch(setOperationOpListWhenFail({id, list}));
     },
   }
 }
@@ -135,24 +118,17 @@ const mapDispatchToEditorCanvasProps = (dispatch) => {
   const fire = wrapDispatchToFire(dispatch);
   return {
     onAddOrUpdate: (newWidget) => {
-      fire(`${NS.widgets}/addOrUpdate`, {
-        widget: newWidget,
-      })
+      console.log('onAddOrUpdate', addOrUpdateWidget(newWidget));
+      fire(addOrUpdateWidget(newWidget));
     },
     onDeleteOne: (widgetId) => {
-      fire(`${NS.widgets}/deleteOne`, { widgetId, }) 
+      fire(deleteWidget({ widgetId }));
     },
     onWidgetDispatch: (widgetId, widgetAction) => {
-      fire(`${NS.widgets}/updateContent`, {
-        widgetId,
-        widgetAction,
-      })
+      fire(updateWidgetContent({widgetId, widgetAction}));
     },
     onSetActiveWidgetId: (id) => {
-      dispatch({
-        type: `${NS.editorCtx}/${setActiveWidgetId}`,
-        payload: id,
-      });
+      dispatch(setActiveWidgetId(id));
     },
   }
 }
@@ -171,16 +147,10 @@ const mapDispatchToWidgetConfigPanelProps = (dispatch) => {
   const fire = wrapDispatchToFire(dispatch);
   return {
     onWidgetDispatch: (widgetId, widgetAction) => {
-      fire(`${NS.widgets}/updateContent`, {
-        widgetId,
-        widgetAction,
-      })
+      fire(updateWidgetContent({ widgetId, widgetAction, }));
     },
     onChangeWidgetId: (oldWidgetId, newWidgetId) => {
-      fire(`${NS.widgets}/changeWidgetId`, {
-        oldWidgetId,
-        newWidgetId,
-      })
+      fire(changeWidgetIdAndSetActive({oldWidgetId, newWidgetId}));
     },
   };
 };
