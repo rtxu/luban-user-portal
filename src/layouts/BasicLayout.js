@@ -4,6 +4,9 @@ import { Component } from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import Link from 'umi/link';
 
+import styles from './BasicLayout.less';
+import { ReactComponent as Logo } from './logo.svg';
+
 const { Header, Footer, Sider, Content } = Layout;
 
 // 引入子菜单组件
@@ -14,6 +17,9 @@ export default class BasicLayout extends Component {
     return (
       <Layout>
         <Sider width={256} style={{ minHeight: '100vh' }}>
+          <div className={styles.logo}>
+            <Logo viewBox='25 100 250 100' />
+          </div>
           <div style={{ height: '32px', background: 'rgba(255,255,255,.2)', margin: '16px'}}/>
           <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
             <Menu.Item key="1">
