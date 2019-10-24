@@ -3,7 +3,7 @@
     <defs data-v-29081953="">
     <!---->
     </defs>
-    <rect data-v-29081953="" fill="#48463E" x="0" y="0" width="300px" height="300px" class="logo-background-square"></rect>
+    <rect data-v-29081953="" stoke='none' x="0" y="0" width="300px" height="300px" class="logo-background-square"></rect>
     <defs data-v-29081953=""><!----></defs>
     <g data-v-29081953="" 
         id="bde826a4-e59b-450d-a3f9-c5f359b9d276" 
