@@ -1,7 +1,5 @@
 import alasql from 'alasql';
-import moment from 'moment';
 
-import { NS } from './common';
 import { initEditorCtx, initialState as editorCtxInitialState } from './models/editorCtx';
 import { initialState as operationsInitialState, initOperations } from './models/operations';
 import { initialState as widgetsInitialState, initWidgets } from './models/widgets';

@@ -38,7 +38,7 @@ import {
 } from './models/operations';
 import { evaluate } from '../../util/template';
 import { wrapDispatchToFire } from '../../util';
-import { NS } from './common';
+import * as demoApp  from './demoApp';
 
 const { Header, Sider, Content } = Layout;
 
@@ -252,7 +252,6 @@ const mapStateToProps = (state) => {
 };
 const AppEditor = connect(mapStateToProps)(Editor);
 
-import * as demoApp  from './demoApp';
 const App = ({ match, dispatch }) => {
   useEffect(() => {
     const { app } = match.params;

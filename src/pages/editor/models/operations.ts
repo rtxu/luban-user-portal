@@ -35,6 +35,7 @@ const setPreparedSqlTemplateInputTypeNs = `${NS}/${setPreparedSqlTemplateInputTy
 export const setPreparedSqlTemplateInput = createAction<{id: string, input: string}>(setPreparedSqlTemplateInputTypeNs);
 const evalPreparedSqlTemplateType = 'OPERATION_PREPARED_SQL_TEMPLATE_INPUT_EVAL';
 const evalPreparedSqlTemplateTypeNs = `${NS}/${evalPreparedSqlTemplateType}`;
+const evalPreparedSqlTemplateLocal = createAction<{id: string, value: string, error: ErrorT}>(evalPreparedSqlTemplateType);
 export const evalPreparedSqlTemplate = createAction<{id: string, value: string, error: ErrorT}>(evalPreparedSqlTemplateTypeNs);
 const setOperationTypeType = 'OPERATION_TYPE_SET';
 const setOperationTypeTypeNs = `${NS}/${setOperationTypeType}`;
@@ -47,14 +48,17 @@ const setOperationOpListWhenFailTypeNs = `${NS}/${setOperationOpListWhenFailType
 export const setOperationOpListWhenFail = createAction<{id: string, list: string[]}>(setOperationOpListWhenFailTypeNs);
 const execOperationFailType = 'OPERATION_EXEC_FAIL';
 const execOperationFailTypeNs = `${NS}/${execOperationFailType}`;
-const execOperationFail = createAction<{id: string, error: string}>(execOperationFailTypeNs);
+const execOperationFailLocal = createAction<{id: string, error: string}>(execOperationFailType);
+export const execOperationFail = createAction<{id: string, error: string}>(execOperationFailTypeNs);
 const execOperationSuccessType = 'OPERATION_EXEC_SUCCESS';
 const execOperationSuccessTypeNs = `${NS}/${execOperationSuccessType}`;
-const execOperationSuccess = createAction<{id: string, data: any, sql: {sqlTempalte: string, params: any[]}}>(execOperationSuccessTypeNs);
+const execOperationSuccessLocal = createAction<{id: string, data: any, sql: {sqlTempalte: string, params: any[]}}>(execOperationSuccessType);
+export const execOperationSuccess = createAction<{id: string, data: any, sql: {sqlTempalte: string, params: any[]}}>(execOperationSuccessTypeNs);
 
 // Effects
 const execOperationType = 'OPERATION_EXEC';
 const execOperationTypeNs = `${NS}/${execOperationType}`;
+const execOperationLocal = createAction<{id: string}>(execOperationType);
 export const execOperation = createAction<{id: string}>(execOperationTypeNs);
 const evalAndExecIfNeededType = 'OPERATION_EVAL_AND_EXEC_IF_NEEDED';
 const evalAndExecIfNeededTypeNs = `${NS}/${evalAndExecIfNeededType}`;
@@ -160,20 +164,20 @@ export default {
           // console.log('===> exec', sql.sqlTemplate, sql.params);
           const data = yield call(alasql.promise, sql.sqlTemplate, sql.params);
           // console.log('===> exec result', data);
-          yield put(execOperationSuccess({id, data, sql}));
+          yield put(execOperationSuccessLocal({id, data, sql}));
           if (op.opListWhenSuccess) {
             for (const opId of op.opListWhenSuccess) {
-              yield put(execOperation({id: opId}));
+              yield put(execOperationLocal({id: opId}));
             }
           }
         } catch (e) {
-          yield put(execOperationFail({
+          yield put(execOperationFailLocal({
             id,
             error: `${e.name}: ${e.message}`,
           }));
           if (op.opListWhenFail) {
             for (const opId of op.opListWhenFail) {
-              yield put(execOperation({id: opId}));
+              yield put(execOperationLocal({id: opId}));
             }
           }
         }
@@ -182,7 +186,7 @@ export default {
     *[evalAndExecIfNeededType](action, sagaEffects) {
       const { put, select } = sagaEffects;
       const { id, value, error } = action.payload;
-      yield put(evalPreparedSqlTemplate(action.payload));
+      yield put(evalPreparedSqlTemplateLocal(action.payload));
       
       if (error) {
         // do nothing
@@ -193,7 +197,7 @@ export default {
             // do nothing
           } else {
             // auto exec when sql changed
-            yield put(execOperation({id: op.id}));
+            yield put(execOperationLocal({id: op.id}));
           }
         }
       }

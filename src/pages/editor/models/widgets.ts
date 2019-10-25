@@ -44,6 +44,7 @@ const updateWidgetContentTypeNs = `${NS}/${updateWidgetContentType}`;
 export const updateWidgetContent = createAction<{widgetId: string, widgetAction: any}>(updateWidgetContentTypeNs);
 const initWidgetsType = `WIDGETS_INIT`;
 const initWidgetsTypeNS = `${NS}/${initWidgetsType}`;
+const initWidgetsLocal = createAction<IWdigetMap>(initWidgetsType);
 export const initWidgets = createAction<IWdigetMap>(initWidgetsTypeNS);
 const changeWidgetIdType = `WIDGET_ID_CHANGE`;
 const changeWidgetIdTypeNs = `${NS}/${changeWidgetIdType}`;
@@ -124,7 +125,7 @@ export default {
       const userId = 'user1';
       const appId = 'app1';
       const resp = yield call(widgetsService.loadWidgets, userId, appId);
-      yield put(initWidgets(resp));
+      yield put(initWidgetsLocal(resp));
     },
     saveWidgets: [function *(action, sagaEffects) {
       const { call, put, select } = sagaEffects;
