@@ -1,5 +1,5 @@
 import { IDefaultTemplate } from "./common";
-import EvalNode, { EvalNodeTypeEnum } from './EvalNode';
+import EvalNode, { EvalNodeTypeEnum } from "./EvalNode";
 
 export default {
   buildEvalNodes: (template: IDefaultTemplate) => {
@@ -7,8 +7,8 @@ export default {
       template.id,
       EvalNodeTypeEnum.Default,
       template.input,
-      template.onEval,
+      template.onEval
     );
-    return [node]
+    return [node];
   }
-}
+};

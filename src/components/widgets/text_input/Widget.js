@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import { Input, } from "antd";
+import PropTypes from "prop-types";
+import { Input } from "antd";
 
-import styles from './Widget.less';
-import { setInputValue } from './reducer';
+import styles from "./Widget.less";
+import { setInputValue } from "./reducer";
 
 // BETTER(feature) TODO(ruitao.xu): support different display mode
 // [done] one-line mode: <label> <input>
@@ -10,20 +10,20 @@ import { setInputValue } from './reducer';
 // multi-line mode: <label>\n <textarea>
 function TextInput({ label, labelMaxWidth, input, dispatch }) {
   const labelStyle = {
-    maxWidth: labelMaxWidth,
-  }
+    maxWidth: labelMaxWidth
+  };
 
   return (
     <div className={styles.widgetTextInput}>
-      { label && <label style={labelStyle}>{label}</label> }
-      <Input 
+      {label && <label style={labelStyle}>{label}</label>}
+      <Input
         type={input.type}
-        placeholder={input.placeholder} 
-        value={input.value} 
-        onChange={(e) => {
+        placeholder={input.placeholder}
+        value={input.value}
+        onChange={e => {
           dispatch(setInputValue(e.target.value));
         }}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           // disable DELETE propagation
           e.stopPropagation();
         }}
@@ -38,12 +38,12 @@ TextInput.propTypes = {
   input: PropTypes.shape({
     type: PropTypes.string,
     value: PropTypes.string,
-    placeholder: PropTypes.string,
+    placeholder: PropTypes.string
     // defaultValue: PropTypes.string,
     // onChange: PropTypes.func,
     // onPressEnter: PropTypes.func,
   }),
-  dispatch: PropTypes.func.isRequired,
+  dispatch: PropTypes.func.isRequired
 };
 
 export default TextInput;

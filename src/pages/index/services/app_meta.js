@@ -1,14 +1,13 @@
+const DB = "luban.db.app";
 
-const DB = 'luban.db.app'
-
-function makeJsonResponse(json, status=200, statusText='OK') {
+function makeJsonResponse(json, status = 200, statusText = "OK") {
   return new Response(
-    new Blob([JSON.stringify(json)], {type: 'application/json'}), 
-    {'status': status, 'statusText': statusText}
+    new Blob([JSON.stringify(json)], { type: "application/json" }),
+    { status: status, statusText: statusText }
   );
 }
 
-export function add({name, description}) {
+export function add({ name, description }) {
   // local storage impl
   return new Promise((resolve, reject) => {
     try {
@@ -16,14 +15,14 @@ export function add({name, description}) {
       let appList = null;
       if (value) {
         appList = JSON.parse(value);
-        appList.push({name, description});
+        appList.push({ name, description });
       } else {
-        appList = [{name, description}]
+        appList = [{ name, description }];
       }
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: 'ok', }));
-    } catch(e) {
+      resolve(makeJsonResponse({ code: 0, msg: "ok" }));
+    } catch (e) {
       reject(e);
     }
   });
@@ -38,13 +37,13 @@ export function remove(name) {
       if (value) {
         appList = JSON.parse(value);
       } else {
-        appList = []
+        appList = [];
       }
-      appList = appList.filter((app) => app.name != name);
+      appList = appList.filter(app => app.name != name);
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: 'ok', }));
-    } catch(e) {
+      resolve(makeJsonResponse({ code: 0, msg: "ok" }));
+    } catch (e) {
       reject(e);
     }
   });
@@ -59,22 +58,22 @@ export function setAppDescription(name, newDescription) {
       if (value) {
         appList = JSON.parse(value);
       } else {
-        appList = []
+        appList = [];
       }
-      appList = appList.map((app) => {
+      appList = appList.map(app => {
         if (app.name === name) {
           return {
             ...app,
-            description: newDescription,
-          }
+            description: newDescription
+          };
         } else {
           return app;
         }
       });
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: 'ok', }));
-    } catch(e) {
+      resolve(makeJsonResponse({ code: 0, msg: "ok" }));
+    } catch (e) {
       reject(e);
     }
   });
@@ -89,12 +88,12 @@ export function loadApps() {
       if (value) {
         appList = JSON.parse(value);
       } else {
-        appList = []
+        appList = [];
       }
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: 'ok', data: appList, }));
-    } catch(e) {
+      resolve(makeJsonResponse({ code: 0, msg: "ok", data: appList }));
+    } catch (e) {
       reject(e);
     }
   });

@@ -1,17 +1,17 @@
-import produce from 'immer';
-import { createAction, handleActions } from 'redux-actions';
+import produce from "immer";
+import { createAction, handleActions } from "redux-actions";
 
-import { createDefaultToEvalTemplate } from '../common';
-import { logger } from './common';
+import { createDefaultToEvalTemplate } from "../common";
+import { logger } from "./common";
 
 // Actions
-export const toggleColumnVisibility = createAction('COLUMN_VISIBILITY_TOGGLE');
-export const moveColumn = createAction('COLUMN_MOVE');
-export const setColumnWidth = createAction('COLUMN_WIDTH_SET');
-export const setIsCompact = createAction('IS_COMPACT_SET');
-export const setSelectedRowIndex = createAction('SELECTED_ROW_INDEX_SET');
-export const setDataTemplateInput = createAction('DATA_TEMPLATE_INPUT_SET');
-export const evalDataTemplate = createAction('DATA_TEMPLATE_EVAL');
+export const toggleColumnVisibility = createAction("COLUMN_VISIBILITY_TOGGLE");
+export const moveColumn = createAction("COLUMN_MOVE");
+export const setColumnWidth = createAction("COLUMN_WIDTH_SET");
+export const setIsCompact = createAction("IS_COMPACT_SET");
+export const setSelectedRowIndex = createAction("SELECTED_ROW_INDEX_SET");
+export const setDataTemplateInput = createAction("DATA_TEMPLATE_INPUT_SET");
+export const evalDataTemplate = createAction("DATA_TEMPLATE_EVAL");
 
 /*
  * memberArr 和 replaceArr 都是 array of object
@@ -24,15 +24,15 @@ function replaceObjectArr(memberArr, replaceArr, getObjId) {
     const objId = getObjId(obj);
     result[objId] = obj;
     return result;
-  }, {})
-  return memberArr.map((obj) => {
+  }, {});
+  return memberArr.map(obj => {
     const objId = getObjId(obj);
     if (objId in replaceMap) {
       return replaceMap[objId];
     } else {
       return obj;
     }
-  })
+  });
 }
 
 export function genColumnsByFirstRow(firstRow) {
@@ -40,11 +40,11 @@ export function genColumnsByFirstRow(firstRow) {
   for (const key of Object.keys(firstRow)) {
     columns.push({
       meta: {
-        visible: true,
+        visible: true
       },
       config: {
         title: key,
-        dataIndex: key, 
+        dataIndex: key
       }
     });
   }
@@ -53,34 +53,35 @@ export function genColumnsByFirstRow(firstRow) {
 
 const demoData = [
   {
-    name: '胡彦斌',
+    name: "胡彦斌",
     age: 32,
-    address: '西湖区湖底公园1号',
+    address: "西湖区湖底公园1号"
   },
   {
-    name: '胡彦祖',
+    name: "胡彦祖",
     age: 42,
     // 这段超长的内容可以测试出很多有关 table 样式的 bug
-    address: '西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号',
-  },
+    address:
+      "西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号西湖区湖底公园1号"
+  }
 ];
 const demoDataInput = JSON.stringify(demoData, null, 2);
 const demoColumns = genColumnsByFirstRow(demoData[0]);
 const defaultEvalResult = Object.freeze({
   code: 0,
-  msg: 'ok',
-  visible: true,
+  msg: "ok",
+  visible: true
 });
 export const initialState = {
   dataInput: demoDataInput,
-  dataInputEvalResult: {...defaultEvalResult},
+  dataInputEvalResult: { ...defaultEvalResult },
   data: demoData,
   dataError: null,
   columns: demoColumns,
   lastValidColumns: demoColumns,
   height: 320,
   isCompact: false,
-  selectedRowIndex: 0,
+  selectedRowIndex: 0
 };
 
 // Reducers
@@ -88,9 +89,9 @@ const INVALID_RAW_INPUT_ERR_MSG = `数据不合法。请输入一个 json array�
 const convertToTableData = (input: any): [object[], number, string] => {
   let tableData: object[] = [];
   let errCode = defaultEvalResult.code;
-  let errMsg =  defaultEvalResult.msg;
+  let errMsg = defaultEvalResult.msg;
   let objInput = input;
-  if (typeof(input) === 'string') {
+  if (typeof input === "string") {
     try {
       objInput = JSON.parse(input);
     } catch (e) {
@@ -99,7 +100,7 @@ const convertToTableData = (input: any): [object[], number, string] => {
     }
   }
 
-  if (typeof(objInput) === 'object') {
+  if (typeof objInput === "object") {
     if (Array.isArray(objInput)) {
       tableData = objInput;
     } else {
@@ -111,121 +112,128 @@ const convertToTableData = (input: any): [object[], number, string] => {
     errMsg = INVALID_RAW_INPUT_ERR_MSG;
   }
 
-  return [tableData, errCode, errMsg]
-}
-export default handleActions({
-  [setDataTemplateInput]: (state, action) => {
-    return {
-      ...state,
-      dataInput: action.payload,
-    }
-  },
-  [evalDataTemplate]: (state, action) => {
-    const { value, error } = action.payload;
-    const evalResult = { ...defaultEvalResult, }
-    if (error) { // eval error
-      evalResult.code = 110;
-      evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
+  return [tableData, errCode, errMsg];
+};
+export default handleActions(
+  {
+    [setDataTemplateInput]: (state, action) => {
       return {
         ...state,
-        dataInputEvalResult: evalResult,
-        data: [],
-        columns: [],
-      }
-    } else {
-      let newData: object[] = [];
-      [newData, evalResult.code, evalResult.msg] = convertToTableData(value);
-      if (evalResult.code === 0) { 
-        let newColumns = [];
-        if (newData.length > 0) {
-          newColumns = replaceObjectArr(genColumnsByFirstRow(newData[0]), 
-            state.lastValidColumns, 
-            (obj) => obj.config.dataIndex,
-          );
-        }
-        return {
-          ...state,
-          dataInputEvalResult: evalResult,
-          data: newData,
-          columns: newColumns,
-          lastValidColumns: newColumns,
-        }
-      } else { // convert error
+        dataInput: action.payload
+      };
+    },
+    [evalDataTemplate]: (state, action) => {
+      const { value, error } = action.payload;
+      const evalResult = { ...defaultEvalResult };
+      if (error) {
+        // eval error
+        evalResult.code = 110;
+        evalResult.msg = INVALID_RAW_INPUT_ERR_MSG;
         return {
           ...state,
           dataInputEvalResult: evalResult,
           data: [],
-          columns: [],
+          columns: []
+        };
+      } else {
+        let newData: object[] = [];
+        [newData, evalResult.code, evalResult.msg] = convertToTableData(value);
+        if (evalResult.code === 0) {
+          let newColumns = [];
+          if (newData.length > 0) {
+            newColumns = replaceObjectArr(
+              genColumnsByFirstRow(newData[0]),
+              state.lastValidColumns,
+              obj => obj.config.dataIndex
+            );
+          }
+          return {
+            ...state,
+            dataInputEvalResult: evalResult,
+            data: newData,
+            columns: newColumns,
+            lastValidColumns: newColumns
+          };
+        } else {
+          // convert error
+          return {
+            ...state,
+            dataInputEvalResult: evalResult,
+            data: [],
+            columns: []
+          };
         }
       }
+    },
+    [toggleColumnVisibility]: (state, action) => {
+      const columnIndex = action.payload;
+      return produce(state, draft => {
+        draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex]
+          .meta.visible;
+        draft.lastValidColumns = draft.columns;
+      });
+    },
+    [moveColumn]: (state, action) => {
+      const fromIndex = action.payload.from;
+      const toIndex = action.payload.to;
+      return produce(state, draft => {
+        const from = state.columns[fromIndex];
+        draft.columns.splice(fromIndex, 1);
+        draft.columns.splice(toIndex, 0, from);
+      });
+    },
+    [setColumnWidth]: (state, action) => {
+      const { index, width } = action.payload;
+      logger.debug(
+        `in table reducer, setColumnWidth(index=${index}, width=${width})`
+      );
+      return produce(state, draft => {
+        draft.columns[index].config.width = width;
+      });
+    },
+    [setIsCompact]: (state, action) => {
+      return {
+        ...state,
+        isCompact: action.payload
+      };
+    },
+    [setSelectedRowIndex]: (state, action) => {
+      return {
+        ...state,
+        selectedRowIndex: action.payload
+      };
     }
   },
-  [toggleColumnVisibility]: (state, action) => {
-    const columnIndex = action.payload;
-    return produce(state, draft => {
-      draft.columns[columnIndex].meta.visible = !draft.columns[columnIndex].meta.visible;
-      draft.lastValidColumns = draft.columns;
-    })
-  },
-  [moveColumn]: (state, action) => {
-    const fromIndex = action.payload.from;
-    const toIndex = action.payload.to;
-    return produce(state, draft => {
-      const from = state.columns[fromIndex];
-      draft.columns.splice(fromIndex, 1);
-      draft.columns.splice(toIndex, 0, from);
-    })
-  },
-  [setColumnWidth]: (state, action) => {
-    const { index, width } = action.payload;
-    logger.debug(`in table reducer, setColumnWidth(index=${index}, width=${width})`);
-    return produce(state, draft => {
-      draft.columns[index].config.width = width;
-    })
-  },
-  [setIsCompact]: (state, action) => {
-    return {
-      ...state,
-      isCompact: action.payload,
-    }
-  },
-  [setSelectedRowIndex]: (state, action) => {
-    return {
-      ...state,
-      selectedRowIndex: action.payload,
-    }
-  },
-}, initialState);
+  initialState
+);
 
 // Selectors
 // 用于构造计算模板结果时使用的 context，不包含模板项
-export const getRawExportedState = (state) => {
+export const getRawExportedState = state => {
   const selectedRow = {
-    index: state.selectedRowIndex,
-  }
+    index: state.selectedRowIndex
+  };
   if (state.data.length > selectedRow.index) {
     selectedRow.data = state.data[selectedRow.index];
   }
-  
+
   return {
     data: state.data,
-    selectedRow,
-  }
-}
+    selectedRow
+  };
+};
 
 // ModelBrowser 使用，组件公开的所有数据
-export const getExportedState = (state) => (
-  {
-    ...getRawExportedState(state),
-  }
-)
+export const getExportedState = state => ({
+  ...getRawExportedState(state)
+});
 
-export const getToEvalTemplates = (state) => {
+export const getToEvalTemplates = state => {
   return [
     createDefaultToEvalTemplate(
-      'data',
-      state.dataInput, 
+      "data",
+      state.dataInput,
       evalDataTemplate.toString()
-    ),
+    )
   ];
 };

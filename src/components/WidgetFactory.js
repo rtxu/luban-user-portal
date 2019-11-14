@@ -1,15 +1,15 @@
-import lodash from 'lodash';
-import { Text, TextInput, Button, Table } from './widgets';
+import lodash from "lodash";
+import { Text, TextInput, Button, Table } from "./widgets";
 
 // NOTICE: `Type` must be a unique description string, when drop it will be used to generate widgetId(= type + instanceId)
 export const Type = Object.freeze({
-  TEXT: 'text',
-  BUTTON: 'button',
-  TABLE: 'table',
-  TEXTINPUT: 'text_input',
+  TEXT: "text",
+  BUTTON: "button",
+  TABLE: "table",
+  TEXTINPUT: "text_input",
 
-  ONE_LINE_OVERFLOW_TEXT: 'one_line_overflow_text',
-})
+  ONE_LINE_OVERFLOW_TEXT: "one_line_overflow_text"
+});
 
 function createState(type) {
   switch (type) {
@@ -29,13 +29,13 @@ function createState(type) {
 function createElement(type, props) {
   switch (type) {
     case Type.TEXT:
-      return <Text {...props} />
+      return <Text {...props} />;
     case Type.BUTTON:
-      return <Button {...props} />
+      return <Button {...props} />;
     case Type.TABLE:
-      return <Table {...props} />
+      return <Table {...props} />;
     case Type.TEXTINPUT:
-      return <TextInput {...props} />
+      return <TextInput {...props} />;
     default:
       throw new Error(`in createElement: unexpected widget type: ${type}`);
   }
@@ -44,15 +44,17 @@ function createElement(type, props) {
 function createConfigPanelElement(type, props) {
   switch (type) {
     case Type.TEXT:
-      return <Text.ConfigPanel {...props} />
+      return <Text.ConfigPanel {...props} />;
     case Type.BUTTON:
-      return <Button.ConfigPanel {...props} />
+      return <Button.ConfigPanel {...props} />;
     case Type.TABLE:
-      return <Table.ConfigPanel {...props} />
+      return <Table.ConfigPanel {...props} />;
     case Type.TEXTINPUT:
-      return <TextInput.ConfigPanel {...props} />
+      return <TextInput.ConfigPanel {...props} />;
     default:
-      throw new Error(`in createConfigPanelElement: unexpected widget type: ${type}`);
+      throw new Error(
+        `in createConfigPanelElement: unexpected widget type: ${type}`
+      );
   }
 }
 
@@ -115,7 +117,6 @@ function getToEvalTemplates(type) {
       throw new Error(`in getExporter: unexpected widget type: ${type}`);
   }
 }
-
 
 const WidgetFactory = {};
 WidgetFactory.Type = Type;

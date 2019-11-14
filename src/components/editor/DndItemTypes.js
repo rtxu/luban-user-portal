@@ -1,18 +1,18 @@
-import WidgetFactory from '../WidgetFactory';
+import WidgetFactory from "../WidgetFactory";
 
 const _ = {
   // widget
   ...WidgetFactory.Type,
 
   // resize handle
-  RH_LEFT_TOP: 'resize.left_top',
-  RH_RIGHT_TOP: 'resize.right_top',
-  RH_RIGHT_BOTTOM: 'resize.right_bottom',
-  RH_LEFT_BOTTOM: 'resize.left_bottom',
-}
+  RH_LEFT_TOP: "resize.left_top",
+  RH_RIGHT_TOP: "resize.right_top",
+  RH_RIGHT_BOTTOM: "resize.right_bottom",
+  RH_LEFT_BOTTOM: "resize.left_bottom"
+};
 
-export const isResizeHandle = (type) => {
-  switch(type) {
+export const isResizeHandle = type => {
+  switch (type) {
     case _.RH_LEFT_TOP:
     case _.RH_RIGHT_TOP:
     case _.RH_RIGHT_BOTTOM:
@@ -20,6 +20,6 @@ export const isResizeHandle = (type) => {
       return true;
   }
   return false;
-}
+};
 
 export default _;

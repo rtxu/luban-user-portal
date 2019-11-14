@@ -1,9 +1,9 @@
-import { ErrorT, ICtx, OnEvalT } from './common';
-import EvalNodeOp from './EvalNodeOp';
+import { ErrorT, ICtx, OnEvalT } from "./common";
+import EvalNodeOp from "./EvalNodeOp";
 
 export enum EvalNodeTypeEnum {
   Default,
-  Alasql,
+  Alasql
 }
 
 export interface IEvalNodeMap {
@@ -13,16 +13,16 @@ export interface IEvalNodeMap {
 export enum EvalNodeStateEnum {
   Pending,
   Evaluated,
-  Error,
+  Error
 }
 
 /**
  * 状态机:
- *   用户修改 input           topoGraph 调用 evaluate  
+ *   用户修改 input           topoGraph 调用 evaluate
  *  --------------> PENDING -----------------------> EVALUATED
  *                     |                  \
  *                     |                   --------> ERROR
- *                     |                  / 
+ *                     |                  /
  *                     ------------------
  *                     topoGraph 判定循环依赖
  * 用户输入不变，处于 EVALUATED 和 ERROR 状态的节点不会更新，因此被称为终止态
@@ -40,7 +40,12 @@ class EvalNode {
   /** My children depend on me */
   private children: IEvalNodeMap = {};
 
-  constructor(id: string, type: EvalNodeTypeEnum, input: string, onEval?: OnEvalT) {
+  constructor(
+    id: string,
+    type: EvalNodeTypeEnum,
+    input: string,
+    onEval?: OnEvalT
+  ) {
     this.id = id;
     this.type = type;
     this.input = input;
@@ -61,7 +66,7 @@ class EvalNode {
   public getDepState(): [EvalNodeStateEnum, string[]] {
     const errDeps: string[] = [];
     for (const depNode of Object.values(this.parents)) {
-      switch(depNode.state) {
+      switch (depNode.state) {
         case EvalNodeStateEnum.Pending:
           return [EvalNodeStateEnum.Pending, errDeps];
         case EvalNodeStateEnum.Error:
@@ -77,12 +82,12 @@ class EvalNode {
       return [EvalNodeStateEnum.Evaluated, errDeps];
     }
   }
-  
+
   public getDepCount() {
     return Object.keys(this.parents).length;
   }
 
-  public getDepCtx(): {[key: string]: any} {
+  public getDepCtx(): { [key: string]: any } {
     return Object.keys(this.parents).reduce((ctx, id) => {
       ctx[id] = this.parents[id].value;
       return ctx;
@@ -111,7 +116,7 @@ class EvalNode {
 
   private _setEvaluated(value, extra, error: ErrorT) {
     this.value = value;
-    this.state = error ? EvalNodeStateEnum.Error: EvalNodeStateEnum.Evaluated;
+    this.state = error ? EvalNodeStateEnum.Error : EvalNodeStateEnum.Evaluated;
     if (this.onEval) {
       this.onEval(value, extra, error);
     }

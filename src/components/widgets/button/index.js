@@ -1,6 +1,11 @@
-import ConfigPanel from './ConfigPanel';
-import reducer, { getExportedState, getRawExportedState, getToEvalTemplates, initialState } from './reducer';
-import Widget from './Widget';
+import ConfigPanel from "./ConfigPanel";
+import reducer, {
+  getExportedState,
+  getRawExportedState,
+  getToEvalTemplates,
+  initialState
+} from "./reducer";
+import Widget from "./Widget";
 
 // View: <Widget> and <Widget.ConfigPanel>
 Widget.ConfigPanel = ConfigPanel;

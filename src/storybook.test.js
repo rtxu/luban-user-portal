@@ -1,4 +1,4 @@
-import initStoryshots from '@storybook/addon-storyshots';
+import initStoryshots from "@storybook/addon-storyshots";
 // initStoryshots();
 
-test('disable snapshot tests due to too many false positives', () => {})
+test("disable snapshot tests due to too many false positives", () => {});

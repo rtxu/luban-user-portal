@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import styles from './Widget.less';
-import classNames from 'classnames';
+import PropTypes from "prop-types";
+import styles from "./Widget.less";
+import classNames from "classnames";
 
 function Text({ value, isScrollWhenOverflow, isExpandWhenHover }) {
   const cls = classNames({
     [styles.widgetText]: true,
     [styles.scroll]: isScrollWhenOverflow,
-    [styles.hover]: isScrollWhenOverflow && isExpandWhenHover,
+    [styles.hover]: isScrollWhenOverflow && isExpandWhenHover
   });
   return (
     <div className={cls}>
@@ -22,8 +22,8 @@ Text.propTypes = {
   valueInput: PropTypes.string,
   value: PropTypes.string,
   valueError: PropTypes.string,
-  
-  dispatch: PropTypes.func.isRequired,
+
+  dispatch: PropTypes.func.isRequired
 };
 
 export default Text;

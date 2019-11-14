@@ -1,16 +1,18 @@
-import { Action, createAction, handleActions } from 'redux-actions';
-import * as AppMetaService from '../services/app_meta';
-import { message } from 'antd';
+import { Action, createAction, handleActions } from "redux-actions";
+import * as AppMetaService from "../services/app_meta";
+import { message } from "antd";
 
 // Actions
-const NS = 'apps';
-const addAppSuccessType = 'APP_ADD_SUCCESS';
+const NS = "apps";
+const addAppSuccessType = "APP_ADD_SUCCESS";
 const addAppSuccessLocal = createAction(addAppSuccessType);
 const deleteAppSuccessType = `APP_DELETE_SUCCESS`;
 const deleteAppSuccessLocal = createAction(deleteAppSuccessType);
 const setAppDescriptionSuccessType = `APP_DESCRIPTION_SET_SUCCESS`;
-const setAppDescriptionSuccessLocal = createAction(setAppDescriptionSuccessType);
-const initAppsType = 'APPS_INIT';
+const setAppDescriptionSuccessLocal = createAction(
+  setAppDescriptionSuccessType
+);
+const initAppsType = "APPS_INIT";
 const initAppsLocal = createAction(initAppsType);
 
 // Effects
@@ -32,10 +34,11 @@ export const initialState = {};
 // schema
 const appInitialState = {
   // TODO(ruitao.xu): session-level data
-  organization: '该 app 所属的组织，该数据应该来自 session(current_user, current_org)',
-  name: 'sample app',
-  description: 'sample app description',
-}
+  organization:
+    "该 app 所属的组织，该数据应该来自 session(current_user, current_org)",
+  name: "sample app",
+  description: "sample app description"
+};
 
 // Reducers
 export default {
@@ -48,11 +51,11 @@ export default {
         const body = yield resp.json();
         if (body.code === 0) {
           yield put(addAppSuccessLocal(action.payload));
-          message.success('应用创建成功');
+          message.success("应用创建成功");
         } else {
           message.error(`应用创建失败(错误码: ${body.code}): ${body.msg}`);
         }
-      } catch(e) {
+      } catch (e) {
         message.error(`应用创建异常(${e.name}): ${e.message}`);
       }
     },
@@ -66,12 +69,12 @@ export default {
           const appMap = appList.reduce((m, app) => {
             m[app.name] = app;
             return m;
-          }, {})
+          }, {});
           yield put(initAppsLocal(appMap));
         } else {
           message.error(`加载应用失败(错误码: ${body.code}): ${body.msg}`);
         }
-      } catch(e) {
+      } catch (e) {
         message.error(`加载应用异常(${e.name}): ${e.message}`);
       }
     },
@@ -87,7 +90,7 @@ export default {
         } else {
           message.error(`删除应用失败(错误码: ${body.code}): ${body.msg}`);
         }
-      } catch(e) {
+      } catch (e) {
         message.error(`删除应用异常(${e.name}): ${e.message}`);
       }
     },
@@ -95,17 +98,21 @@ export default {
       const { call, put } = sagaEffects;
       const { name, description } = action.payload;
       try {
-        const resp = yield call(AppMetaService.setAppDescription, name, description);
+        const resp = yield call(
+          AppMetaService.setAppDescription,
+          name,
+          description
+        );
         const body = yield resp.json();
         if (body.code === 0) {
-          yield put(setAppDescriptionSuccessLocal({name, description}));
+          yield put(setAppDescriptionSuccessLocal({ name, description }));
         } else {
           message.error(`更新应用描述失败(错误码: ${body.code}): ${body.msg}`);
         }
-      } catch(e) {
+      } catch (e) {
         message.error(`更新应用描述异常(${e.name}): ${e.message}`);
       }
-    },
+    }
   },
   reducers: {
     [addAppSuccessType]: (state, action) => {
@@ -115,32 +122,33 @@ export default {
         [name]: {
           ...appInitialState,
           name,
-          description,
+          description
         }
-      }
+      };
     },
     [deleteAppSuccessType]: (state, action) => {
       const toDeleteId = action.payload;
-      return Object.keys(state).filter((id) => id !== toDeleteId)
+      return Object.keys(state)
+        .filter(id => id !== toDeleteId)
         .reduce((newApps, id) => {
-          newApps[id] = state[id]
-          return newApps
-        }, {})
+          newApps[id] = state[id];
+          return newApps;
+        }, {});
     },
     [initAppsType]: (state, action) => {
       return action.payload;
     },
     [setAppDescriptionSuccessType]: (state, action) => {
-      const {name, description} = action.payload;
+      const { name, description } = action.payload;
       return {
         ...state,
         [name]: {
           ...state[name],
-          description,
+          description
         }
       };
-    },
-  },
+    }
+  }
 };
 
 // Selectors

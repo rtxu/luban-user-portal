@@ -1,10 +1,10 @@
-@import '../widget_global.less';
-@import '~@/styles/antd_default.less';
+@import "../widget_global.less";
+@import "~@/styles/antd_default.less";
 
 .widgetTable {
   .widget();
   background-color: white;
-  box-shadow: 0 0 0 0 rgba(0,0,0,.5), 0 1px 3px 0 rgba(0,0,0,.25);
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5), 0 1px 3px 0 rgba(0, 0, 0, 0.25);
   border-radius: 5px;
 
   // 超长内容下，表格样式修复
@@ -13,7 +13,8 @@
     & table tr {
       display: flex;
 
-      & th, & td {
+      & th,
+      & td {
         // flex 与 width 同值，可以达到 resize 的效果
         // 如: flex: 100 0 auto; width: 100px;
         // width: 0; 相当于全部听从 flex 的 layout
@@ -27,7 +28,6 @@
       }
     }
   }
-  
 }
 
 .selected {

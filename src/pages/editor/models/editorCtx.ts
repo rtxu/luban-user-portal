@@ -1,10 +1,13 @@
-import { createAction } from 'redux-actions';
+import { createAction } from "redux-actions";
 
 // Actions
-const NS = 'editorCtx';
+const NS = "editorCtx";
 const initEditorCtxType = `EDITOR_CTX_INIT`;
 const initEditorCtxTypeNs = `${NS}/EDITOR_CTX_INIT`;
-export const initEditorCtx = createAction<{activeOpId?: string | null, activeWidgetId?: string | null}>(initEditorCtxTypeNs);
+export const initEditorCtx = createAction<{
+  activeOpId?: string | null;
+  activeWidgetId?: string | null;
+}>(initEditorCtxTypeNs);
 const setActiveOpIdType = `ACTIVE_OP_ID_SET`;
 const setActiveOpIdTypeNs = `${NS}/ACTIVE_OP_ID_SET`;
 export const setActiveOpId = createAction<string>(setActiveOpIdTypeNs);
@@ -15,8 +18,8 @@ export const setActiveWidgetId = createAction<string>(setActiveWidgetIdTypeNs);
 // initial state
 export const initialState = {
   activeOpId: null,
-  activeWidgetId: null,
-}
+  activeWidgetId: null
+};
 
 // Reducers
 export default {
@@ -29,16 +32,16 @@ export default {
     [setActiveOpIdType]: (state, action) => {
       return {
         ...state,
-        activeOpId: action.payload,
-      }
+        activeOpId: action.payload
+      };
     },
     [setActiveWidgetIdType]: (state, action) => {
       return {
         ...state,
-        activeWidgetId: action.payload,
-      }
-    },
-  },
+        activeWidgetId: action.payload
+      };
+    }
+  }
 };
 
 // Selectors

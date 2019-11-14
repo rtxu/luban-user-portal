@@ -1,5 +1,5 @@
-import { ICtx } from './common';
-import EvalNode from './EvalNode';
+import { ICtx } from "./common";
+import EvalNode from "./EvalNode";
 
 enum DefaultTemplateTypeEnum {
   /** 该模板不包含任何 code snippet(代码片段) */
@@ -7,19 +7,19 @@ enum DefaultTemplateTypeEnum {
   /** 该模板仅包含唯一 code snippet 且无任何其他字面量 */
   Expression,
   /** 该模板由 >=1 个 code snippet 和字面量共同组成 */
-  TemplateString,
+  TemplateString
 }
 function parse(input: string) {
   // 匹配规则：a.b.c
   // \b 代表 word boundary, ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Boundaries
-  const EvalNodeIdRE =/(\w+[.])*\w+\b/g;
+  const EvalNodeIdRE = /(\w+[.])*\w+\b/g;
   const codeSnippetRE = /{{(.*?)}}/g;
   const codeSnippets: string[] = [];
   let match;
-  while (match = codeSnippetRE.exec(input)) {
+  while ((match = codeSnippetRE.exec(input))) {
     codeSnippets.push(match[1]);
   }
-  /** 
+  /**
    * 在每一个 code snippet 里用正则表达式匹配可能的 id，这并不是一个精确的做法，只是一个保证不遗漏的做法。
    * 只要在该模板内引用数据（如：{{w1.data}}），就能匹配到
    */
@@ -39,32 +39,32 @@ function parse(input: string) {
 
   const rtnValue = {
     codeSnippets,
-    possibleDepIds,
-  }
+    possibleDepIds
+  };
 
   if (codeSnippets.length === 0) {
     return {
       ...rtnValue,
-      type: DefaultTemplateTypeEnum.Literal,
+      type: DefaultTemplateTypeEnum.Literal
     };
   } else if (codeSnippets.length === 1) {
-    if (input.trim().length === codeSnippets[0].length + '{{}}'.length) {
+    if (input.trim().length === codeSnippets[0].length + "{{}}".length) {
       // nothing outside the {{}}
       return {
         ...rtnValue,
-        type: DefaultTemplateTypeEnum.Expression,
-      }
+        type: DefaultTemplateTypeEnum.Expression
+      };
     } else {
       return {
         ...rtnValue,
-        type: DefaultTemplateTypeEnum.TemplateString,
-      }
+        type: DefaultTemplateTypeEnum.TemplateString
+      };
     }
   } else {
     return {
       ...rtnValue,
-      type: DefaultTemplateTypeEnum.TemplateString,
-    }
+      type: DefaultTemplateTypeEnum.TemplateString
+    };
   }
 }
 
@@ -104,24 +104,25 @@ function renderTemplateString_v1_deprecated(tmpl, ctx) {
   // 思路：生成一个模板字符串，js code 的地方使用 evaluateExpression 获得结果
   const codeSnippetRE = /{{(.*?)}}/g;
   const TemplateStringMark = {
-    begin: '`',
-    end: '`',
+    begin: "`",
+    end: "`"
   };
   let functionBody = `return (${TemplateStringMark.begin}`;
   let cursor = 0;
   let match;
-  while (match = codeSnippetRE.exec(tmpl)) {
+  while ((match = codeSnippetRE.exec(tmpl))) {
     functionBody += tmpl.slice(cursor, match.index);
-    functionBody += '${evaluateExpression(' + match[1] + ', ctx)}'
+    functionBody += "${evaluateExpression(" + match[1] + ", ctx)}";
     cursor = match.index + match[0].length;
   }
-  functionBody += tmpl.substr(cursor, tmpl.length - cursor) + `${TemplateStringMark.end})`;
+  functionBody +=
+    tmpl.substr(cursor, tmpl.length - cursor) + `${TemplateStringMark.end})`;
   // console.log('functionBody', functionBody);
   const newCtx = {
     ...ctx,
     ctx,
-    evaluateExpression,
-  }
+    evaluateExpression
+  };
   return callFn(functionBody, newCtx);
 }
 
@@ -130,21 +131,25 @@ function renderTemplateString_v1_deprecated(tmpl, ctx) {
 // 2. 多次调用 evaluateExpression，不知性能如何，未实测
 function renderTemplateString(tmpl, ctx) {
   const codeSnippetRE = /{{(.*?)}}/g;
-  let code = '\'use strict\'; const r=[];\n';
+  let code = "'use strict'; const r=[];\n";
   let cursor = 0;
   let match;
   const add = (line: string, js?: boolean) => {
-      js? (code += 'r.push(' + line + ');\n') :
-          (code += line !== '' ? 'r.push("' + line.replace(/"/g, '\\\\"') + '");\n' : '');
-      return add;
-  }
-  while(match = codeSnippetRE.exec(tmpl)) {
-      add(tmpl.slice(cursor, match.index))(match[1], true);
-      cursor = match.index + match[0].length;
+    js
+      ? (code += "r.push(" + line + ");\n")
+      : (code +=
+          line !== ""
+            ? 'r.push("' + line.replace(/"/g, '\\\\"') + '");\n'
+            : "");
+    return add;
+  };
+  while ((match = codeSnippetRE.exec(tmpl))) {
+    add(tmpl.slice(cursor, match.index))(match[1], true);
+    cursor = match.index + match[0].length;
   }
   add(tmpl.substr(cursor, tmpl.length - cursor));
   code += 'return r.join("");';
-  const functionBody = code.replace(/[\r\t\n]/g, '');
+  const functionBody = code.replace(/[\r\t\n]/g, "");
   // console.log('functionBody', functionBody);
   return callFn(functionBody, ctx);
 }
@@ -168,7 +173,7 @@ export default {
   },
   evaluate(node: EvalNode, ctx: ICtx) {
     function createOrSetDescendantProp(obj, desc: string, value) {
-      const arr = desc.split('.');
+      const arr = desc.split(".");
       while (arr.length > 1) {
         const id = arr.shift();
         if (id in obj) {
@@ -182,7 +187,7 @@ export default {
     }
 
     const appendCtx = createOrSetDescendantProp;
-    const myCtx = {...ctx};
+    const myCtx = { ...ctx };
     const depCtx = node.getDepCtx();
     for (const [depId, depValue] of Object.entries(depCtx)) {
       appendCtx(myCtx, depId, depValue);
@@ -194,5 +199,5 @@ export default {
     } catch (e) {
       node.setError(e);
     }
-  },
-}
+  }
+};

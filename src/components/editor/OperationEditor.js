@@ -1,37 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { 
-  Select, 
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import {
+  Select,
   TreeSelect,
-  Tabs, 
-  Icon, 
-  Button, 
+  Tabs,
+  Icon,
+  Button,
   Drawer,
   Table,
-  notification,
-} from 'antd';
-import alasql from 'alasql';
+  notification
+} from "antd";
+import alasql from "alasql";
 
-import myStyles from './OperationEditor.less';
+import myStyles from "./OperationEditor.less";
 alasql.options.errorlog = true;
-import { assert } from '../../util';
-import CmEvalInput from '../CmEvalInput';
+import { assert } from "../../util";
+import CmEvalInput from "../CmEvalInput";
 
 function runSql(statement) {
-  console.log('run sql: ', statement)
+  console.log("run sql: ", statement);
   return alasql(statement);
 }
 
-function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton}) {
+function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton }) {
   return (
     <div className={myStyles.opNaviBar}>
       <div className={myStyles.tabContainer}>
         <div className={myStyles.override}>
-          <Tabs activeKey={activeOpId} type='card' 
-            onChange={(activeKey) => {
+          <Tabs
+            activeKey={activeOpId}
+            type="card"
+            onChange={activeKey => {
               onSetActiveOpId(activeKey);
-            }}>
-            {ops.map((i) => (
+            }}
+          >
+            {ops.map(i => (
               <Tabs.TabPane tab={i} key={i} />
             ))}
           </Tabs>
@@ -44,16 +47,16 @@ function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton}) {
         */}
       </div>
     </div>
-  )
+  );
 }
 
 function TargetDetail({ target, visible, setVisible }) {
   function listLocalStorageTable() {
-    const tables = runSql('show tables;');
+    const tables = runSql("show tables;");
     if (tables) {
-      return tables.map((table) => table.tableid)
+      return tables.map(table => table.tableid);
     } else {
-      return []
+      return [];
     }
   }
 
@@ -64,253 +67,293 @@ function TargetDetail({ target, visible, setVisible }) {
     const columns = runSql(`show columns from ${table};`);
     if (columns) {
       //console.log(`show columns from ${table}`, columns);
-      return columns.map((col) => ({
+      return columns.map(col => ({
         key: col.columnid,
         column_name: col.columnid,
-        data_type: col.dbtypeid,
-      }))
+        data_type: col.dbtypeid
+      }));
     } else {
-      return []
+      return [];
     }
   }
 
   useEffect(() => {
-    const [scope, dbName] = target.split('.');
-    assert(scope === 'localStorage');
+    const [scope, dbName] = target.split(".");
+    assert(scope === "localStorage");
     runSql(`
       ATTACH LOCALSTORAGE DATABASE ${dbName};
       USE ${dbName};
     `);
-  }, [target])
+  }, [target]);
 
   const tbls = listLocalStorageTable();
   const columns = [
     {
-      title: '列名',
-      dataIndex: 'column_name',
-      key: 'column_name',
+      title: "列名",
+      dataIndex: "column_name",
+      key: "column_name"
     },
     {
-      title: '数据类型',
-      dataIndex: 'data_type',
-      key: 'data_type',
-    },
+      title: "数据类型",
+      dataIndex: "data_type",
+      key: "data_type"
+    }
   ];
 
   return (
     <Drawer
-        title="数据库详情"
-        placement="right"
-        closable={false}
-        onClose={() => setVisible(false)}
-        visible={visible}
-        width={300}
-      >
-        {
-          tbls.map((table) => (
-            <div key={table} style={{marginBottom: 16}}>
-              <h4>表名: {table}</h4>
-              <Table dataSource={listLocalStorageTableColumn(table)} columns={columns} pagination={false} />
-            </div>
-          ))
-        }
+      title="数据库详情"
+      placement="right"
+      closable={false}
+      onClose={() => setVisible(false)}
+      visible={visible}
+      width={300}
+    >
+      {tbls.map(table => (
+        <div key={table} style={{ marginBottom: 16 }}>
+          <h4>表名: {table}</h4>
+          <Table
+            dataSource={listLocalStorageTableColumn(table)}
+            columns={columns}
+            pagination={false}
+          />
+        </div>
+      ))}
     </Drawer>
-  )
+  );
 }
 
-function NormalOpHeader({op, onDeleteOperation, onExecOperation, onSetOperationType}) {
+function NormalOpHeader({
+  op,
+  onDeleteOperation,
+  onExecOperation,
+  onSetOperationType
+}) {
   // console.log('current op in header: ', op);
   const [target, setTarget] = useState();
   const [targetDetailVisible, setTargetDetailVisible] = useState(false);
   function listLocalStorageDb() {
-    const dbJson = localStorage.getItem('alasql');
+    const dbJson = localStorage.getItem("alasql");
     const dbMap = JSON.parse(dbJson);
-    const dbs = Object.keys(dbMap['databases'])
+    const dbs = Object.keys(dbMap["databases"]);
     return dbs;
   }
 
   const dbs = listLocalStorageDb();
   const treeData = [
     {
-      title: 'localStorage',
+      title: "localStorage",
       selectable: false,
-      value: 'localStorage',
-      key: 'localStorage',
-      children: [ ],
-    },
+      value: "localStorage",
+      key: "localStorage",
+      children: []
+    }
   ];
-  treeData[0].children = dbs.map((db) => ({
+  treeData[0].children = dbs.map(db => ({
     title: `${db}`,
     value: `localStorage.${db}`,
-    key: `localStorage.${db}`,
-  }))
+    key: `localStorage.${db}`
+  }));
 
   return (
     <>
-    <div className={myStyles.left}>
-      <label>类型：
-        <Select defaultValue="SQLReadonly" value={op.type} style={{ width: 200 }} 
-          onChange={(value) => onSetOperationType(op.id, value)}
+      <div className={myStyles.left}>
+        <label>
+          类型：
+          <Select
+            defaultValue="SQLReadonly"
+            value={op.type}
+            style={{ width: 200 }}
+            onChange={value => onSetOperationType(op.id, value)}
+          >
+            <Select.Option value="SQLReadonly">SQL(只读)</Select.Option>
+            <Select.Option value="SQLReadWrite">SQL(读写)</Select.Option>
+          </Select>
+        </label>
+        <label>
+          数据库：
+          <TreeSelect
+            style={{ width: 200 }}
+            value={target}
+            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+            treeData={treeData}
+            placeholder="选择数据库"
+            treeDefaultExpandAll
+            onChange={newTarget => setTarget(newTarget)}
+            allowClear
+          />
+        </label>
+        {target ? (
+          <Button
+            type="link"
+            onClick={() => {
+              if (target) {
+                setTargetDetailVisible(true);
+              }
+            }}
+          >
+            详情
+          </Button>
+        ) : null}
+        {target ? (
+          <TargetDetail
+            target={target}
+            visible={targetDetailVisible}
+            setVisible={setTargetDetailVisible}
+          />
+        ) : null}
+      </div>
+      <div className={myStyles.right}>
+        <Button
+          type="danger"
+          onClick={() => {
+            onDeleteOperation(op.id);
+          }}
         >
-          <Select.Option value="SQLReadonly">SQL(只读)</Select.Option>
-          <Select.Option value="SQLReadWrite">SQL(读写)</Select.Option>
-        </Select>
-      </label>
-      <label>数据库：
-        <TreeSelect 
-          style={{ width: 200 }} 
-          value={target}
-          dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-          treeData={treeData}
-          placeholder="选择数据库"
-          treeDefaultExpandAll
-          onChange={(newTarget) => setTarget(newTarget)}
-          allowClear
-        />
-      </label>
-      { target ? (
-        <Button type='link' onClick={() => {
-          if (target) {
-            setTargetDetailVisible(true)
-          }
-        }}>详情</Button>
-      ): null}
-      {
-        target ? (
-          <TargetDetail target={target} 
-            visible={targetDetailVisible} 
-            setVisible={setTargetDetailVisible} />
-        ) : null
-      }
-    </div>
-    <div className={myStyles.right}>
-      <Button type='danger' onClick={() => {
-        onDeleteOperation(op.id);
-      }}>删除</Button>
-      {/* <Button>格式化</Button> */}
-      {/* <Button>复制</Button> */}
-      {/* <Button disabled>保存</Button> */}
-      <Button type='primary' onClick={() => {
-        if (op.preparedSqlError) {
-          notification.error({
-            message: '输入不合法',
-          });
-        } else if (op.preparedSqlInput === '') {
-          notification.info({
-            message: '输入为空',
-          });
-        } else {
-          onExecOperation(op.id);
-        }
-      }}>运行</Button>
-    </div>
+          删除
+        </Button>
+        {/* <Button>格式化</Button> */}
+        {/* <Button>复制</Button> */}
+        {/* <Button disabled>保存</Button> */}
+        <Button
+          type="primary"
+          onClick={() => {
+            if (op.preparedSqlError) {
+              notification.error({
+                message: "输入不合法"
+              });
+            } else if (op.preparedSqlInput === "") {
+              notification.info({
+                message: "输入为空"
+              });
+            } else {
+              onExecOperation(op.id);
+            }
+          }}
+        >
+          运行
+        </Button>
+      </div>
     </>
-  )
+  );
 }
 
 function EmptyOpHeader() {
   return null;
 }
 
-function OpHeader({op, onDeleteOperation, onExecOperation, onSetOperationType}) {
+function OpHeader({
+  op,
+  onDeleteOperation,
+  onExecOperation,
+  onSetOperationType
+}) {
   return (
     <div className={myStyles.opHeader}>
-      {
-        op ? (
-          <NormalOpHeader op={op} 
-            onDeleteOperation={onDeleteOperation} 
-            onExecOperation={onExecOperation}
-            onSetOperationType={onSetOperationType}
-          />
-        ) : (
-          <EmptyOpHeader />
-        )
-      }
+      {op ? (
+        <NormalOpHeader
+          op={op}
+          onDeleteOperation={onDeleteOperation}
+          onExecOperation={onExecOperation}
+          onSetOperationType={onSetOperationType}
+        />
+      ) : (
+        <EmptyOpHeader />
+      )}
     </div>
-  )
+  );
 }
 
 function AfterExecute({
   op,
   opNames,
   onSetOpListWhenSuccess,
-  onSetOpListWhenFail,
+  onSetOpListWhenFail
 }) {
-  const otherOpNames = opNames.filter((opId) => op.id !== opId);
+  const otherOpNames = opNames.filter(opId => op.id !== opId);
   return (
     <>
       <h5>执行完成后</h5>
       <div className={myStyles.afterExec}>
         <div className={myStyles.left}>
           <p>如果成功，执行如下操作</p>
-          <Select defaultValue={op.opListWhenSuccess} style={{ width: '100%'}}
-            onChange={(value) => {
-              if (value === '') {
+          <Select
+            defaultValue={op.opListWhenSuccess}
+            style={{ width: "100%" }}
+            onChange={value => {
+              if (value === "") {
                 // do nothing
               } else {
-                onSetOpListWhenSuccess(op.id, value.split(','));
+                onSetOpListWhenSuccess(op.id, value.split(","));
               }
             }}
           >
-            {
-              otherOpNames.map((opId) => (
-                <Select.Option value={opId} key={opId}>{opId}</Select.Option>
-              ))
-            }
+            {otherOpNames.map(opId => (
+              <Select.Option value={opId} key={opId}>
+                {opId}
+              </Select.Option>
+            ))}
           </Select>
         </div>
         <div className={myStyles.right}>
           <p>如果失败，执行如下操作</p>
-          <Select defaultValue={op.opListWhenFail} style={{ width: '100%'}} 
-            onChange={(value) => {
-              if (value === '') {
+          <Select
+            defaultValue={op.opListWhenFail}
+            style={{ width: "100%" }}
+            onChange={value => {
+              if (value === "") {
                 // do nothing
               } else {
-                onSetOpListWhenFail(op.id, value.split(','));
+                onSetOpListWhenFail(op.id, value.split(","));
               }
             }}
           >
-            {
-              otherOpNames.map((opId) => (
-                <Select.Option value={opId} key={opId}>opId</Select.Option>
-              ))
-            }
+            {otherOpNames.map(opId => (
+              <Select.Option value={opId} key={opId}>
+                opId
+              </Select.Option>
+            ))}
           </Select>
         </div>
       </div>
     </>
-  )
+  );
 }
 
-function NormalOpBody({op, onSetOperationInput, opNames, onSetOpListWhenSuccess, onSetOpListWhenFail}) {
+function NormalOpBody({
+  op,
+  onSetOperationInput,
+  opNames,
+  onSetOpListWhenSuccess,
+  onSetOpListWhenFail
+}) {
   return (
     <div className={myStyles.normalOpBody}>
       <section>
         <CmEvalInput
           value={op.preparedSqlInput}
           options={{
-            mode: 'sql',
-            theme: 'neo',
+            mode: "sql",
+            theme: "neo",
             lineWrapping: true,
             lineNumbers: true,
-            viewportMargin: Infinity,
+            viewportMargin: Infinity
           }}
-          onChange={(newValue) => {
+          onChange={newValue => {
             onSetOperationInput(op.id, newValue);
           }}
         />
       </section>
       <section>
-        <hr/>
-        {
-          op.type === 'SQLReadWrite' ? 
-          (
-            <AfterExecute op={op} 
-              opNames={opNames} 
-              onSetOpListWhenSuccess={onSetOpListWhenSuccess} 
-              onSetOpListWhenFail={onSetOpListWhenFail}
-          />) : null
-        }
+        <hr />
+        {op.type === "SQLReadWrite" ? (
+          <AfterExecute
+            op={op}
+            opNames={opNames}
+            onSetOpListWhenSuccess={onSetOpListWhenSuccess}
+            onSetOpListWhenFail={onSetOpListWhenFail}
+          />
+        ) : null}
       </section>
       {/* 
       <section>
@@ -323,14 +366,18 @@ function NormalOpBody({op, onSetOperationInput, opNames, onSetOpListWhenSuccess,
       </section>
       */}
     </div>
-  )
+  );
 }
 
-function EmptyOpBody({ newOperationButton}) {
+function EmptyOpBody({ newOperationButton }) {
   return (
     <div className={myStyles.emptyOpBody}>
       <div className={myStyles.icon}>
-        <Icon type="appstore" theme={'filled'} style={{fontSize: 72, color: ''}} />
+        <Icon
+          type="appstore"
+          theme={"filled"}
+          style={{ fontSize: 72, color: "" }}
+        />
       </div>
       <h4>未选中任何操作</h4>
       <div className={myStyles.description}>
@@ -338,47 +385,45 @@ function EmptyOpBody({ newOperationButton}) {
         一个操作 或 选择已有操作
       </div>
     </div>
-  )
+  );
 }
 
 function OpBody({
-  op, 
-  opNames, 
-  newOperationButton, 
-  onSetOperationInput, 
-  onSetOpListWhenSuccess, 
-  onSetOpListWhenFail,
+  op,
+  opNames,
+  newOperationButton,
+  onSetOperationInput,
+  onSetOpListWhenSuccess,
+  onSetOpListWhenFail
 }) {
   return (
     <>
-    {
-      op ? (
-        <NormalOpBody 
-          op={op} 
+      {op ? (
+        <NormalOpBody
+          op={op}
           opNames={opNames}
-          onSetOperationInput={onSetOperationInput} 
+          onSetOperationInput={onSetOperationInput}
           onSetOpListWhenSuccess={onSetOpListWhenSuccess}
           onSetOpListWhenFail={onSetOpListWhenFail}
         />
       ) : (
         <EmptyOpBody newOperationButton={newOperationButton} />
-      )
-    }
+      )}
     </>
-  )
+  );
 }
 
-function OperationEditor({ 
-  opNames, 
-  activeOp, 
-  onAddOperation, 
-  onDeleteOperation, 
+function OperationEditor({
+  opNames,
+  activeOp,
+  onAddOperation,
+  onDeleteOperation,
   onSetActiveOpId,
   onExecOperation,
   onSetOperationInput,
   onSetOperationType,
   onSetOpListWhenSuccess,
-  onSetOpListWhenFail,
+  onSetOpListWhenFail
 }) {
   function generateNewOpId(ops) {
     let instanceId = ops.length + 1;
@@ -391,30 +436,33 @@ function OperationEditor({
     const newOpId = generateNewOpId(opNames);
     onAddOperation(newOpId);
     onSetActiveOpId(newOpId);
-  }
-  const myOnDeleteOperation = (id) => {
+  };
+  const myOnDeleteOperation = id => {
     onDeleteOperation(id);
     onSetActiveOpId(null);
-  }
+  };
   const newOperationButton = (
     <Button onClick={myOnAddOperation}>
-      <Icon type="plus" />新建
+      <Icon type="plus" />
+      新建
     </Button>
-  )
+  );
   return (
     <div className={myStyles.opEditor}>
-      <OpTabBar 
-        ops={opNames} 
-        activeOpId={activeOp ? activeOp.id: null}
+      <OpTabBar
+        ops={opNames}
+        activeOpId={activeOp ? activeOp.id : null}
         onSetActiveOpId={onSetActiveOpId}
         newOperationButton={newOperationButton}
       />
-      <OpHeader op={activeOp} 
-        onDeleteOperation={myOnDeleteOperation} 
+      <OpHeader
+        op={activeOp}
+        onDeleteOperation={myOnDeleteOperation}
         onExecOperation={onExecOperation}
         onSetOperationType={onSetOperationType}
       />
-      <OpBody op={activeOp} 
+      <OpBody
+        op={activeOp}
         opNames={opNames}
         onSetOperationInput={onSetOperationInput}
         newOperationButton={newOperationButton}
@@ -422,7 +470,7 @@ function OperationEditor({
         onSetOpListWhenFail={onSetOpListWhenFail}
       />
     </div>
-  )
+  );
 }
 
 OperationEditor.propTypes = {
@@ -436,7 +484,7 @@ OperationEditor.propTypes = {
   onExecOperation: PropTypes.func.isRequired,
   onSetOperationType: PropTypes.func.isRequired,
   onSetOpListWhenSuccess: PropTypes.func.isRequired,
-  onSetOpListWhenFail: PropTypes.func.isRequired,
-}
+  onSetOpListWhenFail: PropTypes.func.isRequired
+};
 
 export default OperationEditor;

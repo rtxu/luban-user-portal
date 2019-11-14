@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useLayoutEffect, } from 'react';
-import { useDrop } from 'react-dnd'
-import PropTypes from 'prop-types';
-import throttle from 'lodash.throttle';
-import classNames from 'classnames';
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { useDrop } from "react-dnd";
+import PropTypes from "prop-types";
+import throttle from "lodash.throttle";
+import classNames from "classnames";
 
-import WidgetBox from './WidgetBox';
-import { CSS, CANVAS } from './constant';
-import styles from './EditorCanvas.less';
-import DndItemTypes, {isResizeHandle} from './DndItemTypes';
-import { createLogger } from '@/util';
+import WidgetBox from "./WidgetBox";
+import { CSS, CANVAS } from "./constant";
+import styles from "./EditorCanvas.less";
+import DndItemTypes, { isResizeHandle } from "./DndItemTypes";
+import { createLogger } from "@/util";
 
-const logger = createLogger('/components/editor/EditorCanvas');
+const logger = createLogger("/components/editor/EditorCanvas");
 
-const canvasId = 'canvas';
+const canvasId = "canvas";
 
 const Grid = ({ canvasHeight, canvasColumnWidth }) => {
   const height = canvasHeight + 2 * CANVAS.rowHeight;
@@ -20,41 +20,39 @@ const Grid = ({ canvasHeight, canvasColumnWidth }) => {
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
   let columns = [];
-  for (let i = 0; i < CANVAS.columnCnt+1; i++) {
+  for (let i = 0; i < CANVAS.columnCnt + 1; i++) {
     const style = {
       height: height,
-      transform: `translate3d(${leftOffset}px, 0px, 0px)`,
-    }
+      transform: `translate3d(${leftOffset}px, 0px, 0px)`
+    };
     leftOffset += canvasColumnWidth;
-    columns.push(
-      <div className={styles.column} style={style} key={i}></div>
-    );
+    columns.push(<div className={styles.column} style={style} key={i}></div>);
   }
-  return (
-    <div className={styles.grid}>
-      {columns}
-    </div>
-  )
-}
+  return <div className={styles.grid}>{columns}</div>;
+};
 
 Grid.propTypes = {
   canvasHeight: PropTypes.number.isRequired,
-  canvasColumnWidth: PropTypes.number.isRequired,
+  canvasColumnWidth: PropTypes.number.isRequired
 };
 
-const HoverWidgetBox = React.memo((props) => {
-  const { gridTop, gridLeft, gridHeight, gridWidth, canvasColumnWidth, className } = props;
+const HoverWidgetBox = React.memo(props => {
+  const {
+    gridTop,
+    gridLeft,
+    gridHeight,
+    gridWidth,
+    canvasColumnWidth,
+    className
+  } = props;
   const top = gridTop * CANVAS.rowHeight;
   const left = gridLeft * canvasColumnWidth;
   const style = {
     transform: `translate(${left}px, ${top}px)`,
     height: gridHeight * CANVAS.rowHeight,
-    width: gridWidth * canvasColumnWidth,
-  }
-  return (
-    <div className={className} style={style} >
-    </div>
-  )
+    width: gridWidth * canvasColumnWidth
+  };
+  return <div className={className} style={style}></div>;
 });
 
 HoverWidgetBox.propTypes = {
@@ -63,7 +61,7 @@ HoverWidgetBox.propTypes = {
   gridWidth: PropTypes.number.isRequired,
   gridHeight: PropTypes.number.isRequired,
   className: PropTypes.string.isRequired,
-  canvasColumnWidth: PropTypes.number.isRequired,
+  canvasColumnWidth: PropTypes.number.isRequired
 };
 
 function getCanvasOriginOffsetByDOM() {
@@ -73,28 +71,44 @@ function getCanvasOriginOffsetByDOM() {
   }
 
   const rect = canvas.getBoundingClientRect();
-  return [ true, rect.x, rect.y ]
+  return [true, rect.x, rect.y];
 }
 
-function calcDropOriginPos({ x: dropOriginX, y: dropOriginY }, canvasColumnWidth) {
+function calcDropOriginPos(
+  { x: dropOriginX, y: dropOriginY },
+  canvasColumnWidth
+) {
   // both offsets are relative to viewport
-  const [, canvasOriginX, canvasOriginY ] = getCanvasOriginOffsetByDOM();
-  const [ x, y ] = [ dropOriginX - canvasOriginX, dropOriginY - canvasOriginY ];
+  const [, canvasOriginX, canvasOriginY] = getCanvasOriginOffsetByDOM();
+  const [x, y] = [dropOriginX - canvasOriginX, dropOriginY - canvasOriginY];
 
-  return [ Math.floor(x / canvasColumnWidth), Math.floor(y / CANVAS.rowHeight) ];
+  return [Math.floor(x / canvasColumnWidth), Math.floor(y / CANVAS.rowHeight)];
 }
 
 function overlap(newWidget, widgets) {
   for (let widgetId of Object.keys(widgets)) {
-    if ('id' in newWidget && newWidget.id === widgetId) {
+    if ("id" in newWidget && newWidget.id === widgetId) {
       continue;
     }
 
     const widget = widgets[widgetId];
     // L: left, R: right, T: top, D: down
-    const [L1, R1, L2, R2] = [newWidget.gridLeft, newWidget.gridLeft + newWidget.gridWidth, widget.gridLeft, widget.gridLeft + widget.gridWidth];
-    const [T1, D1, T2, D2] = [newWidget.gridTop, newWidget.gridTop + newWidget.gridHeight, widget.gridTop, widget.gridTop + widget.gridHeight];
-    if (Math.max(L1, L2) < Math.min(R1, R2) && Math.max(T1, T2) < Math.min(D1, D2)) {
+    const [L1, R1, L2, R2] = [
+      newWidget.gridLeft,
+      newWidget.gridLeft + newWidget.gridWidth,
+      widget.gridLeft,
+      widget.gridLeft + widget.gridWidth
+    ];
+    const [T1, D1, T2, D2] = [
+      newWidget.gridTop,
+      newWidget.gridTop + newWidget.gridHeight,
+      widget.gridTop,
+      widget.gridTop + widget.gridHeight
+    ];
+    if (
+      Math.max(L1, L2) < Math.min(R1, R2) &&
+      Math.max(T1, T2) < Math.min(D1, D2)
+    ) {
       return true;
     }
   }
@@ -104,7 +118,7 @@ function overlap(newWidget, widgets) {
 function checkBoundary(widget) {
   const result = {
     ...widget
-  }
+  };
   // rule#1: top [0, +oo)
   if (result.gridTop < 0) {
     result.gridTop = 0;
@@ -113,8 +127,8 @@ function checkBoundary(widget) {
   if (result.gridLeft < 0) {
     result.gridLeft = 0;
   }
-  if (result.gridLeft > CANVAS.columnCnt-1) {
-    result.gridLeft = CANVAS.columnCnt-1;
+  if (result.gridLeft > CANVAS.columnCnt - 1) {
+    result.gridLeft = CANVAS.columnCnt - 1;
   }
   // rule#3: min-height = 1
   result.gridHeight = Math.max(1, result.gridHeight);
@@ -144,12 +158,12 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
   if (isResizeHandle(item.type)) {
     const delta = monitor.getDifferenceFromInitialOffset();
     const newWidget = {
-      ...item.widget,
-    }
+      ...item.widget
+    };
     if (delta) {
       const deltaGridX = Math.ceil(delta.x / canvasColumnWidth - 0.5);
       const deltaGridY = Math.ceil(delta.y / CANVAS.rowHeight - 0.5);
-      switch(item.type) {
+      switch (item.type) {
         case DndItemTypes.RH_LEFT_TOP:
           newWidget.gridLeft += deltaGridX;
           newWidget.gridWidth -= deltaGridX;
@@ -173,19 +187,18 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
           break;
       }
       return checkBoundary(newWidget);
-
     } else {
       return null;
     }
   } else {
     const offset = monitor.getClientOffset();
     if (offset) {
-      const [ gridLeft, gridTop ] = calcDropOriginPos(offset, canvasColumnWidth);
+      const [gridLeft, gridTop] = calcDropOriginPos(offset, canvasColumnWidth);
       const newWidget = {
         ...item,
         gridTop,
-        gridLeft,
-      }
+        gridLeft
+      };
       return checkBoundary(newWidget);
     } else {
       return null;
@@ -193,34 +206,45 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
   }
 }
 
-const handleHoverThrottled = throttle((item, monitor, hoverWidget, setHoverWidget, canvasColumnWidth) => {
-  const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
-  if (newWidget === null) {
-    // handleHoverThrottled.cancel() might be called after drop()
-    // newWidget will be null if it happens
-  } else {
-    if (hoverWidget &&
-      hoverWidget.gridLeft === newWidget.gridLeft &&
-      hoverWidget.gridTop === newWidget.gridTop &&
-      hoverWidget.gridHeight === newWidget.gridHeight &&
-      hoverWidget.gridWidth === newWidget.gridWidth
-    ) {
+const handleHoverThrottled = throttle(
+  (item, monitor, hoverWidget, setHoverWidget, canvasColumnWidth) => {
+    const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
+    if (newWidget === null) {
+      // handleHoverThrottled.cancel() might be called after drop()
+      // newWidget will be null if it happens
     } else {
-      if (monitor.canDrop()) {
-        newWidget.className = styles.hoverWidgetBox;
+      if (
+        hoverWidget &&
+        hoverWidget.gridLeft === newWidget.gridLeft &&
+        hoverWidget.gridTop === newWidget.gridTop &&
+        hoverWidget.gridHeight === newWidget.gridHeight &&
+        hoverWidget.gridWidth === newWidget.gridWidth
+      ) {
       } else {
-        newWidget.className = styles.hoverWidgetBoxCanNotPlace;
+        if (monitor.canDrop()) {
+          newWidget.className = styles.hoverWidgetBox;
+        } else {
+          newWidget.className = styles.hoverWidgetBoxCanNotPlace;
+        }
+        logger.debug(
+          "in hover(), new: ",
+          newWidget.gridLeft,
+          newWidget.gridTop,
+          newWidget.className
+        );
+        setHoverWidget(newWidget);
       }
-      logger.debug('in hover(), new: ', newWidget.gridLeft, newWidget.gridTop, newWidget.className);
-      setHoverWidget(newWidget);
     }
-  }
-}, 16);
+  },
+  16
+);
 
 function updateCanvasHeight(hoverWidget, widgets, setter) {
-  const newHeightOptions = [ CANVAS.minHeight - 2 * CANVAS.rowHeight];
+  const newHeightOptions = [CANVAS.minHeight - 2 * CANVAS.rowHeight];
   if (hoverWidget) {
-    newHeightOptions.push((hoverWidget.gridTop + hoverWidget.gridHeight) * CANVAS.rowHeight);
+    newHeightOptions.push(
+      (hoverWidget.gridTop + hoverWidget.gridHeight) * CANVAS.rowHeight
+    );
   }
   if (widgets) {
     for (let widgetId of Object.keys(widgets)) {
@@ -237,99 +261,107 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
 function EditorCanvas(props) {
   const { widgets } = props;
-  const [ mounted, setMounted ] = useState(false);
-  const [ hoverWidget, setHoverWidget ] = useState(null);
-  const [ canvasHeight, setCanvasHeight ] = useState(CANVAS.minHeight);
-  const [ canvasColumnWidth, setCanvasColumnWidth ] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [hoverWidget, setHoverWidget] = useState(null);
+  const [canvasHeight, setCanvasHeight] = useState(CANVAS.minHeight);
+  const [canvasColumnWidth, setCanvasColumnWidth] = useState(0);
 
-  const setHover = (widget) => {
+  const setHover = widget => {
     setHoverWidget(widget);
-  }
+  };
   const clearHover = () => {
     handleHoverThrottled.cancel();
     setHoverWidget(null);
-  }
+  };
 
-  const [{isOver}, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop({
     accept: Object.values(DndItemTypes),
     drop(item, monitor) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
-      console.log('dropItem:', newWidget);
+      console.log("dropItem:", newWidget);
       props.onAddOrUpdate(newWidget);
-      return undefined
+      return undefined;
     },
     canDrop(item, monitor) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
       return !overlap(newWidget, widgets);
     },
-    // Performance Issue: 
+    // Performance Issue:
     //  hover is too expensive: too many unneccesary re-render when mouse hover, even hover still
     // solution#1: (not tried yet)
-    //  CustomizedDragLayer example in react-dnd official site shows that 
+    //  CustomizedDragLayer example in react-dnd official site shows that
     //  no re-render when mouse hover still
     //  ref: https://codesandbox.io/s/react-dnd-example-6-qnhd0
     // solution#2: optimization effect is obvious
     //  unneccesary re-render comes from WidgetBox mainly,
-    //  so re-impl WidgetBox wrapped by React.memo() 
+    //  so re-impl WidgetBox wrapped by React.memo()
     //  ref: https://reactjs.org/docs/hooks-faq.html#how-do-i-implement-shouldcomponentupdate
 
     // hover is called very frequently, so throttle it
     // ref: https://reactjs.org/docs/faq-functions.html#how-can-i-prevent-a-function-from-being-called-too-quickly-or-too-many-times-in-a-row
     hover(item, monitor) {
-      handleHoverThrottled(item, monitor, hoverWidget, setHover, canvasColumnWidth);
+      handleHoverThrottled(
+        item,
+        monitor,
+        hoverWidget,
+        setHover,
+        canvasColumnWidth
+      );
     },
     collect: monitor => ({
-      isOver: monitor.isOver(),
+      isOver: monitor.isOver()
       // clientOffset failed to keep updating when isOver was true
       /*
       clientOffset: monitor.getClientOffset(),
       currentDragItem: monitor.getItem(),
       */
-    }),
-  })
+    })
+  });
 
   useLayoutEffect(() => {
     if (isOver) {
     } else {
       clearHover();
     }
-  }, [isOver])
+  }, [isOver]);
 
   useLayoutEffect(() => {
     setMounted(true);
-  }, [])
+  }, []);
 
   useLayoutEffect(() => {
     updateCanvasHeight(hoverWidget, widgets, setCanvasHeight);
-  }, [hoverWidget, widgets])
+  }, [hoverWidget, widgets]);
 
   useEffect(() => {
     const updateCanvasColumnWidth = () => {
       const canvas = document.getElementById(canvasId);
       if (canvas) {
         setCanvasColumnWidth(canvas.offsetWidth / CANVAS.columnCnt);
-        console.log(`canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`);
+        console.log(
+          `canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`
+        );
       }
-    }
+    };
     // FIXME(ruitao.xu):
     // Bug: the first cavas offsetWidth is wider than the actual(always more 200px) when the first update
     // solution#1: DONOT work, more 200px still
     //  method: callback ref (ref)[https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node]
-    // 
+    //
     // solution#2(current): workaround, but I DONOT know why
     //  method: add 500ms delay to the first update
     setTimeout(() => {
       updateCanvasColumnWidth();
     }, 500);
-    window.addEventListener('resize', updateCanvasColumnWidth);
+    window.addEventListener("resize", updateCanvasColumnWidth);
     return () => {
-      window.removeEventListener('resize', updateCanvasColumnWidth);
-    }
-  }, [])
+      window.removeEventListener("resize", updateCanvasColumnWidth);
+    };
+  }, []);
 
   const canvasClassName = classNames({
     [styles.canvas]: true,
-    [styles.lift]: isOver,
+    [styles.lift]: isOver
   });
 
   const { activeWidgetId, onSetActiveWidgetId } = props;
@@ -345,37 +377,54 @@ function EditorCanvas(props) {
   return (
     <div className={styles.root} onClick={() => onSetActiveWidgetId(null)}>
       <div className={styles.container}>
-        <div id={canvasId} ref={drop} className={canvasClassName} style={{height: canvasHeight}}>
-          { mounted && isOver && <Grid canvasHeight={canvasHeight} canvasColumnWidth={canvasColumnWidth} /> }
-          { mounted && hoverWidget && <HoverWidgetBox {...hoverWidget} canvasColumnWidth={canvasColumnWidth} /> }
-          { mounted && Object.keys(widgets).map(widgetId => (
-            <WidgetBox key={widgetId} 
-              {...widgets[widgetId]} 
-              canvasColumnWidth={canvasColumnWidth} 
-              showBorder={hoverWidget !== null}
-              selected={widgetId === activeWidgetId}
-              onClick={(e) => widgetOnClick(widgetId, e)}
-              onDeleteOne={(widgetId) => {
-                props.onDeleteOne(widgetId);
-                onSetActiveWidgetId(null);
-              }}
-              onWidgetDispatch={props.onWidgetDispatch}
+        <div
+          id={canvasId}
+          ref={drop}
+          className={canvasClassName}
+          style={{ height: canvasHeight }}
+        >
+          {mounted && isOver && (
+            <Grid
+              canvasHeight={canvasHeight}
+              canvasColumnWidth={canvasColumnWidth}
             />
-          )) }
+          )}
+          {mounted && hoverWidget && (
+            <HoverWidgetBox
+              {...hoverWidget}
+              canvasColumnWidth={canvasColumnWidth}
+            />
+          )}
+          {mounted &&
+            Object.keys(widgets).map(widgetId => (
+              <WidgetBox
+                key={widgetId}
+                {...widgets[widgetId]}
+                canvasColumnWidth={canvasColumnWidth}
+                showBorder={hoverWidget !== null}
+                selected={widgetId === activeWidgetId}
+                onClick={e => widgetOnClick(widgetId, e)}
+                onDeleteOne={widgetId => {
+                  props.onDeleteOne(widgetId);
+                  onSetActiveWidgetId(null);
+                }}
+                onWidgetDispatch={props.onWidgetDispatch}
+              />
+            ))}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 EditorCanvas.propTypes = {
   widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-  activeWidgetId: PropTypes.string,   // may be null
+  activeWidgetId: PropTypes.string, // may be null
 
   onSetActiveWidgetId: PropTypes.func.isRequired,
   onAddOrUpdate: PropTypes.func.isRequired,
   onDeleteOne: PropTypes.func.isRequired,
-  onWidgetDispatch: PropTypes.func.isRequired,
-}
+  onWidgetDispatch: PropTypes.func.isRequired
+};
 
 export default EditorCanvas;

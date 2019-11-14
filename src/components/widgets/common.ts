@@ -1,8 +1,8 @@
-import { ErrorT, ITemplate, TemplateTypeEnum } from '../../util/template';
-import { IEvalResult } from '../CmEvalInput';
+import { ErrorT, ITemplate, TemplateTypeEnum } from "../../util/template";
+import { IEvalResult } from "../CmEvalInput";
 
 interface IRestPayload {
-    [id: string]: any;
+  [id: string]: any;
 }
 
 interface IOnEvalAction {
@@ -15,13 +15,18 @@ interface IOnEvalAction {
   };
 }
 
-type IToEvalTemplateBase = Pick<ITemplate, 'id' | 'input' | 'type'>;
+type IToEvalTemplateBase = Pick<ITemplate, "id" | "input" | "type">;
 
 interface IToEvalTemplate extends IToEvalTemplateBase {
   onEvalActionCreator: (value: any, extra: any, error: ErrorT) => IOnEvalAction;
 }
 
-export function createDefaultToEvalTemplate(id: string, input: string, actionType: string, restPayload?: IRestPayload) {
+export function createDefaultToEvalTemplate(
+  id: string,
+  input: string,
+  actionType: string,
+  restPayload?: IRestPayload
+) {
   const tmpl: IToEvalTemplate = {
     id,
     type: TemplateTypeEnum.Default,
@@ -29,10 +34,10 @@ export function createDefaultToEvalTemplate(id: string, input: string, actionTyp
     onEvalActionCreator: (value: any, extra: any, error: ErrorT) => {
       return {
         type: actionType,
-        payload: { value, extra, error, ...restPayload},
-      }
-    },
-  }
+        payload: { value, extra, error, ...restPayload }
+      };
+    }
+  };
   return tmpl;
 }
 
@@ -44,8 +49,8 @@ export interface IEvaluatedTemplate {
 
 export function toEvalResult(value: any, error: string): IEvalResult {
   if (error) {
-    return { code: 1, msg: error, }
+    return { code: 1, msg: error };
   } else {
-    return { code: 0, msg: `= ${value}`, }
+    return { code: 0, msg: `= ${value}` };
   }
 }

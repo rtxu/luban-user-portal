@@ -1,4 +1,3 @@
-
 export default class DependencyNotMeetError extends Error {
   constructor(...params) {
     // Pass remaining arguments (including vendor specific ones) to parent constructor
@@ -9,6 +8,6 @@ export default class DependencyNotMeetError extends Error {
       Error.captureStackTrace(this, DependencyNotMeetError);
     }
 
-    this.name = 'DependencyNotMeetError';
+    this.name = "DependencyNotMeetError";
   }
 }

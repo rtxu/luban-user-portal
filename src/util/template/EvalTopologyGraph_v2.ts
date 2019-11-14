@@ -1,9 +1,9 @@
-import { ITemplate } from './common';
-import CyclicDependencyError from './CyclicDependencyError';
-import DependencyNotMeetError from './DependencyNotMeetError';
-import EvalNode, { EvalNodeStateEnum, IEvalNodeMap } from './EvalNode';
-import EvalNodeOp from './EvalNodeOp';
-import TemplateOp from './TemplateOp';
+import { ITemplate } from "./common";
+import CyclicDependencyError from "./CyclicDependencyError";
+import DependencyNotMeetError from "./DependencyNotMeetError";
+import EvalNode, { EvalNodeStateEnum, IEvalNodeMap } from "./EvalNode";
+import EvalNodeOp from "./EvalNodeOp";
+import TemplateOp from "./TemplateOp";
 
 class EvalTopologyGraph {
   private evalNodeMap: IEvalNodeMap;
@@ -23,8 +23,8 @@ class EvalTopologyGraph {
     // 2. 构造 EvalNode 间的依赖关系
     for (const node of Object.values(this.evalNodeMap)) {
       const possibleDepIds = EvalNodeOp.listPossibleDepId(node);
-      const deps: IEvalNodeMap = {}
-      for (const depId of possibleDepIds ) {
+      const deps: IEvalNodeMap = {};
+      for (const depId of possibleDepIds) {
         if (depId in this.evalNodeMap) {
           const depNode = this.evalNodeMap[depId];
           deps[depId] = depNode;
@@ -36,11 +36,13 @@ class EvalTopologyGraph {
 
   // 前提：节点的状态和依赖关系设置正确
   public evaluate(ctx) {
-    let pendingNodes = Object.values(this.evalNodeMap).filter((node) => node.isPending() );
+    let pendingNodes = Object.values(this.evalNodeMap).filter(node =>
+      node.isPending()
+    );
 
     this.checkCyclicDependency(pendingNodes);
     // remove cyclic dependency nodes
-    pendingNodes = pendingNodes.filter((node) => node.isPending() );
+    pendingNodes = pendingNodes.filter(node => node.isPending());
 
     while (pendingNodes.length > 0) {
       const node = pendingNodes.shift();
@@ -54,7 +56,11 @@ class EvalTopologyGraph {
           node.evaluate(ctx);
           break;
         case EvalNodeStateEnum.Error:
-          node.setError(new DependencyNotMeetError(`所依赖节点存在错误: [${(errDeps as string[]).join(', ')}]`));
+          node.setError(
+            new DependencyNotMeetError(
+              `所依赖节点存在错误: [${(errDeps as string[]).join(", ")}]`
+            )
+          );
           break;
         default:
           throw new Error(`${node.id} got unexpected depState: ${depState}`);
@@ -67,7 +73,11 @@ class EvalTopologyGraph {
       [key: string]: boolean;
     }
 
-    function _dfs(currentNode: EvalNode, currentPath: EvalNode[], globalVisited: IFlagMap) {
+    function _dfs(
+      currentNode: EvalNode,
+      currentPath: EvalNode[],
+      globalVisited: IFlagMap
+    ) {
       currentPath.push(currentNode);
       globalVisited[currentNode.id] = true;
 
@@ -84,7 +94,10 @@ class EvalTopologyGraph {
           const cycleNodesCopy = [...cycleNodes];
           for (const node of cycleNodesCopy) {
             // 0 -> 1 -> 2 -> ... -> n -> 0
-            const errMsg = cycleNodes.concat(cycleNodes[0]).map((n) => n.id).join('->');
+            const errMsg = cycleNodes
+              .concat(cycleNodes[0])
+              .map(n => n.id)
+              .join("->");
             node.setError(new CyclicDependencyError(errMsg));
             cycleNodes.push(cycleNodes.shift());
           }
@@ -97,11 +110,11 @@ class EvalTopologyGraph {
       currentPath.pop();
     }
 
-    const visited: IFlagMap = {}
+    const visited: IFlagMap = {};
     for (const node of nodes) {
       if (!visited[node.id]) {
         const path: EvalNode[] = [];
-        _dfs(node, path, visited)
+        _dfs(node, path, visited);
       }
     }
   }

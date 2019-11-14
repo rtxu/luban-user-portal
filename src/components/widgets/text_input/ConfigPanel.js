@@ -1,38 +1,50 @@
-import { Collapse, } from "antd";
+import { Collapse } from "antd";
 
-import Config from '../Config';
-import { setLabel, setLabelMaxWidth, setInputValue, setInputPlaceholder, setInputType } from './reducer';
+import Config from "../Config";
+import {
+  setLabel,
+  setLabelMaxWidth,
+  setInputValue,
+  setInputPlaceholder,
+  setInputType
+} from "./reducer";
 
 function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
   const { Panel } = Collapse;
 
   const inputTypes = [
-    'text', 'password', 'color', 
-    'date', 'datetime-local', 'email',
-    'month', 'number', 'range', 
-    'search', 'tel', 'time', 'url', 
-    'week',
+    "text",
+    "password",
+    "color",
+    "date",
+    "datetime-local",
+    "email",
+    "month",
+    "number",
+    "range",
+    "search",
+    "tel",
+    "time",
+    "url",
+    "week"
   ];
 
   return (
-    <Collapse
-      defaultActiveKey={['1', '2']}
-      expandIconPosition='right'
-    >
-      <Panel header='基础配置' key='1' >
+    <Collapse defaultActiveKey={["1", "2"]} expandIconPosition="right">
+      <Panel header="基础配置" key="1">
         <Config.LabelInput
-          label={{ value: '字段名' }}
+          label={{ value: "字段名" }}
           input={{
             value: label,
-            onChange: (e) => dispatch(setLabel(e.target.value)),
+            onChange: e => dispatch(setLabel(e.target.value))
           }}
         />
-        <Config.LabelSelect 
-          label={{ value: '输入框类型' }}
+        <Config.LabelSelect
+          label={{ value: "输入框类型" }}
           select={{
-            defaultValue: 'text',
+            defaultValue: "text",
             options: inputTypes,
-            onChange: (newInputType) => dispatch(setInputType(newInputType)),
+            onChange: newInputType => dispatch(setInputType(newInputType))
           }}
         />
         {/*  暂时没有想到应用场景
@@ -45,21 +57,21 @@ function ConfigPanel({ label, labelMaxWidth, input, dispatch }) {
         />
         */}
       </Panel>
-      <Panel header='显示选项' key='2' >
+      <Panel header="显示选项" key="2">
         <Config.LabelInput
-          label={{ value: '占位文本' }}
+          label={{ value: "占位文本" }}
           input={{
             value: input.placeholder,
-            onChange: (e) => dispatch(setInputPlaceholder(e.target.value)),
+            onChange: e => dispatch(setInputPlaceholder(e.target.value))
           }}
         />
         <Config.LabelInput
-          label={{ value: '字段名最大宽度' }}
+          label={{ value: "字段名最大宽度" }}
           input={{
-            type: 'number',
+            type: "number",
             value: String(labelMaxWidth),
-            placeholder: '默认值 150',
-            onChange: (e) => dispatch(setLabelMaxWidth(Number(e.target.value))),
+            placeholder: "默认值 150",
+            onChange: e => dispatch(setLabelMaxWidth(Number(e.target.value)))
           }}
         />
       </Panel>

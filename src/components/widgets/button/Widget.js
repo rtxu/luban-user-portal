@@ -1,26 +1,26 @@
-import PropTypes from 'prop-types';
-import styles from './Widget.less';
-import { connect } from 'dva';
+import PropTypes from "prop-types";
+import styles from "./Widget.less";
+import { connect } from "dva";
 import { Button as AntButton, notification } from "antd";
-import { actionOptions, BUTTON_ACTION_OPTION_MAP } from './common';
-import TriggerAnActionConfigPanel from './TriggerAnActionConfigPanel';
+import { actionOptions, BUTTON_ACTION_OPTION_MAP } from "./common";
+import TriggerAnActionConfigPanel from "./TriggerAnActionConfigPanel";
 // import OpenAnotherLocalPageConfigPanel from './OpenAnotherLocalPageConfigPanel';
-import OpenAnyWebPageConfigPanel from './OpenAnyWebPageConfigPanel';
+import OpenAnyWebPageConfigPanel from "./OpenAnyWebPageConfigPanel";
 
-import { execOperation } from '../../../pages/editor/models/operations';
+import { execOperation } from "../../../pages/editor/models/operations";
 
-function Button({ 
-  text, 
-  color, 
-  actionType, 
-  actionOpenAnyWebPage, 
+function Button({
+  text,
+  color,
+  actionType,
+  actionOpenAnyWebPage,
   actionTriggerAnAction,
-  onExecOperation,
+  onExecOperation
 }) {
   const style = {
     backgroundColor: color,
-    borderColor: color,
-  }
+    borderColor: color
+  };
 
   const onClick = () => {
     // console.log('====', actionType, actionTriggerAnAction, actionOpenAnyWebPage);
@@ -29,7 +29,7 @@ function Button({
         if (actionTriggerAnAction.opId) {
           // console.log('onExecOperation', actionTriggerAnAction.opId);
           onExecOperation(actionTriggerAnAction.opId);
-        } 
+        }
         /*
         else {
           notification.error({
@@ -50,13 +50,15 @@ function Button({
         break;
 
       default:
-        throw new Error(`when buildButtonActions: unexpected action type: ${actionType}`);
+        throw new Error(
+          `when buildButtonActions: unexpected action type: ${actionType}`
+        );
     }
-  }
-  
+  };
+
   return (
-    <div className={styles.widgetButton} >
-      <AntButton type='primary' style={style} onClick={onClick} >
+    <div className={styles.widgetButton}>
+      <AntButton type="primary" style={style} onClick={onClick}>
         {text}
       </AntButton>
     </div>
@@ -73,14 +75,14 @@ Button.propTypes = {
   actionTriggerAnAction: PropTypes.shape(TriggerAnActionConfigPanel.propTypes),
   actionOpenAnyWebPage: PropTypes.shape(OpenAnyWebPageConfigPanel.propTypes),
 
-  dispatch: PropTypes.func.isRequired,
-}
+  dispatch: PropTypes.func.isRequired
+};
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    onExecOperation: (opId) => {
-      dispatch(execOperation({id: opId}));
-    },
-  }
-}
+    onExecOperation: opId => {
+      dispatch(execOperation({ id: opId }));
+    }
+  };
+};
 export default connect(null, mapDispatchToProps)(Button);

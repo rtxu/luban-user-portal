@@ -1,11 +1,18 @@
-
 /** 模板类型 */
 export enum TemplateTypeEnum {
   Default,
-  Alasql,
+  Alasql
 }
 
-export type ErrorT = null | Error | EvalError | RangeError | ReferenceError | SyntaxError | TypeError | URIError;
+export type ErrorT =
+  | null
+  | Error
+  | EvalError
+  | RangeError
+  | ReferenceError
+  | SyntaxError
+  | TypeError
+  | URIError;
 export type OnEvalT = (value, valueExtra, error: ErrorT) => void;
 
 export interface ITemplate {
@@ -27,5 +34,5 @@ export interface IAlasqlTemplate extends ITemplate {
 }
 
 export interface ICtx {
-  [key: string]: any,
+  [key: string]: any;
 }

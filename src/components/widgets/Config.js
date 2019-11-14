@@ -1,22 +1,17 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import styles from './Config.less';
-import { 
-  Switch as AntSwitch,
-  Input as AntInput,
-  Tooltip,
-  Select,
-} from "antd";
-import CmEvalInput, { EvalResult } from '../CmEvalInput';
+import React from "react";
+import PropTypes from "prop-types";
+import styles from "./Config.less";
+import { Switch as AntSwitch, Input as AntInput, Tooltip, Select } from "antd";
+import CmEvalInput, { EvalResult } from "../CmEvalInput";
 
 // [layout
 // layout]
 
 // [component
-function Switch({disabled, checked, onChange, description}) {
+function Switch({ disabled, checked, onChange, description }) {
   const classNames = [styles.labelEntry, styles.switch];
   return (
-    <div className={classNames.join(' ')}>
+    <div className={classNames.join(" ")}>
       <AntSwitch disabled={disabled} checked={checked} onChange={onChange} />
       <span>{description}</span>
     </div>
@@ -27,20 +22,20 @@ Switch.propTypes = {
   disabled: PropTypes.bool,
   checked: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
-  description: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired
 };
 
 Switch.defaultProps = {
-  disabled: false,
+  disabled: false
 };
 
-function Label({value, tooltip}) {
+function Label({ value, tooltip }) {
   const labelNode = tooltip ? (
     <Tooltip title={tooltip}>
       <label>{value}</label>
     </Tooltip>
   ) : (
-      <label>{value}</label>
+    <label>{value}</label>
   );
 
   return labelNode;
@@ -48,10 +43,10 @@ function Label({value, tooltip}) {
 
 Label.propTypes = {
   value: PropTypes.string.isRequired,
-  tooltip: PropTypes.string,
-}
+  tooltip: PropTypes.string
+};
 
-function LabelInput({ label, input, }) {
+function LabelInput({ label, input }) {
   return (
     <div className={styles.labelEntry}>
       <Label {...label} />
@@ -69,24 +64,24 @@ LabelInput.propTypes = {
     placeholder: PropTypes.string,
     defaultValue: PropTypes.string,
     onChange: PropTypes.func,
-    onPressEnter: PropTypes.func,
-  }),
+    onPressEnter: PropTypes.func
+  })
 };
 
-function LabelCmEvalInput({ label, input, }) {
+function LabelCmEvalInput({ label, input }) {
   const defaultOptions = {
-    mode: 'javascript',
-    theme: 'neo',
+    mode: "javascript",
+    theme: "neo",
     lineWrapping: true,
     lineNumbers: false,
-    viewportMargin: Infinity,
+    viewportMargin: Infinity
   };
 
   const { options: userOptions } = input;
   const options = {
     ...defaultOptions,
-    ...userOptions,
-  }
+    ...userOptions
+  };
 
   return (
     <div className={styles.labelEntry}>
@@ -98,22 +93,20 @@ function LabelCmEvalInput({ label, input, }) {
 
 LabelCmEvalInput.propTypes = {
   label: PropTypes.shape(Label.propTypes).isRequired,
-  input: PropTypes.shape(CmEvalInput.propTypes),
+  input: PropTypes.shape(CmEvalInput.propTypes)
 };
 
-
-function LabelSelect({ label, select, }) {
+function LabelSelect({ label, select }) {
   const { options, ...rest } = select;
   return (
     <div className={styles.labelEntry}>
       {label && <Label {...label} />}
-      <Select 
-        style={{display: 'block'}} 
-        {...rest }
-      >
-        { options.map((option, index) => (
-          <Select.Option value={option} key={index}>{option}</Select.Option>
-        )) }
+      <Select style={{ display: "block" }} {...rest}>
+        {options.map((option, index) => (
+          <Select.Option value={option} key={index}>
+            {option}
+          </Select.Option>
+        ))}
       </Select>
     </div>
   );
@@ -126,8 +119,8 @@ LabelSelect.propTypes = {
     value: PropTypes.string,
     options: PropTypes.arrayOf(PropTypes.string).isRequired,
     onChange: PropTypes.func.isRequired,
-    placeholder: PropTypes.string,
-  }),
+    placeholder: PropTypes.string
+  })
 };
 // component]
 
