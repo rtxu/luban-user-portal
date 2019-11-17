@@ -2,7 +2,7 @@ import alasql from "alasql";
 import isEqual from "lodash.isequal";
 import { Action, createAction, handleActions } from "redux-actions";
 
-import { ErrorT, TemplateTypeEnum } from "../../../util/template";
+import { ErrorT, TemplateTypeEnum } from "../util/template";
 
 enum OpTypeEnum {
   SQLReadonly = "SQLReadonly",

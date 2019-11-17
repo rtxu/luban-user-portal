@@ -344,7 +344,7 @@ function EditorCanvas(props) {
       }
     };
     // FIXME(ruitao.xu):
-    // Bug: the first cavas offsetWidth is wider than the actual(always more 200px) when the first update
+    // Bug: the first canvas offsetWidth is wider than the actual(always more 200px) when the first update
     // solution#1: DONOT work, more 200px still
     //  method: callback ref (ref)[https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node]
     //

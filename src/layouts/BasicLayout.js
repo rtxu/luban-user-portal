@@ -17,6 +17,7 @@ export default class BasicLayout extends Component {
           <div className={styles.logo}>
             <Logo viewBox="40 115 220 70" />
           </div>
+          {/** 搜索框 */}
           <div
             style={{
               height: "32px",

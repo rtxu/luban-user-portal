@@ -1,9 +1,8 @@
 import { createAction } from "redux-actions";
 
-import WidgetFactory from "../../../components/WidgetFactory";
-import { createLogger } from "../../../util";
+import WidgetFactory from "../components/WidgetFactory";
 import * as widgetsService from "../services/widgets";
-import { setActiveWidgetId } from "./editorCtx";
+import { createLogger } from "../util";
 
 const logger = createLogger("/pages/editor/models/widgets");
 
@@ -59,18 +58,8 @@ export const changeWidgetId = createAction<{
   oldWidgetId: string;
   newWidgetId: string;
 }>(changeWidgetIdTypeNs);
-const changeWidgetIdLocal = createAction<{
-  oldWidgetId: string;
-  newWidgetId: string;
-}>(changeWidgetIdType);
 
 // Effects
-const changeWidgetIdAndSetActiveType = `WIDGET_ID_CHANGE_AND_SET_ACTIVE`;
-const changeWidgetIdAndSetActiveTypeNs = `${NS}/${changeWidgetIdAndSetActiveType}`;
-export const changeWidgetIdAndSetActive = createAction<{
-  oldWidgetId: string;
-  newWidgetId: string;
-}>(changeWidgetIdAndSetActiveTypeNs);
 
 function removePrefix(str, prefix) {
   if (str.startsWith(prefix)) {
@@ -169,11 +158,7 @@ export default {
         // when to use 'takeLatest'?
       },
       "takeLatest"
-    ],
-    *[changeWidgetIdAndSetActiveType](action, { put }) {
-      yield put(changeWidgetIdLocal(action.payload));
-      yield put(setActiveWidgetId(action.payload.newWidgetId));
-    }
+    ]
   },
   reducers: {
     [initWidgetsType]: (widgets, action) => {

@@ -1,17 +1,17 @@
 import alasql from "alasql";
 
 import {
-  initEditorCtx,
-  initialState as editorCtxInitialState
-} from "./models/editorCtx";
-import {
   initialState as operationsInitialState,
   initOperations
-} from "./models/operations";
+} from "../../models/operations";
 import {
   initialState as widgetsInitialState,
   initWidgets
-} from "./models/widgets";
+} from "../../models/widgets";
+import {
+  initEditorCtx,
+  initialState as editorCtxInitialState
+} from "./models/editorCtx";
 
 const demoInitialState = {
   widgets: {

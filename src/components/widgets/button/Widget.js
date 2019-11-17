@@ -7,7 +7,7 @@ import TriggerAnActionConfigPanel from "./TriggerAnActionConfigPanel";
 // import OpenAnotherLocalPageConfigPanel from './OpenAnotherLocalPageConfigPanel';
 import OpenAnyWebPageConfigPanel from "./OpenAnyWebPageConfigPanel";
 
-import { execOperation } from "../../../pages/editor/models/operations";
+import { execOperation } from "../../../models/operations";
 
 function Button({
   text,

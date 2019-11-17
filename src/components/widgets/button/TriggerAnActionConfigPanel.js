@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import Config from "../Config";
 import { TriggerAnAction } from "./reducer";
 
-import { addOperation } from "../../../pages/editor/models/operations";
+import { addOperation } from "../../../models/operations";
 import { setActiveOpId } from "../../../pages/editor/models/editorCtx";
 
 function TriggerAnActionConfigPanel({

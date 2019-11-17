@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Layout } from "antd";
 import { DragDropContext } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { connect } from "dva";
-import isEqual from "lodash.isequal";
 
 import ControPanel from "../../components/editor/ControlPanel";
 import ModelBrowser from "../../components/editor/ModelBrowser";
@@ -19,26 +18,20 @@ import {
   execOperation,
   setOperationType,
   setOperationOpListWhenSuccess,
-  setOperationOpListWhenFail
-} from "./models/operations";
+  setOperationOpListWhenFail,
+  getExportedState as opGetExportedState
+} from "../../models/operations";
 import { setActiveOpId, setActiveWidgetId } from "./models/editorCtx";
 import {
-  getToEvalTemplates,
-  getEvalContext,
   getExportedState,
   addOrUpdateWidget,
   deleteWidget,
   updateWidgetContent,
-  changeWidgetIdAndSetActive
-} from "./models/widgets";
-import {
-  getToEvalTemplates as opGetToEvalTemplates,
-  getEvalContext as opGetEvalContext,
-  getExportedState as opGetExportedState
-} from "./models/operations";
-import { evaluate } from "../../util/template";
+  changeWidgetId
+} from "../../models/widgets";
 import { wrapDispatchToFire } from "../../util";
 import * as demoApp from "./demoApp";
+import { useAutoEvalTemplates } from "../../hooks/app";
 
 const { Header, Sider, Content } = Layout;
 
@@ -148,7 +141,8 @@ const mapDispatchToWidgetConfigPanelProps = dispatch => {
       fire(updateWidgetContent({ widgetId, widgetAction }));
     },
     onChangeWidgetId: (oldWidgetId, newWidgetId) => {
-      fire(changeWidgetIdAndSetActive({ oldWidgetId, newWidgetId }));
+      fire(changeWidgetId({ oldWidgetId, newWidgetId }));
+      fire(setActiveWidgetId({ newWidgetId }));
     }
   };
 };
@@ -199,45 +193,7 @@ function EditorLayout({ activeWidgetId }) {
 }
 
 const Editor = ({ widgets, activeWidgetId, operations, dispatch }) => {
-  const [lastEvalEnv, setLastEvalEnv] = useState([]);
-
-  useEffect(() => {
-    const widgetTemplates = getToEvalTemplates(widgets);
-    const widgetContext = getEvalContext(widgets);
-    const opTemplates = opGetToEvalTemplates(operations);
-    const opContext = opGetEvalContext(operations);
-    const toEvalTemplates = [...widgetTemplates, ...opTemplates];
-    const evalContext = { ...widgetContext, ...opContext };
-    const evalEnv = {
-      plainObjTemplates: toEvalTemplates.map(tmpl => ({
-        id: tmpl.id,
-        type: tmpl.type,
-        input: tmpl.input
-      })),
-      evalContext
-    };
-
-    if (isEqual(evalEnv, lastEvalEnv)) {
-    } else {
-      console.log("trigger re-evaluate");
-      console.log("to eval templates: ", toEvalTemplates);
-      console.log("eval context: ", evalContext);
-      const templates = toEvalTemplates.map(tmpl => ({
-        id: tmpl.id,
-        type: tmpl.type,
-        input: tmpl.input,
-        onEval: (value, extra, error) => {
-          console.log("evaluated", value, extra, error);
-          const action = tmpl.onEvalActionCreator(value, extra, error);
-          console.log("action", action);
-          dispatch(action);
-        }
-      }));
-      evaluate(templates, evalContext);
-      setLastEvalEnv(evalEnv);
-    }
-  });
-
+  useAutoEvalTemplates(widgets, operations, dispatch);
   return <EditorLayout activeWidgetId={activeWidgetId} />;
 };
 

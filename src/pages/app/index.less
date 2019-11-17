@@ -1,0 +1,41 @@
+// DANGER ZONE: the following varaibles are referenced by js
+// [--
+@widgetBoxHPadding: 6px;
+@widgetBoxVPadding: 5.5px;
+@resizeHandlePadding: 2px;
+
+@dotWidth: 2px;
+// --]
+
+@widgetBoxZIndexWhenSelected: 5;
+@widgetBoxZIndexWhenHover: @widgetBoxZIndexWhenSelected+1;
+@hoverWidgetBoxZIndex: @widgetBoxZIndexWhenHover+1;
+
+.root {
+  padding: 15px;
+  height: 100%;
+  overflow: auto;
+
+  .container {
+    min-width: 800px;
+    max-width: 1560px;
+    height: 100%;
+
+    .canvas {
+      margin: 12.5px;
+      position: relative;
+
+      .widgetBoxCommon {
+        position: absolute;
+        will-change: transform;
+        transition-property: height, width, transform;
+        transition-duration: 0.1s;
+        padding: @widgetBoxVPadding @widgetBoxHPadding;
+      }
+
+      .widgetBox {
+        .widgetBoxCommon();
+      }
+    }
+  }
+}
