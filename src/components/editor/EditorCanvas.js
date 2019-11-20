@@ -3,6 +3,7 @@ import { useDrop } from "react-dnd";
 import PropTypes from "prop-types";
 import throttle from "lodash.throttle";
 import classNames from "classnames";
+import { useMeasure } from "react-use";
 
 import WidgetBox from "./WidgetBox";
 import { CSS, CANVAS } from "./constant";
@@ -161,6 +162,7 @@ function calcNewWidget(item, monitor, canvasColumnWidth) {
       ...item.widget
     };
     if (delta) {
+      // 移动量超过半个单元格，则自适应到下个单元格
       const deltaGridX = Math.ceil(delta.x / canvasColumnWidth - 0.5);
       const deltaGridY = Math.ceil(delta.y / CANVAS.rowHeight - 0.5);
       switch (item.type) {
@@ -264,7 +266,8 @@ function EditorCanvas(props) {
   const [mounted, setMounted] = useState(false);
   const [hoverWidget, setHoverWidget] = useState(null);
   const [canvasHeight, setCanvasHeight] = useState(CANVAS.minHeight);
-  const [canvasColumnWidth, setCanvasColumnWidth] = useState(0);
+  const [canvasRef, { width }] = useMeasure();
+  const canvasColumnWidth = width / CANVAS.columnCnt;
 
   const setHover = widget => {
     setHoverWidget(widget);
@@ -333,32 +336,6 @@ function EditorCanvas(props) {
     updateCanvasHeight(hoverWidget, widgets, setCanvasHeight);
   }, [hoverWidget, widgets]);
 
-  useEffect(() => {
-    const updateCanvasColumnWidth = () => {
-      const canvas = document.getElementById(canvasId);
-      if (canvas) {
-        setCanvasColumnWidth(canvas.offsetWidth / CANVAS.columnCnt);
-        console.log(
-          `canvas height: ${canvas.offsetHeight}, width: ${canvas.offsetWidth}`
-        );
-      }
-    };
-    // FIXME(ruitao.xu):
-    // Bug: the first canvas offsetWidth is wider than the actual(always more 200px) when the first update
-    // solution#1: DONOT work, more 200px still
-    //  method: callback ref (ref)[https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node]
-    //
-    // solution#2(current): workaround, but I DONOT know why
-    //  method: add 500ms delay to the first update
-    setTimeout(() => {
-      updateCanvasColumnWidth();
-    }, 500);
-    window.addEventListener("resize", updateCanvasColumnWidth);
-    return () => {
-      window.removeEventListener("resize", updateCanvasColumnWidth);
-    };
-  }, []);
-
   const canvasClassName = classNames({
     [styles.canvas]: true,
     [styles.lift]: isOver
@@ -377,26 +354,26 @@ function EditorCanvas(props) {
   return (
     <div className={styles.root} onClick={() => onSetActiveWidgetId(null)}>
       <div className={styles.container}>
-        <div
-          id={canvasId}
-          ref={drop}
-          className={canvasClassName}
-          style={{ height: canvasHeight }}
-        >
-          {mounted && isOver && (
-            <Grid
-              canvasHeight={canvasHeight}
-              canvasColumnWidth={canvasColumnWidth}
-            />
-          )}
-          {mounted && hoverWidget && (
-            <HoverWidgetBox
-              {...hoverWidget}
-              canvasColumnWidth={canvasColumnWidth}
-            />
-          )}
-          {mounted &&
-            Object.keys(widgets).map(widgetId => (
+        <div ref={drop}>
+          <div
+            id={canvasId}
+            ref={canvasRef}
+            className={canvasClassName}
+            style={{ height: canvasHeight }}
+          >
+            {isOver && (
+              <Grid
+                canvasHeight={canvasHeight}
+                canvasColumnWidth={canvasColumnWidth}
+              />
+            )}
+            {hoverWidget && (
+              <HoverWidgetBox
+                {...hoverWidget}
+                canvasColumnWidth={canvasColumnWidth}
+              />
+            )}
+            {Object.keys(widgets).map(widgetId => (
               <WidgetBox
                 key={widgetId}
                 {...widgets[widgetId]}
@@ -411,6 +388,7 @@ function EditorCanvas(props) {
                 onWidgetDispatch={props.onWidgetDispatch}
               />
             ))}
+          </div>
         </div>
       </div>
     </div>
