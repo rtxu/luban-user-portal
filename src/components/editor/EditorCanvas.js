@@ -263,7 +263,6 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
 function EditorCanvas(props) {
   const { widgets } = props;
-  const [mounted, setMounted] = useState(false);
   const [hoverWidget, setHoverWidget] = useState(null);
   const [canvasHeight, setCanvasHeight] = useState(CANVAS.minHeight);
   const [canvasRef, { width }] = useMeasure();
@@ -327,10 +326,6 @@ function EditorCanvas(props) {
       clearHover();
     }
   }, [isOver]);
-
-  useLayoutEffect(() => {
-    setMounted(true);
-  }, []);
 
   useLayoutEffect(() => {
     updateCanvasHeight(hoverWidget, widgets, setCanvasHeight);

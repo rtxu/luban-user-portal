@@ -1,45 +1,36 @@
 import React, { useEffect } from "react";
 import { connect } from "dva";
+import { useMeasure } from "react-use";
 
 import styles from "./index.less";
+import { updateWidgetContent } from "../../models/widgets";
+import { CANVAS } from "../../components/editor/constant";
 
 // TODO(ruitao.xu): extract common logic
 import * as demoApp from "../editor/demoApp";
 import WidgetFactory from "../../components/WidgetFactory";
 import { useAutoEvalTemplates } from "../../hooks/app";
-
-const getStyle = (gridTop, gridLeft, gridHeight, gridWidth) => {
-  // TODO(ruitao.xu): use CANVAS common and adaptive canvas column width to replace 40/80
-  const top = gridTop * 40;
-  const left = gridLeft * 80;
-  const style = {
-    transform: `translate(${left}px, ${top}px)`,
-    height: gridHeight * 40,
-    width: gridWidth * 80
-  };
-  return style;
-};
+import { getLayoutStyle } from "../../util/widget";
 
 const ViewCanvas = ({ widgets, onWidgetDispatch }) => {
+  const [canvasRef, { width }] = useMeasure();
+  const canvasColumnWidth = width / CANVAS.columnCnt;
+
   return (
     <div className={styles.root}>
       <div className={styles.container}>
-        <div
-          className={styles.canvas}
-          style={{ height: "100vh", overflow: "auto" }}
-        >
+        <div ref={canvasRef} className={styles.canvas}>
           {Object.keys(widgets).map(widgetId => {
             const widget = widgets[widgetId];
             return (
               <div
                 key={widget.id}
                 className={styles.widgetBox}
-                style={getStyle(
-                  widget.gridTop,
-                  widget.gridLeft,
-                  widget.gridHeight,
-                  widget.gridWidth
-                )}
+                style={getLayoutStyle({
+                  ...widget,
+                  unitHeight: CANVAS.rowHeight,
+                  unitWidth: canvasColumnWidth
+                })}
               >
                 {WidgetFactory.createElement(widget.type, {
                   ...widget.content,

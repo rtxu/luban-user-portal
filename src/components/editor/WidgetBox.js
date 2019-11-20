@@ -10,6 +10,7 @@ import DndItemTypes from "./DndItemTypes";
 import styles from "./EditorCanvas.less";
 import WidgetFactory from "../WidgetFactory";
 import { createLogger } from "../../util";
+import { getLayoutStyle } from "../../util/widget";
 
 const logger = createLogger("/components/editor/WidgetBox");
 
@@ -67,18 +68,14 @@ const WidgetBox = React.memo(props => {
   }, []);
 
   // console.log('WigetBox', gridLeft, gridTop, gridHeight, gridWidth, id );
-  const top = gridTop * CANVAS.rowHeight;
-  const left = gridLeft * canvasColumnWidth;
-  const style = {
-    /*
-    // try to optimize performance, use transform instead of top/left, no obvious effect
-    top: gridTop * CANVAS.rowHeight,
-    left: gridLeft * canvasColumnWidth,
-    */
-    transform: `translate(${left}px, ${top}px)`,
-    height: gridHeight * CANVAS.rowHeight,
-    width: gridWidth * canvasColumnWidth
-  };
+  const style = getLayoutStyle({
+    gridTop,
+    gridLeft,
+    gridHeight,
+    gridWidth,
+    unitHeight: CANVAS.rowHeight,
+    unitWidth: canvasColumnWidth
+  });
   const {
     resizeHandlePadding,
     widgetBoxHPadding: boxHPadding,
