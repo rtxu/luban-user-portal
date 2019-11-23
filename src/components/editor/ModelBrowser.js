@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useContext, useMemo } from "react";
 import { Collapse } from "antd";
-import PropTypes from "prop-types";
 import JSONTree from "react-json-tree";
+
+import { AppContext } from "../containers/withAppContext";
+import { EditorContext } from "../containers/withEditorContext";
+import { getExportedState as opGetExportedState } from "../../models/operations";
+import { getExportedState } from "../../models/widgets";
 
 function MyJsonTree({ json, activeKey }) {
   return (
@@ -63,7 +67,30 @@ function ModelGroup({ json, activeKey }) {
   return node;
 }
 
-function ModelBrowser({ modelGroups }) {
+function useModelGroups() {
+  const [{ widgets, operations }] = useContext(AppContext);
+  const [{ activeWidgetId, activeOpId }] = useContext(EditorContext);
+  const exportedWidgets = getExportedState(widgets);
+  const exportedOps = opGetExportedState(operations);
+
+  return useMemo(
+    () => [
+      {
+        name: "组件",
+        json: exportedWidgets,
+        activeKey: activeWidgetId
+      },
+      {
+        name: "操作",
+        json: exportedOps,
+        activeKey: activeOpId
+      }
+    ],
+    [exportedWidgets, exportedOps, activeWidgetId, activeOpId]
+  );
+}
+
+function ModelBrowser({}) {
   const themes = [
     "apathy",
     "ashes",
@@ -107,6 +134,7 @@ function ModelBrowser({ modelGroups }) {
     "tube",
     "twilight"
   ];
+  const modelGroups = useModelGroups();
   const defaultActiveKey = [];
   for (let i = 0; i < modelGroups.length; i++) {
     if (Object.keys(modelGroups[i].json).length === 0) {
@@ -144,16 +172,5 @@ function ModelBrowser({ modelGroups }) {
     </Collapse>
   );
 }
-
-ModelBrowser.propTypes = {
-  // {name, json, activeKey}
-  modelGroups: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      json: PropTypes.object.isRequired,
-      activeKey: PropTypes.string
-    })
-  )
-};
 
 export default ModelBrowser;

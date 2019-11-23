@@ -30,8 +30,10 @@ const AppOperation = ({
   };
   return (
     <div>
-      {/** 
-        <Button icon='eye' >查看</Button>
+      {/**
+      <Link to={`/app/${encodeURIComponent(record.name)}`}>
+        <Button icon="eye">查看</Button>
+      </Link>
       */}
       <Link to={`/editor/${encodeURIComponent(record.name)}`}>
         <Button icon="edit">编辑</Button>

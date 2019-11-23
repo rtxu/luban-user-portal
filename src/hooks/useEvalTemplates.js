@@ -8,7 +8,7 @@ import {
   getEvalContext as opGetEvalContext
 } from "../models/operations";
 
-export const useAutoEvalTemplates = (widgets, operations, dispatch) => {
+export default (widgets, operations, dispatch) => {
   const lastEvalEnvRef = useRef([]);
 
   useEffect(() => {

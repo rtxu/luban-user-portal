@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import { Typography, message } from "antd";
 
-import WidgetBox from "./WidgetBox";
 import WidgetFactory from "../WidgetFactory";
 import styles from "./WidgetConfigPanel.less";
+import { AppContext } from "../containers/withAppContext";
+import { EditorContext } from "../containers/withEditorContext";
 
 function Header(props) {
   const { widgetId } = props;
@@ -30,18 +31,16 @@ Header.propTypes = {
 
 Header.defaultProps = {};
 
-function WidgetConfigPanel({
-  widget,
-  onWidgetDispatch,
-  onChangeWidgetId,
-  widgets
-}) {
+function WidgetConfigPanel({}) {
+  const [{ widgets }] = useContext(AppContext);
+  const [{ activeWidgetId }, { changeWidgetId }] = useContext(EditorContext);
+  const widget = widgets[activeWidgetId];
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
     {
       ...widget.content,
       dispatch: action => {
-        onWidgetDispatch(widget.id, action);
+        widgetDispatch(widget.id, action);
       }
     }
   );
@@ -50,7 +49,7 @@ function WidgetConfigPanel({
     if (newWidgetId in widgets) {
       message.error(`${newWidgetId} 已经存在`);
     } else {
-      onChangeWidgetId(widget.id, newWidgetId);
+      changeWidgetId(widget.id, newWidgetId);
     }
   }
   return (
@@ -60,14 +59,6 @@ function WidgetConfigPanel({
     </div>
   );
 }
-
-WidgetConfigPanel.propTypes = {
-  widget: PropTypes.shape(WidgetBox.propTypes).isRequired,
-  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-
-  onWidgetDispatch: PropTypes.func.isRequired,
-  onChangeWidgetId: PropTypes.func.isRequired
-};
 
 WidgetConfigPanel.Header = Header;
 

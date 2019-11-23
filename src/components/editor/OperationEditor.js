@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Select,
   TreeSelect,
@@ -16,13 +15,16 @@ import myStyles from "./OperationEditor.less";
 alasql.options.errorlog = true;
 import { assert } from "../../util";
 import CmEvalInput from "../CmEvalInput";
+import { AppContext } from "../containers/withAppContext";
+import { EditorContext } from "../containers/withEditorContext";
 
 function runSql(statement) {
   console.log("run sql: ", statement);
   return alasql(statement);
 }
 
-function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton }) {
+function OpTabBar({ ops, activeOpId, newOperationButton }) {
+  const [, { setActiveOpId }] = useContext(EditorContext);
   return (
     <div className={myStyles.opNaviBar}>
       <div className={myStyles.tabContainer}>
@@ -31,7 +33,7 @@ function OpTabBar({ ops, activeOpId, onSetActiveOpId, newOperationButton }) {
             activeKey={activeOpId}
             type="card"
             onChange={activeKey => {
-              onSetActiveOpId(activeKey);
+              setActiveOpId(activeKey);
             }}
           >
             {ops.map(i => (
@@ -123,13 +125,11 @@ function TargetDetail({ target, visible, setVisible }) {
   );
 }
 
-function NormalOpHeader({
-  op,
-  onDeleteOperation,
-  onExecOperation,
-  onSetOperationType
-}) {
+function NormalOpHeader({ op }) {
   // console.log('current op in header: ', op);
+  const [, { deleteOperation, execOperation, setOperationType }] = useContext(
+    EditorContext
+  );
   const [target, setTarget] = useState();
   const [targetDetailVisible, setTargetDetailVisible] = useState(false);
   function listLocalStorageDb() {
@@ -164,7 +164,7 @@ function NormalOpHeader({
             defaultValue="SQLReadonly"
             value={op.type}
             style={{ width: 200 }}
-            onChange={value => onSetOperationType(op.id, value)}
+            onChange={value => setOperationType(op.id, value)}
           >
             <Select.Option value="SQLReadonly">SQL(只读)</Select.Option>
             <Select.Option value="SQLReadWrite">SQL(读写)</Select.Option>
@@ -207,7 +207,7 @@ function NormalOpHeader({
         <Button
           type="danger"
           onClick={() => {
-            onDeleteOperation(op.id);
+            deleteOperation(op.id);
           }}
         >
           删除
@@ -227,7 +227,7 @@ function NormalOpHeader({
                 message: "输入为空"
               });
             } else {
-              onExecOperation(op.id);
+              execOperation(op.id);
             }
           }}
         >
@@ -242,34 +242,18 @@ function EmptyOpHeader() {
   return null;
 }
 
-function OpHeader({
-  op,
-  onDeleteOperation,
-  onExecOperation,
-  onSetOperationType
-}) {
+function OpHeader({ op }) {
   return (
     <div className={myStyles.opHeader}>
-      {op ? (
-        <NormalOpHeader
-          op={op}
-          onDeleteOperation={onDeleteOperation}
-          onExecOperation={onExecOperation}
-          onSetOperationType={onSetOperationType}
-        />
-      ) : (
-        <EmptyOpHeader />
-      )}
+      {op ? <NormalOpHeader op={op} /> : <EmptyOpHeader />}
     </div>
   );
 }
 
-function AfterExecute({
-  op,
-  opNames,
-  onSetOpListWhenSuccess,
-  onSetOpListWhenFail
-}) {
+function AfterExecute({ op, opNames }) {
+  const [, { setOpListWhenSuccess, setOpListWhenFail }] = useContext(
+    EditorContext
+  );
   const otherOpNames = opNames.filter(opId => op.id !== opId);
   return (
     <>
@@ -284,7 +268,7 @@ function AfterExecute({
               if (value === "") {
                 // do nothing
               } else {
-                onSetOpListWhenSuccess(op.id, value.split(","));
+                setOpListWhenSuccess(op.id, value.split(","));
               }
             }}
           >
@@ -304,7 +288,7 @@ function AfterExecute({
               if (value === "") {
                 // do nothing
               } else {
-                onSetOpListWhenFail(op.id, value.split(","));
+                setOpListWhenFail(op.id, value.split(","));
               }
             }}
           >
@@ -320,13 +304,8 @@ function AfterExecute({
   );
 }
 
-function NormalOpBody({
-  op,
-  onSetOperationInput,
-  opNames,
-  onSetOpListWhenSuccess,
-  onSetOpListWhenFail
-}) {
+function NormalOpBody({ op, opNames }) {
+  const [, { setOperationInput }] = useContext(EditorContext);
   return (
     <div className={myStyles.normalOpBody}>
       <section>
@@ -340,19 +319,14 @@ function NormalOpBody({
             viewportMargin: Infinity
           }}
           onChange={newValue => {
-            onSetOperationInput(op.id, newValue);
+            setOperationInput(op.id, newValue);
           }}
         />
       </section>
       <section>
         <hr />
         {op.type === "SQLReadWrite" ? (
-          <AfterExecute
-            op={op}
-            opNames={opNames}
-            onSetOpListWhenSuccess={onSetOpListWhenSuccess}
-            onSetOpListWhenFail={onSetOpListWhenFail}
-          />
+          <AfterExecute op={op} opNames={opNames} />
         ) : null}
       </section>
       {/* 
@@ -388,24 +362,11 @@ function EmptyOpBody({ newOperationButton }) {
   );
 }
 
-function OpBody({
-  op,
-  opNames,
-  newOperationButton,
-  onSetOperationInput,
-  onSetOpListWhenSuccess,
-  onSetOpListWhenFail
-}) {
+function OpBody({ op, opNames, newOperationButton }) {
   return (
     <>
       {op ? (
-        <NormalOpBody
-          op={op}
-          opNames={opNames}
-          onSetOperationInput={onSetOperationInput}
-          onSetOpListWhenSuccess={onSetOpListWhenSuccess}
-          onSetOpListWhenFail={onSetOpListWhenFail}
-        />
+        <NormalOpBody op={op} opNames={opNames} />
       ) : (
         <EmptyOpBody newOperationButton={newOperationButton} />
       )}
@@ -413,18 +374,14 @@ function OpBody({
   );
 }
 
-function OperationEditor({
-  opNames,
-  activeOp,
-  onAddOperation,
-  onDeleteOperation,
-  onSetActiveOpId,
-  onExecOperation,
-  onSetOperationInput,
-  onSetOperationType,
-  onSetOpListWhenSuccess,
-  onSetOpListWhenFail
-}) {
+function OperationEditor({}) {
+  const [{ operations }] = useContext(AppContext);
+  const [{ activeOpId }, { addOperation, setActiveOpId }] = useContext(
+    EditorContext
+  );
+  const opNames = Object.keys(operations);
+  const activeOp = operations[activeOpId];
+
   function generateNewOpId(ops) {
     let instanceId = ops.length + 1;
     while (ops.includes(`op${instanceId}`)) {
@@ -434,12 +391,12 @@ function OperationEditor({
   }
   const myOnAddOperation = () => {
     const newOpId = generateNewOpId(opNames);
-    onAddOperation(newOpId);
-    onSetActiveOpId(newOpId);
+    addOperation(newOpId);
+    setActiveOpId(newOpId);
   };
   const myOnDeleteOperation = id => {
-    onDeleteOperation(id);
-    onSetActiveOpId(null);
+    deleteOperation(id);
+    setActiveOpId(null);
   };
   const newOperationButton = (
     <Button onClick={myOnAddOperation}>
@@ -452,39 +409,16 @@ function OperationEditor({
       <OpTabBar
         ops={opNames}
         activeOpId={activeOp ? activeOp.id : null}
-        onSetActiveOpId={onSetActiveOpId}
         newOperationButton={newOperationButton}
       />
-      <OpHeader
-        op={activeOp}
-        onDeleteOperation={myOnDeleteOperation}
-        onExecOperation={onExecOperation}
-        onSetOperationType={onSetOperationType}
-      />
+      <OpHeader op={activeOp} />
       <OpBody
         op={activeOp}
         opNames={opNames}
-        onSetOperationInput={onSetOperationInput}
         newOperationButton={newOperationButton}
-        onSetOpListWhenSuccess={onSetOpListWhenSuccess}
-        onSetOpListWhenFail={onSetOpListWhenFail}
       />
     </div>
   );
 }
-
-OperationEditor.propTypes = {
-  opNames: PropTypes.array,
-  activeOp: PropTypes.object,
-
-  onAddOperation: PropTypes.func.isRequired,
-  onDeleteOperation: PropTypes.func.isRequired,
-  onSetActiveOpId: PropTypes.func.isRequired,
-  onSetOperationInput: PropTypes.func.isRequired,
-  onExecOperation: PropTypes.func.isRequired,
-  onSetOperationType: PropTypes.func.isRequired,
-  onSetOpListWhenSuccess: PropTypes.func.isRequired,
-  onSetOpListWhenFail: PropTypes.func.isRequired
-};
 
 export default OperationEditor;

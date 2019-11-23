@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useContext, useLayoutEffect } from "react";
 import { useDrop } from "react-dnd";
 import PropTypes from "prop-types";
 import throttle from "lodash.throttle";
@@ -10,6 +10,8 @@ import { CSS, CANVAS } from "./constant";
 import styles from "./EditorCanvas.less";
 import DndItemTypes, { isResizeHandle } from "./DndItemTypes";
 import { createLogger } from "@/util";
+import { AppContext } from "../containers/withAppContext";
+import { EditorContext } from "../containers/withEditorContext";
 
 const logger = createLogger("/components/editor/EditorCanvas");
 
@@ -261,8 +263,12 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
 // BETTER(user experience) TODO(ruitao.xu): custom drag layer, 在整个 viewport 上真实地显示当前的 dragitem 的位置，不 SnapToGrid
 // BETTER(user experience) TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
-function EditorCanvas(props) {
-  const { widgets } = props;
+function EditorCanvas() {
+  const [{ widgets }, { widgetDispatch }] = useContext(AppContext);
+  const [
+    { activeWidgetId },
+    { setActiveWidgetId, addOrUpdateWidget, deleteWidget }
+  ] = useContext(EditorContext);
   const [hoverWidget, setHoverWidget] = useState(null);
   const [canvasHeight, setCanvasHeight] = useState(CANVAS.minHeight);
   const [canvasRef, { width }] = useMeasure();
@@ -281,7 +287,7 @@ function EditorCanvas(props) {
     drop(item, monitor) {
       const newWidget = calcNewWidget(item, monitor, canvasColumnWidth);
       console.log("dropItem:", newWidget);
-      props.onAddOrUpdate(newWidget);
+      addOrUpdateWidget(newWidget);
       return undefined;
     },
     canDrop(item, monitor) {
@@ -336,9 +342,8 @@ function EditorCanvas(props) {
     [styles.lift]: isOver
   });
 
-  const { activeWidgetId, onSetActiveWidgetId } = props;
   function widgetOnClick(widgetId, e) {
-    onSetActiveWidgetId(widgetId);
+    setActiveWidgetId(widgetId);
     // DO NOT bubble up, which will clear the selected state
     e.stopPropagation();
   }
@@ -347,7 +352,7 @@ function EditorCanvas(props) {
   // 1. click non-widget area on the canvas
   // 2. delete the current active widget
   return (
-    <div className={styles.root} onClick={() => onSetActiveWidgetId(null)}>
+    <div className={styles.root} onClick={() => setActiveWidgetId(null)}>
       <div className={styles.container}>
         <div ref={drop}>
           <div
@@ -377,10 +382,10 @@ function EditorCanvas(props) {
                 selected={widgetId === activeWidgetId}
                 onClick={e => widgetOnClick(widgetId, e)}
                 onDeleteOne={widgetId => {
-                  props.onDeleteOne(widgetId);
-                  onSetActiveWidgetId(null);
+                  deleteWidget(widgetId);
+                  setActiveWidgetId(null);
                 }}
-                onWidgetDispatch={props.onWidgetDispatch}
+                onWidgetDispatch={widgetDispatch}
               />
             ))}
           </div>
@@ -389,15 +394,5 @@ function EditorCanvas(props) {
     </div>
   );
 }
-
-EditorCanvas.propTypes = {
-  widgets: PropTypes.objectOf(PropTypes.shape(WidgetBox.propTypes)).isRequired,
-  activeWidgetId: PropTypes.string, // may be null
-
-  onSetActiveWidgetId: PropTypes.func.isRequired,
-  onAddOrUpdate: PropTypes.func.isRequired,
-  onDeleteOne: PropTypes.func.isRequired,
-  onWidgetDispatch: PropTypes.func.isRequired
-};
 
 export default EditorCanvas;

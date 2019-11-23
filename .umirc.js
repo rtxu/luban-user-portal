@@ -4,7 +4,6 @@ export default {
   routes: [
     // component: 相对于 page 目录的路径
     { path: "/editor/:app", component: "./editor/$app.js" },
-    { path: "/app/:app", component: "./app/$app.js" },
     {
       path: "/playground/codemirror2",
       component: "./playground/codemirror2.js"
@@ -23,8 +22,13 @@ export default {
       component: "./playground/ts_import_ts"
     },
     {
+      path: "/app",
+      component: "../layouts/UserLayout",
+      routes: [{ path: "./:app", component: "./app/$app.js" }]
+    },
+    {
       path: "/",
-      component: "../layouts/BasicLayout",
+      component: "../layouts/AdminLayout",
       routes: [
         {
           path: "/",

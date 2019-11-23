@@ -3,15 +3,17 @@ import alasql from "alasql";
 import {
   initialState as operationsInitialState,
   initOperations
-} from "../../models/operations";
+} from "../models/operations";
 import {
   initialState as widgetsInitialState,
   initWidgets
-} from "../../models/widgets";
+} from "../models/widgets";
+
+// TODO(ruitao.xu): service depends on a page?
 import {
   initEditorCtx,
   initialState as editorCtxInitialState
-} from "./models/editorCtx";
+} from "../pages/editor/models/editorCtx";
 
 const demoInitialState = {
   widgets: {
@@ -378,31 +380,6 @@ const setUpLocalStorage = () => {
     "2019-10-08",
     100
   ]);
-
-  /*
-  {
-    const data = alasql('select * from customer where name like \'%\'');
-    console.log('=== sync mode exec sql', data);
-  }
-  {
-    alasql.promise('select * from ? where name like ?', 
-      [
-        [ 
-          { name: '张经理', lastOrderDate: '2019-06-30T16:00:00.000Z', totalOrderCount: 3 },
-          { name: '王工程师', lastOrderDate: '2019-08-06T16:00:00.000Z', totalOrderCount: 5 }, 
-          { name: '李主任', lastOrderDate: '2019-09-04T16:00:00.000Z', totalOrderCount: 8 }, 
-          { name: '赵客服', lastOrderDate: '2019-10-07T16:00:00.000Z', totalOrderCount: 7 },
-        ],
-        '%',
-      ]
-    )
-      .then((data) => {
-        console.log('=== async mode exec sql', data);
-      }).catch((e) => {
-        console.log('=== async caught error', e);
-      });
-  }
-  */
 };
 
 const cleanUpLocalStrorage = () => {

@@ -2,42 +2,24 @@
 // [--
 @widgetBoxHPadding: 6px;
 @widgetBoxVPadding: 5.5px;
-@resizeHandlePadding: 2px;
-
-@dotWidth: 2px;
 // --]
 
-@widgetBoxZIndexWhenSelected: 5;
-@widgetBoxZIndexWhenHover: @widgetBoxZIndexWhenSelected+1;
-@hoverWidgetBoxZIndex: @widgetBoxZIndexWhenHover+1;
+.canvas {
+  min-width: 800px;
+  max-width: 1560px;
 
-.root {
-  padding: 15px;
-  height: 100%;
-  overflow: auto;
+  margin: 16px;
+  position: relative;
 
-  .container {
-    min-width: 800px;
-    max-width: 1560px;
-    height: 100%;
+  .widgetBoxCommon {
+    position: absolute;
+    will-change: transform;
+    transition-property: height, width, transform;
+    transition-duration: 0.1s;
+    padding: @widgetBoxVPadding @widgetBoxHPadding;
+  }
 
-    .canvas {
-      margin: 12.5px;
-      position: relative;
-      height: 100vh;
-      overflow: auto;
-
-      .widgetBoxCommon {
-        position: absolute;
-        will-change: transform;
-        transition-property: height, width, transform;
-        transition-duration: 0.1s;
-        padding: @widgetBoxVPadding @widgetBoxHPadding;
-      }
-
-      .widgetBox {
-        .widgetBoxCommon();
-      }
-    }
+  .widgetBox {
+    .widgetBoxCommon();
   }
 }

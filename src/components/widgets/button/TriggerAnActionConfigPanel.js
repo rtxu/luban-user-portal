@@ -1,26 +1,26 @@
-import { connect } from "dva";
+import { useContext } from "react";
 import PropTypes from "prop-types";
 
 import Config from "../Config";
 import { TriggerAnAction } from "./reducer";
 
-import { addOperation } from "../../../models/operations";
-import { setActiveOpId } from "../../../pages/editor/models/editorCtx";
+import { AppContext } from "../../containers/withAppContext";
+import { EditorContext } from "../../containers/withEditorContext";
 
-function TriggerAnActionConfigPanel({
-  opId,
-  opNames,
-  activeWidgetId,
-  onAddOperation,
-  dispatch
-}) {
+function TriggerAnActionConfigPanel({ opId, dispatch }) {
+  const [{ operations }] = useContext(AppContext);
+  const opNames = Object.keys(operations);
+  const [{ activeWidgetId }, { setActiveOpId, addOperation }] = useContext(
+    EditorContext
+  );
   const newOp = "新建<操作>";
   const options = [newOp, ...opNames];
 
   function onChange(value) {
     if (value === newOp) {
       const newOpId = `${activeWidgetId}Trigger`;
-      onAddOperation(newOpId);
+      addOperation(newOpId);
+      setActiveOpId(newOpId);
       dispatch(TriggerAnAction.setOp(newOpId));
     } else {
       dispatch(TriggerAnAction.setOp(value));
@@ -40,31 +40,9 @@ function TriggerAnActionConfigPanel({
 }
 
 TriggerAnActionConfigPanel.propTypes = {
-  opNames: PropTypes.array,
-  activeWidgetId: PropTypes.string,
-
-  onAddOperation: PropTypes.func,
-
   // ownProps
   opId: PropTypes.string,
   dispatch: PropTypes.func
 };
 
-const mapStateToProps = state => {
-  return {
-    opNames: Object.keys(state.operations),
-    activeWidgetId: state.editorCtx.activeWidgetId
-  };
-};
-const mapDispatchToProps = dispatch => {
-  return {
-    onAddOperation: newOpId => {
-      dispatch(addOperation({ id: newOpId }));
-      dispatch(setActiveOpId(newOpId));
-    }
-  };
-};
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TriggerAnActionConfigPanel);
+export default TriggerAnActionConfigPanel;
