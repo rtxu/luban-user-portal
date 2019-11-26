@@ -89,7 +89,6 @@ let Editor = props => {
   const onChangeWidgetId = useCallback(
     (oldWidgetId, newWidgetId) => {
       dispatch(changeWidgetId({ oldWidgetId, newWidgetId }));
-      dispatch(setActiveWidgetId(newWidgetId));
     },
     [dispatch]
   );

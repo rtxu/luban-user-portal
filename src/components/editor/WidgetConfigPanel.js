@@ -33,7 +33,10 @@ Header.defaultProps = {};
 
 function WidgetConfigPanel({}) {
   const [{ widgets }] = useContext(AppContext);
-  const [{ activeWidgetId }, { changeWidgetId }] = useContext(EditorContext);
+  const [
+    { activeWidgetId },
+    { changeWidgetId, setActiveWidgetId }
+  ] = useContext(EditorContext);
   const widget = widgets[activeWidgetId];
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
@@ -50,6 +53,7 @@ function WidgetConfigPanel({}) {
       message.error(`${newWidgetId} 已经存在`);
     } else {
       changeWidgetId(widget.id, newWidgetId);
+      setActiveWidgetId(newWidgetId);
     }
   }
   return (
