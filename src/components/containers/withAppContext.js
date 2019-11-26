@@ -5,8 +5,10 @@ import {
   updateWidgetContent,
   initialState as widgetsInitialState
 } from "../../models/widgets";
-import { execOperation } from "../../models/operations";
-import { initialState as operationsInitialState } from "../../models/operations";
+import {
+  initialState as operationsInitialState,
+  execOperation
+} from "../../models/operations";
 import useAppLifecycles from "../../hooks/useAppLifecycles";
 import useEvalTemplates from "../../hooks/useEvalTemplates";
 

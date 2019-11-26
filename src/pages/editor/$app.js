@@ -18,7 +18,7 @@ import withEditorContext, {
 const { Header, Sider, Content } = Layout;
 
 let DnDLayout = () => {
-  const { activeWidgetId } = useContext(EditorContext);
+  const [{ activeWidgetId }] = useContext(EditorContext);
   let rightSider;
   if (activeWidgetId) {
     rightSider = <WidgetConfigPanel />;
