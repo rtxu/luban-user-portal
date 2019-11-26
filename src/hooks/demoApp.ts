@@ -9,12 +9,6 @@ import {
   initWidgets
 } from "../models/widgets";
 
-// TODO(ruitao.xu): service depends on a page?
-import {
-  initEditorCtx,
-  initialState as editorCtxInitialState
-} from "../pages/editor/models/editorCtx";
-
 const demoInitialState = {
   widgets: {
     text1: {
@@ -184,9 +178,6 @@ const demoInitialState = {
       opListWhenSuccess: ["op1"],
       opListWhenFail: []
     }
-  },
-  editorCtx: {
-    activeOpId: "op4"
   }
 };
 
@@ -393,10 +384,8 @@ export const setUp = dispatch => {
   setUpLocalStorage();
   dispatch(initWidgets(demoInitialState.widgets));
   dispatch(initOperations(demoInitialState.operations));
-  dispatch(initEditorCtx(demoInitialState.editorCtx));
 };
 export const cleanUp = dispatch => {
-  dispatch(initEditorCtx(editorCtxInitialState));
   dispatch(initWidgets(widgetsInitialState));
   dispatch(initOperations(operationsInitialState));
   cleanUpLocalStrorage();
