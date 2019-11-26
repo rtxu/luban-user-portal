@@ -16,12 +16,17 @@ import {
   changeWidgetId
 } from "../../models/widgets";
 
-export const EditorContext = React.createContext({
-  activeWidgetId: null,
-  activeOpId: null,
-  setActiveWidgetId(newId) {},
-  setActiveOpId(newId) {}
-});
+/** 必须搭配 AppContext 一起使用 */
+export const EditorContext = React.createContext([
+  {
+    activeWidgetId: null,
+    activeOpId: null
+  },
+  {
+    setActiveWidgetId(newId) {},
+    setActiveOpId(newId) {}
+  }
+]);
 EditorContext.displayName = "EditorContext";
 
 let Editor = props => {

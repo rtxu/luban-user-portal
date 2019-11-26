@@ -12,11 +12,15 @@ import {
 import useAppLifecycles from "../../hooks/useAppLifecycles";
 import useEvalTemplates from "../../hooks/useEvalTemplates";
 
-export const AppContext = React.createContext({
-  widgets: widgetsInitialState,
-  operations: operationsInitialState,
-  widgetDispatch(widgetId, widgetAction) {}
-});
+export const AppContext = React.createContext([
+  {
+    widgets: widgetsInitialState,
+    operations: operationsInitialState
+  },
+  {
+    widgetDispatch(widgetId, widgetAction) {}
+  }
+]);
 AppContext.displayName = "AppContext";
 
 /**
