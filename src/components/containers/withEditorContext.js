@@ -22,6 +22,7 @@ export const EditorContext = React.createContext({
   setActiveWidgetId(newId) {},
   setActiveOpId(newId) {}
 });
+EditorContext.displayName = "EditorContext";
 
 let Editor = props => {
   const { dispatch, WrappedComponent, ...restProps } = props;

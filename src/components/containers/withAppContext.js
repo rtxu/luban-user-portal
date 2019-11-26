@@ -17,6 +17,7 @@ export const AppContext = React.createContext({
   operations: operationsInitialState,
   widgetDispatch(widgetId, widgetAction) {}
 });
+AppContext.displayName = "AppContext";
 
 /**
  * 逻辑注入：
