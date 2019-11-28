@@ -3,7 +3,7 @@ const DB = "luban.db.app";
 function makeJsonResponse(json, status = 200, statusText = "OK") {
   return new Response(
     new Blob([JSON.stringify(json)], { type: "application/json" }),
-    { status: status, statusText: statusText }
+    { status, statusText }
   );
 }
 

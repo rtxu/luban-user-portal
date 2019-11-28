@@ -1,5 +1,6 @@
 import { Component } from "react";
 import { Layout } from "antd";
+import Link from "umi/link";
 
 import styles from "./BasicLayout.less";
 import { ReactComponent as Logo } from "./logo.svg";
@@ -12,7 +13,9 @@ export default class BasicLayout extends Component {
       <Layout>
         <Sider width={256} style={{ minHeight: "100vh" }}>
           <div className={styles.logo}>
-            <Logo viewBox="40 115 220 70" />
+            <Link to="/">
+              <Logo viewBox="40 115 220 70" />
+            </Link>
           </div>
           {/** 搜索框 */}
           <div

@@ -15,5 +15,5 @@ export default (appName, dispatch) => {
         demoApp.cleanUp(dispatch);
       }
     };
-  }, []);
+  }, [appName, dispatch]);
 };

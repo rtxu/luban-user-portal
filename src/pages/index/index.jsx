@@ -5,17 +5,17 @@ import { connect } from "dva";
 
 // @ts-ignore
 import styles from "./index.less";
-import { addApp, deleteApp, loadApps, setAppDescription } from "./models/apps";
+import {
+  addApp,
+  deleteApp,
+  loadApps,
+  setAppDescription
+} from "../../models/apps";
+import useApps from "../../hooks/useApps";
 
 const { Text } = Typography;
 
-const AppOperation = ({
-  text,
-  record,
-  index,
-  onDeleteApp,
-  onChangeDescription
-}) => {
+const AppOperation = ({ text, record, index, onDeleteApp }) => {
   const handleDelete = () => {
     Modal.confirm({
       title: `确定要删除 ${record.name} 吗？`,
@@ -51,7 +51,12 @@ const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
       title: "名称",
       dataIndex: "name",
       key: "name",
-      className: styles.appColumn
+      className: styles.appColumn,
+      render: (text, record, index) => (
+        <Link to={`/app/${encodeURIComponent(record.name)}`}>
+          {record.name}
+        </Link>
+      )
     },
     {
       title: "描述",
@@ -138,13 +143,8 @@ const CreateAppForm = Form.create()(
   }
 );
 
-const Index = ({
-  apps,
-  onAddApp,
-  onDeleteApp,
-  initApps,
-  onChangeDescription
-}) => {
+const Index = ({}) => {
+  const [apps, { addApp, deleteApp, setAppDescription }] = useApps();
   const [visible, setVisible] = useState(false);
   const formRef = useRef(null);
   const showModal = () => {
@@ -170,7 +170,7 @@ const Index = ({
         return;
       }
 
-      onAddApp(values);
+      addApp(values);
       form.resetFields();
       setVisible(false);
     });
@@ -180,17 +180,13 @@ const Index = ({
     formRef.current = form;
   };
 
-  useEffect(() => {
-    initApps();
-  }, []);
-
   return (
     <div className={styles.container}>
       <h2>应用列表</h2>
       <AppList
         apps={apps}
-        onDeleteApp={onDeleteApp}
-        onChangeDescription={onChangeDescription}
+        onDeleteApp={deleteApp}
+        onChangeDescription={setAppDescription}
       />
       <div className={styles.appListOperationZone}>
         <Button type="primary" size="large" onClick={showModal}>
@@ -207,6 +203,7 @@ const Index = ({
   );
 };
 
+/*
 const mapStateToProps = state => {
   return {
     apps: state.apps
@@ -229,3 +226,5 @@ const mapDispatchToProps = dispatch => {
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Index);
+*/
+export default Index;

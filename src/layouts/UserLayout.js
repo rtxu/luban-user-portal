@@ -1,34 +1,26 @@
 import { Menu } from "antd";
-import { connect } from "dva";
 import Link from "umi/link";
+import { useLocation } from "react-use";
 
 import BasicLayout from "./BasicLayout";
 import styles from "./BasicLayout.less";
+import useApps from "../hooks/useApps";
 
-const MyMenu = ({ apps }) => {
-  return (
-    <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
-      <Menu.Item key="1">
-        <Link to="/">
-          <span className={styles.menuItem}>应用</span>
-        </Link>
-      </Menu.Item>
-      <Menu.Item key="2">
-        <Link to="/settings">
-          <span className={styles.menuItem}>设置</span>
-        </Link>
-      </Menu.Item>
+const MyLayout = ({ children }) => {
+  const [apps] = useApps();
+  const { pathname } = useLocation();
+  const MyMenu = () => (
+    <Menu theme="dark" mode="inline" defaultSelectedKeys={[pathname]}>
+      {Object.keys(apps).map(appName => (
+        <Menu.Item key={`/app/${encodeURIComponent(appName)}`}>
+          <Link to={`/app/${encodeURIComponent(appName)}`}>
+            <span className={styles.menuItem}>{appName}</span>
+          </Link>
+        </Menu.Item>
+      ))}
     </Menu>
   );
+  return <BasicLayout menu={<MyMenu />}>{children}</BasicLayout>;
 };
 
-const MyLayout = ({ children, apps }) => {
-  return <BasicLayout menu={<MyMenu apps={apps} />}>{children}</BasicLayout>;
-};
-
-const mapStateToProps = state => {
-  return {
-    apps: state.apps
-  };
-};
-export default connect(mapStateToProps)(MyLayout);
+export default MyLayout;
