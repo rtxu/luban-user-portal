@@ -1,5 +1,3 @@
-const CompressionPlugin = require("compression-webpack-plugin");
-
 export default {
   // 「配置式路由」
   // 显式配置 routes 则禁掉「约定式路由」
@@ -62,15 +60,5 @@ export default {
 
   chainWebpack(config, { webpack }) {
     // console.dir(config.module.rules);
-    if (process.env.NODE_ENV === "production") {
-      //gzip压缩
-      config.plugin("compression-webpack-plugin").use(CompressionPlugin, [
-        {
-          test: /\.js$|\.html$|\.css$/, //匹配文件名
-          threshold: 10240, //对超过10k的数据压缩
-          deleteOriginalAssets: false //不删除源文件
-        }
-      ]);
-    }
   }
 };
