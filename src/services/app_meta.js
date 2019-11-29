@@ -21,7 +21,7 @@ export function add({ name, description }) {
       }
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: "ok" }));
+      resolve({ code: 0, msg: "ok" });
     } catch (e) {
       reject(e);
     }
@@ -42,7 +42,7 @@ export function remove(name) {
       appList = appList.filter(app => app.name != name);
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: "ok" }));
+      resolve({ code: 0, msg: "ok" });
     } catch (e) {
       reject(e);
     }
@@ -72,7 +72,7 @@ export function setAppDescription(name, newDescription) {
       });
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: "ok" }));
+      resolve({ code: 0, msg: "ok" });
     } catch (e) {
       reject(e);
     }
@@ -92,7 +92,7 @@ export function loadApps() {
       }
       localStorage.setItem(DB, JSON.stringify(appList));
 
-      resolve(makeJsonResponse({ code: 0, msg: "ok", data: appList }));
+      resolve({ code: 0, msg: "ok", data: appList });
     } catch (e) {
       reject(e);
     }

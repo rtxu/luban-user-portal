@@ -5,24 +5,22 @@ import useSWR, { mutate } from "swr";
 import * as AppMetaService from "../services/app_meta";
 
 async function fetchApps() {
-  let resp;
-  let body;
+  let result;
   try {
-    resp = await AppMetaService.loadApps();
-    body = await resp.json();
+    result = await AppMetaService.loadApps();
   } catch (e) {
     throw new Error(`加载应用异常(${e.name}): ${e.message}`);
   }
 
-  if (body.code === 0) {
-    const appList = body.data;
+  if (result.code === 0) {
+    const appList = result.data;
     const appMap = appList.reduce((m, app) => {
       m[app.name] = app;
       return m;
     }, {});
     return appMap;
   } else {
-    throw new Error(`加载应用失败(错误码: ${body.code}): ${body.msg}`);
+    throw new Error(`加载应用失败(错误码: ${result.code}): ${result.msg}`);
   }
 }
 
@@ -53,9 +51,8 @@ function useApps() {
   const deleteApp = useCallback(
     async (appName, handlers = defaultHandlers) => {
       try {
-        const resp = await AppMetaService.remove(appName);
-        const body = await resp.json();
-        if (body.code === 0) {
+        const result = await AppMetaService.remove(appName);
+        if (result.code === 0) {
           const newAppMap = Object.keys(appMap)
             .filter(id => id !== appName)
             .reduce((newApps, id) => {
@@ -64,7 +61,9 @@ function useApps() {
             }, {});
           mutate(APPS_KEY, newAppMap, NO_REFETCH);
         } else {
-          handlers.onError(`删除应用失败(错误码: ${body.code}): ${body.msg}`);
+          handlers.onError(
+            `删除应用失败(错误码: ${result.code}): ${result.msg}`
+          );
         }
       } catch (e) {
         handlers.onError(`删除应用异常(${e.name}): ${e.message}`);
@@ -75,9 +74,8 @@ function useApps() {
   const addApp = useCallback(
     async (payload, handlers = defaultHandlers) => {
       try {
-        const resp = await AppMetaService.add(payload);
-        const body = await resp.json();
-        if (body.code === 0) {
+        const result = await AppMetaService.add(payload);
+        if (result.code === 0) {
           const { name } = payload;
           mutate(
             APPS_KEY,
@@ -91,7 +89,9 @@ function useApps() {
           );
           handlers.onSuccess("应用创建成功");
         } else {
-          handlers.onError(`应用创建失败(错误码: ${body.code}): ${body.msg}`);
+          handlers.onError(
+            `应用创建失败(错误码: ${result.code}): ${result.msg}`
+          );
         }
       } catch (e) {
         handlers.onError(`应用创建异常(${e.name}): ${e.message}`);
@@ -102,9 +102,11 @@ function useApps() {
   const setAppDescription = useCallback(
     async (name, description, handlers = defaultHandlers) => {
       try {
-        const resp = await AppMetaService.setAppDescription(name, description);
-        const body = await resp.json();
-        if (body.code === 0) {
+        const result = await AppMetaService.setAppDescription(
+          name,
+          description
+        );
+        if (result.code === 0) {
           mutate(
             APPS_KEY,
             {
@@ -118,7 +120,7 @@ function useApps() {
           );
         } else {
           handlers.onError(
-            `更新应用描述失败(错误码: ${body.code}): ${body.msg}`
+            `更新应用描述失败(错误码: ${result.code}): ${result.msg}`
           );
         }
       } catch (e) {
