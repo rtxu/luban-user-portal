@@ -1,5 +1,5 @@
 import { message } from "antd";
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import useSWR, { mutate } from "swr";
 
 import * as AppMetaService from "../services/app_meta";
@@ -40,7 +40,15 @@ const REFETCH = true;
 const NO_REFETCH = false;
 function useApps() {
   // TODO(ruitao.xu): 考虑异常处理
-  const { data: appMap } = useSWR(APPS_KEY, fetchApps, { initialData: {} });
+  const { data: appMap } = useSWR(APPS_KEY, fetchApps, {
+    initialData: {
+      demo: {
+        name: "demo",
+        description:
+          "用以展示 luban 的基础能力：布局可定制、UI可定制、数据流可定制"
+      }
+    }
+  });
   const deleteApp = useCallback(
     async (appName, handlers = defaultHandlers) => {
       try {
