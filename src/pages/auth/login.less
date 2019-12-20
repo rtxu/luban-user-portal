@@ -1,0 +1,103 @@
+:root {
+  --accents-1: #fafafa;
+  --accents-2: #eaeaea;
+  --accents-3: #999;
+  --accents-4: #888;
+  --accents-5: #666;
+  --accents-6: #444;
+  --accents-7: #333;
+  --accents-8: #111;
+
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .main {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-width: 900px;
+
+    .title {
+      font-family: var(--font-family);
+    }
+
+    .actionContainer {
+      margin: 16px auto 0 auto;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+
+      button {
+        --button-fg: #fff;
+        --button-bg: #24292e;
+        --button-border: #24292e;
+
+        text-transform: capitalize;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        text-decoration: none;
+        line-height: 38px;
+        white-space: nowrap;
+        font-weight: 500;
+        min-width: 260px;
+        padding: 0 25px 0 25px;
+        border-radius: 5px;
+        flex-shrink: 0;
+        margin: 0;
+        color: var(--button-fg);
+        background-color: var(--button-bg);
+        border: 1px solid var(--button-border);
+        transition: all 0.2s ease;
+        user-select: none;
+        cursor: pointer;
+        overflow: hidden;
+        outline: none;
+
+        height: 40px;
+        margin-bottom: 10px;
+        width: 100%;
+        padding-left: 40px;
+        position: relative;
+
+        .icon {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          top: 0;
+          bottom: 0;
+          z-index: 1;
+          left: 22px;
+          right: auto;
+          color: var(--button-fg);
+        }
+      }
+    }
+  }
+
+  .signup {
+    width: 100%;
+    background: #fff;
+    border-top: 1px solid var(--accents-2);
+    padding: 2em;
+    height: 100px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

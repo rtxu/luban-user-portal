@@ -3,7 +3,6 @@ export default {
   // 显式配置 routes 则禁掉「约定式路由」
   routes: [
     // component: 相对于 page 目录的路径
-    { path: "/editor/:app", component: "./editor/$app.js" },
     {
       path: "/playground/codemirror2",
       component: "./playground/codemirror2.js"
@@ -21,6 +20,9 @@ export default {
       path: "/playground/ts_import_ts",
       component: "./playground/ts_import_ts"
     },
+    { path: "/auth/login", component: "./auth/login.js" },
+    { path: "/auth/login-success", component: "./auth/login-success.js" },
+    { path: "/editor/:app", component: "./editor/$app.js" },
     {
       path: "/app",
       component: "../layouts/UserLayout",
