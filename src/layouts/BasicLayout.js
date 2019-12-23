@@ -14,7 +14,7 @@ export default class BasicLayout extends Component {
         <Sider width={256} style={{ minHeight: "100vh" }}>
           <div className={styles.logo}>
             <Link to="/">
-              <Logo viewBox="40 115 220 70" />
+              <Logo />
             </Link>
           </div>
           {/** 搜索框 */}
