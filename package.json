@@ -51,6 +51,7 @@
     "react-resizable": "^1.8.0",
     "react-use": "^13.8.0",
     "redux-actions": "^2.6.5",
-    "swr": "^0.1.12"
+    "swr": "^0.1.12",
+    "tailwindcss": "^1.1.4"
   }
 }

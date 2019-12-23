@@ -60,7 +60,25 @@ export default {
     ]
   ],
 
+  // TODO(ruitao.xu): optimizing for production
+  // ref: https://tailwindcss.com/course/optimizing-for-production
+  extraPostCSSPlugins: [require("tailwindcss"), require("autoprefixer")],
+
   chainWebpack(config, { webpack }) {
-    // console.dir(config.module.rules);
+    console.log("typeof rules", typeof config.module.rules);
+    const store = config.module.rules.store;
+    for (const [ruleName, rule] of store.entries()) {
+      console.log(`==== rule: ${ruleName} ====`);
+      console.log("test: ", rule.uses.parent.store.get("test"));
+      console.log("uses: ", rule.uses.store.keys());
+      /*
+      const iterKeys = ["uses", "test"];
+      for (const key of iterKeys) {
+        if (key in rule) {
+          console.log(key, ": ", rule[key]);
+        }
+      }
+      */
+    }
   }
 };
