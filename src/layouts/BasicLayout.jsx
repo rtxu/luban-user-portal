@@ -3,7 +3,7 @@ import { Layout } from "antd";
 import Link from "umi/link";
 
 import styles from "./BasicLayout.less";
-import { ReactComponent as Logo } from "./logo-name.svg";
+import { ReactComponent as Logo } from "../assets/logo-name.svg";
 
 const { Sider } = Layout;
 

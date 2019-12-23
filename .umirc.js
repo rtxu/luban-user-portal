@@ -3,6 +3,7 @@ export default {
   // 显式配置 routes 则禁掉「约定式路由」
   routes: [
     // component: 相对于 page 目录的路径
+    { path: "/playground/component", component: "./playground/component.jsx" },
     {
       path: "/playground/codemirror2",
       component: "./playground/codemirror2.js"
