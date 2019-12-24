@@ -6,7 +6,7 @@ function NavLink({ to, children }) {
   return (
     <a
       href={to}
-      className="text-white px-4 py-1 rounded hover:bg-gray-800 focus:bg-gray-700"
+      className="text-gray-400 hover:text-white px-4 py-1 rounded ml-2 first:ml-0"
     >
       {children}
     </a>
@@ -30,7 +30,7 @@ function Navbar() {
           <NavLink to="#">登录</NavLink>
           <a
             href="#"
-            className="ml-2 text-white bg-red-500 px-4 py-1 focus:bg-red-700 hover:text-gray-700 active:text-black rounded-full"
+            className="ml-2 text-white bg-red-500 px-4 py-1 hover:text-gray-700 active:text-black rounded-full"
           >
             注册
           </a>
