@@ -2,7 +2,7 @@ import Navbar from "../../components/Navbar";
 
 function Container() {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-200">
       <Navbar />
     </div>
   );
