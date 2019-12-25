@@ -30,7 +30,7 @@ function Navbar() {
           <NavLink to="#">登录</NavLink>
           <a
             href="#"
-            className="ml-2 text-white bg-red-500 px-4 py-1 hover:text-gray-700 active:text-black rounded-full"
+            className="ml-2 text-white bg-red-500 px-4 py-1 hover:text-gray-700 active:text-black rounded"
           >
             注册
           </a>
