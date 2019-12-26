@@ -38,4 +38,11 @@
   .grid-row-gap-20 {
     grid-row-gap: 5rem;
   }
+
+  .flex-basis-1\/2 {
+    flex-basis: 50%;
+  }
+  .flex-basis-full {
+    flex-basis: 100%;
+  }
 }
