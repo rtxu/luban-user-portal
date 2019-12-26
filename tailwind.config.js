@@ -3,8 +3,8 @@ module.exports = {
     extend: {}
   },
   variants: {
-    textColor: ["focus", "hover", "active"],
-    margin: ["first"]
+    textColor: ["responsive", "focus", "hover", "active"],
+    margin: ["responsive", "first"]
   },
   plugins: []
 };

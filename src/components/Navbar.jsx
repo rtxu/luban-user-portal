@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import logo from "../assets/logo-name.svg";
+import { ReactComponent as Logo } from "../assets/logo-name.svg";
 
 function NavLink({ to, children }) {
   return (
@@ -20,7 +20,7 @@ function Navbar() {
     <header className="flex items-center justify-between bg-gray-900 px-4 py-3">
       <div>
         <a href="/">
-          <img className="h-8" src={logo} alt="luban" />
+          <Logo className="h-8" />
         </a>
       </div>
       <div>
