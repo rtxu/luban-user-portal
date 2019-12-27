@@ -6,7 +6,7 @@ import { Icon } from "antd";
 function IntroHeader() {
   return (
     <div
-      className="flex items-center justify-center w-full bg-cover bg-gray-600 mb-1"
+      className="flex items-center justify-center bg-cover bg-gray-600 mb-1"
       style={{
         minHeight: 620
       }}
@@ -157,19 +157,25 @@ function IntroSummary() {
 
 function Container() {
   return (
-    <div className="min-h-screen bg-white mx-auto antialiased">
-      <Navbar />
-      <IntroHeader />
-      <div className="mx-auto max-w-6xl">
-        <IntroSummary />
-        <IntroDetail />
-      </div>
+    <>
+      <Navbar contentClassName="max-w-6xl mx-auto" />
+      <main className="min-h-screen">
+        <section>
+          <IntroHeader />
+        </section>
+        <section className="max-w-6xl bg-white mx-auto">
+          <IntroSummary />
+        </section>
+        <section className="max-w-6xl bg-white mx-auto">
+          <IntroDetail />
+        </section>
+      </main>
       <footer className="h-32 px-10 mt-20 bg-gray-200 flex items-center justify-center">
         <p className="text-center">
           Copyright © 2019 luban, Inc. All rights reserved.
         </p>
       </footer>
-    </div>
+    </>
   );
 }
 

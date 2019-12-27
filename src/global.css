@@ -1,5 +1,9 @@
 @tailwind base;
 
+body {
+  @apply antialiased;
+}
+
 @tailwind components;
 
 @tailwind utilities;
@@ -44,5 +48,12 @@
   }
   .flex-basis-full {
     flex-basis: 100%;
+  }
+
+  /* ref: https://stackoverflow.com/questions/5581034/is-there-are-way-to-make-a-child-divs-width-wider-than-the-parent-div-using-css */
+  .w-screen-as-child {
+    width: 100vw;
+    position: relative;
+    left: calc(-50vw + 50%);
   }
 }

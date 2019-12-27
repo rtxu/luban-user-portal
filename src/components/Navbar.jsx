@@ -7,7 +7,7 @@ function NavLink({ to, children, className }) {
     <a
       href={to}
       className={
-        "text-gray-400 text-base hover:text-white px-4 py-1 rounded ml-2 " +
+        "text-white text-base font-medium hover:text-gray-400 px-4 py-1 rounded ml-2 " +
         className
       }
     >
@@ -16,12 +16,16 @@ function NavLink({ to, children, className }) {
   );
 }
 
-function Navbar() {
+function Navbar({ contentClassName }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="bg-gray-900">
-      <header className="px-4 py-3 max-w-6xl mx-auto flex items-center justify-between">
+    <header className="bg-gray-900">
+      <div
+        className={
+          "px-4 py-3 flex items-center justify-between " + contentClassName
+        }
+      >
         <div>
           <a href="/">
             <Logo className="h-8" />
@@ -32,10 +36,7 @@ function Navbar() {
             <NavLink to="#">文档</NavLink>
             <NavLink to="#">价格</NavLink>
             <NavLink to="#">登录</NavLink>
-            <NavLink
-              to="#"
-              className="text-white bg-red-500 hover:text-gray-700"
-            >
+            <NavLink to="#" className="bg-red-500">
               注册
             </NavLink>
           </nav>
@@ -61,8 +62,8 @@ function Navbar() {
             </svg>
           </button>
         </div>
-      </header>
-    </div>
+      </div>
+    </header>
   );
 }
 
