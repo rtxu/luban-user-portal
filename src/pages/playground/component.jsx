@@ -64,15 +64,17 @@ function IntroDetail() {
               <Paragraph className="mt-2">
                 我们实现了一套简单易用的组件库，内含丰富组件，可以覆盖绝大多数应用场景
               </Paragraph>
-              <div className="my-4 text-black">
+              <Paragraph className="my-4">
                 <Text>缺少组件？</Text>
-                <button
-                  type="button"
-                  className="text-white tracking-wider bg-gray-900 px-5 py-1 rounded"
-                >
-                  <a href="#">提交需求</a>
+                <button type="button" className="bg-gray-900 px-5 py-2 rounded">
+                  <a
+                    href="#"
+                    className="text-white hover:text-gray-400 tracking-wider"
+                  >
+                    提交需求
+                  </a>
                 </button>
-              </div>
+              </Paragraph>
             </div>
           </div>
           <img
@@ -112,11 +114,26 @@ function IntroDetail() {
             <div>
               <h2 className="text-gray-800 text-lg font-bold">数据源</h2>
               <Paragraph className="mt-2">
-                我们支持多种数据源，以及基于 HTTP 的 API
+                <Text className="font-bold">数据私有</Text>
+                ，我们仅对数据进行加工与处理
               </Paragraph>
               <Paragraph className="mt-2">
-                我们负责读取与写回数据，并助你快速搭建
-                UI，你只需完成专属于你的业务逻辑
+                多种数据源支持，以及基于 HTTP 的 API，实现数据的无缝接入
+              </Paragraph>
+              <Paragraph className="mt-2">
+                我们负责读取和写回数据，助你快速搭建 UI，
+                <Text className="font-bold">你只需完成专属于你的业务逻辑</Text>
+              </Paragraph>
+              <Paragraph className="my-4">
+                <Text>缺少数据源？</Text>
+                <button type="button" className="bg-gray-900 px-5 py-2 rounded">
+                  <a
+                    href="#"
+                    className="text-white hover:text-gray-400 tracking-wider"
+                  >
+                    提交需求
+                  </a>
+                </button>
               </Paragraph>
             </div>
           </div>
