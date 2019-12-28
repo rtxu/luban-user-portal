@@ -2,13 +2,13 @@ import React, { useContext } from "react";
 import { useMeasure } from "react-use";
 
 import styles from "./index.less";
-import { CANVAS } from "../../components/editor/constant";
+import { CANVAS } from "../../../../components/editor/constant";
 
-import WidgetFactory from "../../components/WidgetFactory";
-import { getLayoutStyle } from "../../util/widget";
+import WidgetFactory from "../../../../components/WidgetFactory";
+import { getLayoutStyle } from "../../../../util/widget";
 import withAppContext, {
   AppContext
-} from "../../components/containers/withAppContext";
+} from "../../../../components/containers/withAppContext";
 
 const ViewCanvas = () => {
   const [{ widgets }, { widgetDispatch }] = useContext(AppContext);

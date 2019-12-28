@@ -16,7 +16,7 @@ function onClickGitHubLogin(event) {
   window.location = `https://github.com/login/oauth/authorize?${query}`;
 }
 
-function Login({}) {
+function Login() {
   return (
     <div className={styles.container}>
       <div className={styles.main}>

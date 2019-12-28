@@ -1,17 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
 import { Button, Table, Typography, Modal, Form, Input } from "antd";
 import Link from "umi/link";
 import { connect } from "dva";
+import { useState, useRef } from "react";
 
 // @ts-ignore
-import styles from "./index.less";
+import styles from "./apps.less";
 import {
   addApp,
   deleteApp,
   loadApps,
   setAppDescription
-} from "../../models/apps";
-import useApps from "../../hooks/useApps";
+} from "../../../models/apps";
+import useApps from "../../../hooks/useApps";
 
 const { Text } = Typography;
 

@@ -3,17 +3,17 @@ import { Layout } from "antd";
 import { DragDropContext } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 
-import ControPanel from "../../components/editor/ControlPanel";
-import ModelBrowser from "../../components/editor/ModelBrowser";
-import EditorCanvas from "../../components/editor/EditorCanvas";
-import OperationEditor from "../../components/editor/OperationEditor";
-import WidgetPicker from "../../components/editor/WidgetPicker";
-import WidgetConfigPanel from "../../components/editor/WidgetConfigPanel";
-import styles from "./index.less";
-import withAppContext from "../../components/containers/withAppContext";
+import ControPanel from "../../../../components/editor/ControlPanel";
+import ModelBrowser from "../../../../components/editor/ModelBrowser";
+import EditorCanvas from "../../../../components/editor/EditorCanvas";
+import OperationEditor from "../../../../components/editor/OperationEditor";
+import WidgetPicker from "../../../../components/editor/WidgetPicker";
+import WidgetConfigPanel from "../../../../components/editor/WidgetConfigPanel";
+import styles from "./edit.less";
+import withAppContext from "../../../../components/containers/withAppContext";
 import withEditorContext, {
   EditorContext
-} from "../../components/containers/withEditorContext";
+} from "../../../../components/containers/withEditorContext";
 
 const { Header, Sider, Content } = Layout;
 

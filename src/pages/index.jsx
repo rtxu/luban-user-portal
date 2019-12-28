@@ -1,5 +1,5 @@
-import Navbar from "../../components/Navbar";
-import DefaultBg from "../../assets/default_bg.svg";
+import Navbar from "../components/Navbar";
+import DefaultBg from "../assets/default_bg.svg";
 
 import { Icon } from "antd";
 
