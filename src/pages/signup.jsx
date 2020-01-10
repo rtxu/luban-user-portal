@@ -1,5 +1,4 @@
 import { Icon, Typography } from "antd";
-import { useSearchParam } from "react-use";
 
 import styles from "./login.less";
 import Navbar from "../components/Navbar";
@@ -13,7 +12,7 @@ function onClickGitHubLogin(event) {
     client_id: GITHUB_OAUTH_APP.client_id,
     scope: "user:read",
     // eslint-disable-next-line no-undef
-    redirect_uri: API_ENDPOINT + "/callback/github/login"
+    redirect_uri: API_ENDPOINT + "/callback/github/signup"
   };
   // ref: https://stackoverflow.com/questions/503093/how-do-i-redirect-to-another-webpage
   window.location.href = `https://github.com/login/oauth/authorize?${makeQueryString(
@@ -22,15 +21,13 @@ function onClickGitHubLogin(event) {
 }
 
 function Page() {
-  const loginError = useSearchParam("loginError");
-
   return (
     <>
       <Navbar contentClassName="max-w-6xl mx-auto" />
       <div className={styles.container}>
         <div className={styles.main}>
           <div className={styles.title}>
-            <Title level={1}>登录</Title>
+            <Title level={1}>注册</Title>
           </div>
           <div className={styles.actionContainer}>
             <button
@@ -47,18 +44,10 @@ function Page() {
               <span>GitHub</span>
             </button>
           </div>
-          <div className="my-5 max-w-xl">
-            {loginError ? (
-              <div className="px-6 py-3 rounded bg-red-600 text-white">
-                <span className="font-bold">Error: </span>
-                {loginError}
-              </div>
-            ) : null}
-          </div>
         </div>
         <div className={styles.signup}>
-          <a href="/signup">
-            <p>还没有账号？点击注册</p>
+          <a href="/login">
+            <p>已有账号？点击登录</p>
           </a>
         </div>
       </div>

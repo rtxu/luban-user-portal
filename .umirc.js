@@ -1,48 +1,4 @@
 export default {
-  // 「配置式路由」
-  // 显式配置 routes 则禁掉「约定式路由」
-  /*
-  routes: [
-    // component: 相对于 page 目录的路径
-    { path: "/playground/component", component: "./playground/component.jsx" },
-    {
-      path: "/playground/codemirror2",
-      component: "./playground/codemirror2.js"
-    },
-    { path: "/playground/alasql", component: "./playground/alasql.js" },
-    {
-      path: "/playground/js_import_ts",
-      component: "./playground/js_import_ts.js"
-    },
-    {
-      path: "/playground/ts_import_js",
-      component: "./playground/ts_import_js"
-    },
-    {
-      path: "/playground/ts_import_ts",
-      component: "./playground/ts_import_ts"
-    },
-    { path: "/auth/login", component: "./auth/login.js" },
-    { path: "/auth/login-success", component: "./auth/login-success.js" },
-    { path: "/editor/:app", component: "./editor/$app.js" },
-    {
-      path: "/app",
-      component: "../layouts/UserLayout",
-      routes: [{ path: "./:app", component: "./app/$app.js" }]
-    },
-    {
-      path: "/",
-      component: "../layouts/AdminLayout",
-      routes: [
-        {
-          path: "/",
-          component: "./index"
-        }
-      ]
-    }
-  ],
-  */
-
   /*
   proxy: {
     '/dev': {
@@ -83,5 +39,14 @@ export default {
       }
       */
     }
+  },
+
+  define: {
+    GITHUB_OAUTH_APP: {
+      client_id: "your_github_oauth_app_client_id",
+      client_secret: "your_github_oauth_app_client_secret"
+    },
+    JWT_SECRET: "your_secret_used_to_sign_jwt",
+    API_ENDPOINT: "your_backend_api_endpoint"
   }
 };

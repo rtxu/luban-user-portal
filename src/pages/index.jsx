@@ -180,16 +180,16 @@ function Container() {
         <section>
           <IntroHeader />
         </section>
-        <section className="max-w-6xl bg-white mx-auto">
+        <section className="max-w-6xl mx-auto bg-white">
           <IntroSummary />
         </section>
-        <section className="max-w-6xl bg-white mx-auto">
+        <section className="max-w-6xl mx-auto bg-white">
           <IntroDetail />
         </section>
       </main>
       <footer className="h-32 px-10 mt-20 bg-gray-200 flex items-center justify-center">
         <p className="text-center">
-          Copyright © 2019 luban, Inc. All rights reserved.
+          Copyright © 2019 luban. All rights reserved.
         </p>
       </footer>
     </>

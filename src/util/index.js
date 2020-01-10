@@ -49,3 +49,9 @@ export function wrapDispatchToFire(dispatch) {
 
   return fire;
 }
+
+export function makeQueryString(params) {
+  return Object.keys(params)
+    .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k]))
+    .join("&");
+}

@@ -6,7 +6,7 @@ function LoginSuccess() {
   if (accessToken) {
     // login
     localStorage.setItem("access_token", accessToken);
-    router.replace("/auth/login-success");
+    //router.replace("/login-success");
     console.log("save access_token to localStorage");
   } else {
     accessToken = localStorage.getItem("access_token");

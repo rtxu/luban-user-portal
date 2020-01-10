@@ -14,7 +14,7 @@
 }
 
 .container {
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -38,54 +38,6 @@
       width: 100%;
       display: flex;
       justify-content: center;
-
-      button {
-        --button-fg: #fff;
-        --button-bg: #24292e;
-        --button-border: #24292e;
-
-        text-transform: capitalize;
-
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        text-decoration: none;
-        line-height: 38px;
-        white-space: nowrap;
-        font-weight: 500;
-        min-width: 260px;
-        padding: 0 25px 0 25px;
-        border-radius: 5px;
-        flex-shrink: 0;
-        margin: 0;
-        color: var(--button-fg);
-        background-color: var(--button-bg);
-        border: 1px solid var(--button-border);
-        transition: all 0.2s ease;
-        user-select: none;
-        cursor: pointer;
-        overflow: hidden;
-        outline: none;
-
-        height: 40px;
-        margin-bottom: 10px;
-        width: 100%;
-        padding-left: 40px;
-        position: relative;
-
-        .icon {
-          position: absolute;
-          display: flex;
-          align-items: center;
-          top: 0;
-          bottom: 0;
-          z-index: 1;
-          left: 22px;
-          right: auto;
-          color: var(--button-fg);
-        }
-      }
     }
   }
 
@@ -99,5 +51,56 @@
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+}
+
+.login-btn-github {
+  &:focus {
+    outline: none;
+  }
+  --button-fg: #fff;
+  --button-bg: #24292e;
+  --button-border: #24292e;
+
+  text-transform: capitalize;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  line-height: 38px;
+  white-space: nowrap;
+  font-weight: 500;
+  min-width: 260px;
+  padding: 0 25px 0 25px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  margin: 0;
+  color: var(--button-fg);
+  background-color: var(--button-bg);
+  border: 1px solid var(--button-border);
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+
+  height: 40px;
+  margin-bottom: 10px;
+  width: 100%;
+  padding-left: 40px;
+  position: relative;
+
+  .icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    left: 22px;
+    right: auto;
+    color: var(--button-fg);
   }
 }
