@@ -43,10 +43,8 @@ export default {
 
   define: {
     GITHUB_OAUTH_APP: {
-      client_id: "your_github_oauth_app_client_id",
-      client_secret: "your_github_oauth_app_client_secret"
+      client_id: "your_github_oauth_app_client_id"
     },
-    JWT_SECRET: "your_secret_used_to_sign_jwt",
     API_ENDPOINT: "your_backend_api_endpoint"
   }
 };
