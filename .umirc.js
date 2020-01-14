@@ -43,8 +43,8 @@ export default {
 
   define: {
     GITHUB_OAUTH_APP: {
-      client_id: "your_github_oauth_app_client_id"
+      client_id: "1421764d694281e03269"
     },
-    API_ENDPOINT: "your_backend_api_endpoint"
+    API_ENDPOINT: "https://luban-api.now.sh/api"
   }
 };
