@@ -1,7 +1,8 @@
+import { Icon, Result, Button } from "antd";
+
 import Navbar from "../components/Navbar";
 import DefaultBg from "../assets/default_bg.svg";
-
-import { Icon } from "antd";
+import UserPortalLayout from "../layouts/UserPortalLayout";
 
 function IntroHeader() {
   return (
@@ -172,7 +173,7 @@ function IntroSummary() {
   );
 }
 
-function Container() {
+function OfficialSiteHomepage() {
   return (
     <>
       <Navbar contentClassName="max-w-6xl mx-auto" />
@@ -196,4 +197,24 @@ function Container() {
   );
 }
 
-export default Container;
+function UserPortalHomepage() {
+  return (
+    <UserPortalLayout>
+      {/* Empty App */}
+      <Result
+        status="404"
+        title="404"
+        subTitle="Sorry, the page you visited does not exist."
+        extra={<Button type="primary">Back Home</Button>}
+      />
+    </UserPortalLayout>
+  );
+}
+
+function Page() {
+  const accessToken = localStorage.getItem("access_token");
+  const isLogin = accessToken ? true : false;
+  return isLogin ? <UserPortalHomepage /> : <OfficialSiteHomepage />;
+}
+
+export default Page;

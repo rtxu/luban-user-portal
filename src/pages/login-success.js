@@ -6,11 +6,13 @@ function LoginSuccess() {
   if (accessToken) {
     // login
     localStorage.setItem("access_token", accessToken);
-    //router.replace("/login-success");
     console.log("save access_token to localStorage");
   } else {
     accessToken = localStorage.getItem("access_token");
     console.log("empty access_token");
+  }
+  if (accessToken) {
+    router.replace("/");
   }
 
   return (

@@ -29,7 +29,7 @@ export const EditorContext = React.createContext([
 ]);
 EditorContext.displayName = "EditorContext";
 
-let Editor = props => {
+let EditorProvider = props => {
   const { dispatch, WrappedComponent, ...restProps } = props;
   const [activeWidgetId, setActiveWidgetId] = useState(null);
   const [activeOpId, setActiveOpId] = useState(null);
@@ -133,8 +133,10 @@ let Editor = props => {
     </EditorContext.Provider>
   );
 };
-Editor = connect()(Editor);
+EditorProvider = connect()(EditorProvider);
 
 export default function withEditorContext(WrappedComponent) {
-  return props => <Editor WrappedComponent={WrappedComponent} {...props} />;
+  return props => (
+    <EditorProvider WrappedComponent={WrappedComponent} {...props} />
+  );
 }

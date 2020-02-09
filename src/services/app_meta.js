@@ -89,8 +89,8 @@ export function loadApps() {
         appList = JSON.parse(value);
       } else {
         appList = [];
+        localStorage.setItem(DB, JSON.stringify(appList));
       }
-      localStorage.setItem(DB, JSON.stringify(appList));
 
       resolve({ code: 0, msg: "ok", data: appList });
     } catch (e) {

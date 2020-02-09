@@ -36,7 +36,7 @@ AppContext.displayName = "AppContext";
  *    1. widgetDispatch
  *    2. execOperation
  */
-const App = props => {
+let AppContextProvider = props => {
   const {
     dispatch,
     widgets,
@@ -87,18 +87,18 @@ const mapStateToProps = state => {
     operations: state.operations
   };
 };
-const AppContainer = connect(mapStateToProps)(App);
+AppContextProvider = connect(mapStateToProps)(AppContextProvider);
 
 export default function withAppContext(WrappedComponent) {
   return props => {
     const { match } = props;
     const { app } = match.params;
     return (
-      <AppContainer
+      <AppContextProvider
         appName={app}
         WrappedComponent={WrappedComponent}
         {...props}
-      ></AppContainer>
+      />
     );
   };
 }
