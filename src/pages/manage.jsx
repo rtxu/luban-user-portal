@@ -1,17 +1,11 @@
 import { Button, Table, Typography, Modal, Form, Input } from "antd";
 import Link from "umi/link";
-import { connect } from "dva";
 import { useState, useRef } from "react";
 
 // @ts-ignore
-import styles from "./apps.less";
-import {
-  addApp,
-  deleteApp,
-  loadApps,
-  setAppDescription
-} from "../../../models/apps";
-import useApps from "../../../hooks/useApps";
+import styles from "./manage.less";
+import useApps from "../hooks/useApps";
+import AdminLayout from "../layouts/AdminLayout";
 
 const { Text } = Typography;
 
@@ -181,25 +175,27 @@ const Index = ({}) => {
   };
 
   return (
-    <div className={styles.container}>
-      <h2>应用列表</h2>
-      <AppList
-        apps={apps}
-        onDeleteApp={deleteApp}
-        onChangeDescription={setAppDescription}
-      />
-      <div className={styles.appListOperationZone}>
-        <Button type="primary" size="large" onClick={showModal}>
-          新建
-        </Button>
-        <CreateAppForm
-          wrappedComponentRef={saveFormRef}
-          visible={visible}
-          onCancel={handleCancel}
-          onCreate={handleCreate}
+    <AdminLayout>
+      <div className={styles.container}>
+        <h2>应用列表</h2>
+        <AppList
+          apps={apps}
+          onDeleteApp={deleteApp}
+          onChangeDescription={setAppDescription}
         />
+        <div className={styles.appListOperationZone}>
+          <Button type="primary" size="large" onClick={showModal}>
+            新建
+          </Button>
+          <CreateAppForm
+            wrappedComponentRef={saveFormRef}
+            visible={visible}
+            onCancel={handleCancel}
+            onCreate={handleCreate}
+          />
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

@@ -3,6 +3,7 @@ import { Icon, Result, Button } from "antd";
 import Navbar from "../components/Navbar";
 import DefaultBg from "../assets/default_bg.svg";
 import UserPortalLayout from "../layouts/UserPortalLayout";
+import withCurrentUserContext from "../components/containers/withCurrentUserContext";
 
 function IntroHeader() {
   return (
@@ -197,19 +198,22 @@ function OfficialSiteHomepage() {
   );
 }
 
-function UserPortalHomepage() {
+const UserPortalHomepage = withCurrentUserContext(() => {
   return (
     <UserPortalLayout>
       {/* Empty App */}
       <Result
         status="404"
-        title="404"
-        subTitle="Sorry, the page you visited does not exist."
-        extra={<Button type="primary">Back Home</Button>}
+        title="暂无应用"
+        extra={
+          <Button type="primary" href="/manage">
+            创建
+          </Button>
+        }
       />
     </UserPortalLayout>
   );
-}
+});
 
 function Page() {
   const accessToken = localStorage.getItem("access_token");

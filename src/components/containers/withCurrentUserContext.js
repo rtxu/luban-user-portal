@@ -1,5 +1,7 @@
 import React from "react";
 
+import useCurrentUser from "../../hooks/useCurrentUser";
+
 export const CurrentUserContext = React.createContext([
   {
     username: "",
@@ -10,12 +12,9 @@ export const CurrentUserContext = React.createContext([
 CurrentUserContext.displayName = "CurrentUserContext";
 
 export default function withCurrentUserContext(WrappedComponent) {
-  // TOOD(ruitao.xu): load real data
-  const ctxValue = {
-    username: "guest",
-    avatarUrl: "https://avatars0.githubusercontent.com/u/539937?v=4"
-  };
   return props => {
+    const [currentUser] = useCurrentUser();
+    const ctxValue = [currentUser, {}];
     return (
       <CurrentUserContext.Provider value={ctxValue}>
         <WrappedComponent {...props} />

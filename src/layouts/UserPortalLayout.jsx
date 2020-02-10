@@ -4,9 +4,10 @@ import Link from "umi/link";
 import { CurrentUserContext } from "../components/containers/withCurrentUserContext";
 import { useContext } from "react";
 import SiderLogo from "../components/SiderLogo";
+import { ReactComponent as EmptySvg } from "../assets/undraw_no_data_qbuo.svg";
 
 function UserSessionNavbar() {
-  const currentUser = useContext(CurrentUserContext);
+  const [currentUser] = useContext(CurrentUserContext);
   const { avatarUrl } = currentUser;
   const MyMenuItem = ({ children }) => {
     return (
@@ -25,8 +26,8 @@ function UserSessionNavbar() {
   return (
     <div className="h-full w-full flex justify-end items-center">
       <div className="px-2">
-        <Button type="primary" icon="edit">
-          编辑
+        <Button type="primary" icon="edit" href="/manage">
+          管理
         </Button>
       </div>
       <div className="px-2">
@@ -34,6 +35,18 @@ function UserSessionNavbar() {
           <Avatar src={avatarUrl} />
         </Dropdown>
       </div>
+    </div>
+  );
+}
+
+function EmptyAppMenu() {
+  return (
+    <div className="mt-40 flex flex-col items-center justify-center">
+      <EmptySvg className="w-32 h-32" />
+      <p className="mt-2 mb-8 text-white">当前未创建任何应用</p>
+      <Button type="primary" href="/manage">
+        立即创建
+      </Button>
     </div>
   );
 }
