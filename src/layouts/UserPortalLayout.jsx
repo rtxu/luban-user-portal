@@ -5,10 +5,10 @@ import { CurrentUserContext } from "../components/containers/withCurrentUserCont
 import { useContext } from "react";
 import SiderLogo from "../components/SiderLogo";
 import { ReactComponent as EmptySvg } from "../assets/undraw_no_data_qbuo.svg";
+import { AppContext } from "../components/containers/withAppContext";
 
 function UserSessionNavbar() {
-  const [currentUser] = useContext(CurrentUserContext);
-  const { avatarUrl } = currentUser;
+  const [{ avatarUrl }] = useContext(CurrentUserContext);
   const MyMenuItem = ({ children }) => {
     return (
       <Menu.Item>
@@ -51,69 +51,150 @@ function EmptyAppMenu() {
   );
 }
 
+function renderDir(dir, prefix, targetAppId) {
+  {
+    /*
+    NEEDHELP(ruitao.xu): 为了实现 icon 与文字在垂直方向的对齐，为什么这里要设置 vertialAlign 为 0，
+      而 antd 的[官方文档](https://ant.design/components/menu-cn/)中的 demo 无需设置？
+    */
+  }
+  const MenuIcon = props => <Icon {...props} style={{ verticalAlign: 0 }} />;
+  let foundAppId;
+  let foundAppKey;
+  let foundAppOpenDirs = [];
+  const menuItems = dir.map((entry, index) => {
+    if (entry.type === "app") {
+      const myKey = `${prefix}${entry.appId}`;
+      if (!targetAppId) {
+        // find the first app
+        if (!foundAppId) {
+          foundAppId = entry.appId;
+          foundAppKey = myKey;
+        }
+      } else if (targetAppId === `${entry.appId}`) {
+        foundAppId = entry.appId;
+        foundAppKey = myKey;
+      }
+      return (
+        <Menu.Item key={myKey}>
+          <Link to={`/app/${entry.appId}`}>
+            <MenuIcon type="mail" />
+            {entry.name}
+          </Link>
+        </Menu.Item>
+      );
+    } else {
+      const myPrefix = `${prefix}${entry.name}_${index}/`;
+      const [
+        subMenuItems,
+        subFoundAppId,
+        subFoundAppKey,
+        subFoundAppOpenDirs
+      ] = renderDir(entry.children, myPrefix, targetAppId);
+      if (!foundAppKey && subFoundAppKey) {
+        foundAppId = subFoundAppId;
+        foundAppKey = subFoundAppKey;
+        foundAppOpenDirs = foundAppOpenDirs.concat(
+          myPrefix,
+          ...subFoundAppOpenDirs
+        );
+      }
+      return (
+        <Menu.SubMenu
+          key={myPrefix}
+          title={
+            <span>
+              <MenuIcon type="mail" />
+              <span>{entry.name}</span>
+            </span>
+          }
+        >
+          {subMenuItems}
+        </Menu.SubMenu>
+      );
+    }
+  });
+
+  return [menuItems, foundAppId, foundAppKey, foundAppOpenDirs];
+}
+
 function AppMenu() {
-  const { SubMenu } = Menu;
-  const handleClick = e => {
-    console.log("click ", e);
-  };
-  return (
-    <Menu
-      onClick={handleClick}
-      defaultSelectedKeys={["1"]}
-      defaultOpenKeys={["sub1"]}
-      mode="inline"
-      theme="dark"
-    >
-      <SubMenu
-        key="sub1"
-        title={
-          <span>
-            <Icon type="mail" />
-            <span>Navigation One</span>
-          </span>
+  const [{ rootDir }] = useContext(CurrentUserContext);
+
+  /*
+  const rootDir = [
+    {
+      name: "分析",
+      type: "app",
+      appId: 1
+    },
+    {
+      name: "app#2",
+      type: "app",
+      appId: 2
+    },
+    {
+      name: "app#3",
+      type: "app",
+      appId: 3
+    },
+    {
+      name: "dir#1",
+      type: "directory",
+      children: [
+        {
+          name: "dir#1",
+          type: "directory",
+          children: [
+            {
+              name: "app#2",
+              type: "app",
+              appId: 22
+            },
+            {
+              name: "app#3",
+              type: "app",
+              appId: 33
+            }
+          ]
+        },
+        {
+          name: "app#2",
+          type: "app",
+          appId: 12
+        },
+        {
+          name: "app#3",
+          type: "app",
+          appId: 13
         }
+      ]
+    }
+  ];
+  */
+
+  // 如果 expectedAppId 为 null，说明当前不在 /app/$app 路径下，此时选中第一个 app
+  const [{ appId: expectedAppId }] = useContext(AppContext);
+
+  if (rootDir && rootDir.length > 0) {
+    const [menuItems, foundAppId, foundAppKey, foundAppOpenDirs] = renderDir(
+      rootDir,
+      "/",
+      expectedAppId
+    );
+    return (
+      <Menu
+        theme="dark"
+        mode="inline"
+        defaultSelectedKeys={[foundAppKey]}
+        defaultOpenKeys={foundAppOpenDirs}
       >
-        <Menu.ItemGroup key="g1" title="Item 1">
-          <Menu.Item key="1">Option 1</Menu.Item>
-          <Menu.Item key="2">Option 2</Menu.Item>
-        </Menu.ItemGroup>
-        <Menu.ItemGroup key="g2" title="Item 2">
-          <Menu.Item key="3">Option 3</Menu.Item>
-          <Menu.Item key="4">Option 4</Menu.Item>
-        </Menu.ItemGroup>
-      </SubMenu>
-      <SubMenu
-        key="sub2"
-        title={
-          <span>
-            <Icon type="appstore" />
-            <span>Navigation Two</span>
-          </span>
-        }
-      >
-        <Menu.Item key="5">Option 5</Menu.Item>
-        <Menu.Item key="6">Option 6</Menu.Item>
-        <SubMenu key="sub3" title="Submenu">
-          <Menu.Item key="7">Option 7</Menu.Item>
-          <Menu.Item key="8">Option 8</Menu.Item>
-        </SubMenu>
-      </SubMenu>
-      <SubMenu
-        key="sub4"
-        title={
-          <span>
-            <Icon type="setting" />
-            <span>Navigation Three</span>
-          </span>
-        }
-      >
-        <Menu.Item key="9">Option 9</Menu.Item>
-        <Menu.Item key="10">Option 10</Menu.Item>
-        <Menu.Item key="11">Option 11</Menu.Item>
-        <Menu.Item key="12">Option 12</Menu.Item>
-      </SubMenu>
-    </Menu>
-  );
+        {menuItems}
+      </Menu>
+    );
+  } else {
+    return <EmptyAppMenu />;
+  }
 }
 
 let UserPortal = ({ children }) => {

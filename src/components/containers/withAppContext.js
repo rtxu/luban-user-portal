@@ -14,6 +14,7 @@ import useEvalTemplates from "../../hooks/useEvalTemplates";
 
 export const AppContext = React.createContext([
   {
+    appId: null,
     widgets: widgetsInitialState,
     operations: operationsInitialState
   },
@@ -41,11 +42,11 @@ let AppContextProvider = props => {
     dispatch,
     widgets,
     operations,
-    appName,
+    appId,
     WrappedComponent,
     ...restProps
   } = props;
-  useAppLifecycles(appName, dispatch);
+  useAppLifecycles(appId, dispatch);
   useEvalTemplates(widgets, operations, dispatch);
 
   const widgetDispatch = useCallback(
@@ -64,6 +65,7 @@ let AppContextProvider = props => {
   const ctxValue = useMemo(
     () => [
       {
+        appId,
         widgets,
         operations
       },
@@ -95,7 +97,7 @@ export default function withAppContext(WrappedComponent) {
     const { app } = match.params;
     return (
       <AppContextProvider
-        appName={app}
+        appId={app}
         WrappedComponent={WrappedComponent}
         {...props}
       />
