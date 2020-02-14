@@ -11,6 +11,7 @@ import withAppContext, {
 } from "../../../components/containers/withAppContext";
 import withCurrentUserContext from "../../../components/containers/withCurrentUserContext";
 import UserPortalLayout from "../../../layouts/UserPortalLayout";
+import UserAppMenu from "../../../components/UserAppMenu";
 
 const AppView = () => {
   const [{ widgets }, { widgetDispatch }] = useContext(AppContext);
@@ -56,8 +57,9 @@ const AppView = () => {
 };
 
 function Page() {
+  const [{ appId }] = useContext(AppContext);
   return (
-    <UserPortalLayout>
+    <UserPortalLayout sider={<UserAppMenu selectedAppId={appId} />}>
       <AppView />
     </UserPortalLayout>
   );

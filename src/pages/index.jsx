@@ -1,6 +1,7 @@
 import { Icon, Result, Button } from "antd";
 
 import Navbar from "../components/Navbar";
+import UserAppMenu from "../components/UserAppMenu";
 import DefaultBg from "../assets/default_bg.svg";
 import UserPortalLayout from "../layouts/UserPortalLayout";
 import withCurrentUserContext from "../components/containers/withCurrentUserContext";
@@ -200,7 +201,7 @@ function OfficialSiteHomepage() {
 
 const UserPortalHomepage = withCurrentUserContext(() => {
   return (
-    <UserPortalLayout>
+    <UserPortalLayout sider={<UserAppMenu />}>
       {/* Empty App */}
       <Result
         status="404"

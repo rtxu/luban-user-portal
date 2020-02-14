@@ -4,6 +4,24 @@ body {
   @apply antialiased;
 }
 
+/*
+NEEDHELP(ruitao.xu): 为了实现 icon 与文字在垂直方向的对齐，为什么这里要设置 vertialAlign 为 0，
+  而 antd 的[官方文档](https://ant.design/components/menu-cn/)中的 demo 无需设置？
+*/
+.anticon {
+  display: inline-block;
+  color: inherit;
+  font-style: normal;
+  line-height: 0;
+  text-align: center;
+  text-transform: none;
+  /* vertical-align: -0.125em; */
+  vertical-align: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 @tailwind components;
 
 @tailwind utilities;
