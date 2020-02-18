@@ -39,9 +39,15 @@ const NO_REFETCH = false;
 function useApps() {
   useEffect(() => {
     AppMetaService.add({
+      type: "app",
       name: "demo",
-      description:
-        "用以展示 luban 的基础能力：布局可定制、UI可定制、数据流可定制"
+      icon: "search",
+      comment: "用以展示 luban 的基础能力：布局可定制、UI可定制、数据流可定制"
+    });
+    AppMetaService.add({
+      type: "directory",
+      name: "demo_dir",
+      comment: "用以展示 luban 的基础能力：布局可定制、UI可定制、数据流可定制"
     });
   }, []);
   // TODO(ruitao.xu): 考虑异常处理
@@ -100,12 +106,9 @@ function useApps() {
     [appMap]
   );
   const setAppDescription = useCallback(
-    async (name, description, handlers = defaultHandlers) => {
+    async (name, comment, handlers = defaultHandlers) => {
       try {
-        const result = await AppMetaService.setAppDescription(
-          name,
-          description
-        );
+        const result = await AppMetaService.setAppDescription(name, comment);
         if (result.code === 0) {
           mutate(
             APPS_KEY,
@@ -113,7 +116,7 @@ function useApps() {
               ...appMap,
               [name]: {
                 ...appMap[name],
-                description
+                comment
               }
             },
             NO_REFETCH

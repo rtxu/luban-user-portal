@@ -1,4 +1,5 @@
 import { Icon, Result, Button } from "antd";
+import Link from "umi/link";
 
 import Navbar from "../components/Navbar";
 import UserAppMenu from "../components/UserAppMenu";
@@ -207,9 +208,9 @@ const UserPortalHomepage = withCurrentUserContext(() => {
         status="404"
         title="暂无应用"
         extra={
-          <Button type="primary" href="/manage">
-            创建
-          </Button>
+          <Link to="/manage">
+            <Button type="primary">创建</Button>
+          </Link>
         }
       />
     </UserPortalLayout>

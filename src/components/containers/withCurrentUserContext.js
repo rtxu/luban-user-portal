@@ -1,11 +1,12 @@
 import React from "react";
 
-import useCurrentUser from "../../hooks/useCurrentUser";
+import useCurrentUser, {
+  currentUserInitialValue
+} from "../../hooks/useCurrentUser";
 
 export const CurrentUserContext = React.createContext([
   {
-    username: "",
-    avatarUrl: ""
+    ...currentUserInitialValue
   },
   {}
 ]);

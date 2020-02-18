@@ -10,9 +10,9 @@ function EmptyAppMenu() {
     <div className="mt-40 flex flex-col items-center justify-center">
       <EmptySvg className="w-32 h-32" />
       <p className="mt-2 mb-8 text-white">当前未创建任何应用</p>
-      <Button type="primary" href="/manage">
-        立即创建
-      </Button>
+      <Link to="/manage">
+        <Button type="primary">立即创建</Button>
+      </Link>
     </div>
   );
 }

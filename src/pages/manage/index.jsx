@@ -9,9 +9,11 @@ import {
   Icon,
   Breadcrumb,
   Radio,
-  Drawer
+  Drawer,
+  Spin,
+  message
 } from "antd";
-import React from "react";
+import React, { useContext } from "react";
 import Link from "umi/link";
 import { useState, useRef } from "react";
 
@@ -19,7 +21,11 @@ import { useState, useRef } from "react";
 import styles from "./index.less";
 import useApps from "../../hooks/useApps";
 import UserPortalLayout from "../../layouts/UserPortalLayout";
-import withCurrentUserContext from "../../components/containers/withCurrentUserContext";
+import withCurrentUserContext, {
+  CurrentUserContext
+} from "../../components/containers/withCurrentUserContext";
+import { SWRKey, lubanApiRequest } from "../../hooks/common";
+import { trigger } from "swr";
 
 const Sider = () => {
   return (
@@ -319,15 +325,37 @@ class IconSelectClassComponent extends React.Component {
 const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
   const columns = [
     {
+      title: "类型",
+      dataIndex: "type",
+      key: "type",
+      className: styles.appColumn,
+      render: (text, record, index) => {
+        if (record.type === "app") {
+          return <Icon type="file-text" className="text-gray-500 text-4xl" />;
+        } else {
+          return (
+            <Icon
+              type="folder"
+              theme="filled"
+              className="text-blue-400 text-4xl"
+            />
+          );
+        }
+      }
+    },
+    {
       title: "名称",
       dataIndex: "name",
       key: "name",
       className: styles.appColumn,
-      render: (text, record, index) => (
-        <Link to={`/app/${encodeURIComponent(record.name)}`}>
-          {record.name}
-        </Link>
-      )
+      render: (text, record, index) => {
+        return (
+          <Link to={`/app/${encodeURIComponent(record.name)}`}>
+            {record.icon ? <Icon type={record.icon} className="pr-2" /> : null}
+            {record.name}
+          </Link>
+        );
+      }
     },
     {
       title: "备注",
@@ -363,7 +391,7 @@ const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
 
   let data = [];
   for (const app of Object.values(apps)) {
-    data.push({ key: app.name, name: app.name, description: app.description });
+    data.push({ ...app, key: app.name });
   }
 
   return (
@@ -433,16 +461,101 @@ const NewAppForm = Form.create()(
   }
 );
 
+function listDir(currentDir, root) {
+  if (currentDir === "/") {
+    return root;
+  } else {
+    const fields = currentDir.split("/");
+    const subDir = fields[1];
+    const leftDir = ["", ...fields.slice(2)].join("/");
+    for (const entry of root) {
+      if (entry.type === "directory" && entry.name === subDir) {
+        return listDir(leftDir, entry);
+      }
+    }
+  }
+}
+
+function makeJsonBody(json) {
+  return new Blob([JSON.stringify(json)], { type: "application/json" });
+}
+
+async function addEntry(setMutating, dir, entry) {
+  setMutating(true);
+  try {
+    const result = await lubanApiRequest(SWRKey.CURRENT_USER_ENTRY, {
+      method: "POST",
+      body: makeJsonBody({
+        dir,
+        entry
+      })
+    });
+    if (result.code === 0) {
+      trigger(SWRKey.CURRENT_USER);
+    } else {
+      message.error(`应用创建失败(错误码: ${result.code}): ${result.msg}`);
+    }
+  } catch (e) {
+    message.error(`应用创建异常(${e.name}): ${e.message}`);
+  }
+  setMutating(false);
+}
+
+async function deleteEntry(setMutating, dir, entryName) {
+  setMutating(true);
+  try {
+    const result = await lubanApiRequest(SWRKey.CURRENT_USER_ENTRY, {
+      method: "DELETE",
+      body: makeJsonBody({
+        dir,
+        entryName
+      })
+    });
+    if (result.code === 0) {
+      trigger(SWRKey.CURRENT_USER);
+    } else {
+      message.error(`删除创建失败(错误码: ${result.code}): ${result.msg}`);
+    }
+  } catch (e) {
+    message.error(`删除创建异常(${e.name}): ${e.message}`);
+  }
+  setMutating(false);
+}
+
 const Page = ({ match }) => {
-  const [apps, { addApp, deleteApp, setAppDescription }] = useApps();
+  const { firstLevelDir, secondLevelDir } = match.params;
+  const currentDir = [firstLevelDir, secondLevelDir]
+    .filter(i => i) // remove undefined
+    .reduce((current, dir) => {
+      return dir + current + "/";
+    }, "/");
+
+  const [currentUser] = useContext(CurrentUserContext);
+  const { rootDir } = currentUser;
+  const entryList = listDir(currentDir, rootDir);
+  // used to detect whether to-add entry already exist
+  let entryNameMap = {};
+  for (const entry of entryList) {
+    entryNameMap[entry.name] = entry;
+  }
+
+  const [mutating, setMutating] = useState(false);
+  const myAddEntry = addEntry.bind(null, setMutating, currentDir);
+  const myDeleteEntry = deleteEntry.bind(null, setMutating, currentDir);
+
   const [visible, setVisible] = useState(false);
-  const formRef = useRef(null);
   const showModal = () => {
     setVisible(true);
   };
   const handleCancel = () => {
     setVisible(false);
   };
+
+  const formRef = useRef(null);
+  const saveFormRef = form => {
+    formRef.current = form;
+  };
+
   const handleCreate = () => {
     const { form } = formRef.current.props;
     form.validateFields((err, values) => {
@@ -450,7 +563,7 @@ const Page = ({ match }) => {
         return;
       }
 
-      if (values.name in apps) {
+      if (values.name in entryNameMap) {
         form.setFields({
           name: {
             value: values.name,
@@ -460,17 +573,11 @@ const Page = ({ match }) => {
         return;
       }
 
-      addApp(values);
+      myAddEntry(values);
       form.resetFields();
       setVisible(false);
     });
   };
-
-  const saveFormRef = form => {
-    formRef.current = form;
-  };
-
-  const { firstLevelDir, secondLevelDir } = match.params;
 
   return (
     <UserPortalLayout sider={<Sider />}>
@@ -478,7 +585,7 @@ const Page = ({ match }) => {
         <div className="my-4">
           <Breadcrumb>
             <Breadcrumb.Item href="/manage/">
-              <Icon type="home" style={{ fontSize: "1.125rem" }} />
+              <Icon type="home" style={{ fontSize: "1.5rem" }} />
             </Breadcrumb.Item>
             {firstLevelDir ? (
               <Breadcrumb.Item href={`/manage/${firstLevelDir}`}>
@@ -495,11 +602,9 @@ const Page = ({ match }) => {
             ) : null}
           </Breadcrumb>
         </div>
-        <AppList
-          apps={apps}
-          onDeleteApp={deleteApp}
-          onChangeDescription={setAppDescription}
-        />
+        <Spin spinning={mutating}>
+          <AppList apps={entryList} onDeleteApp={myDeleteEntry} />
+        </Spin>
         <div className={styles.appListOperationZone}>
           <Button type="primary" size="large" onClick={showModal}>
             新建

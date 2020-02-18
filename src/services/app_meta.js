@@ -7,7 +7,7 @@ function makeJsonResponse(json, status = 200, statusText = "OK") {
   );
 }
 
-export function add({ name, description }) {
+export function add(app) {
   // local storage impl
   return new Promise((resolve, reject) => {
     try {
@@ -15,9 +15,9 @@ export function add({ name, description }) {
       let appList = null;
       if (value) {
         appList = JSON.parse(value);
-        appList.push({ name, description });
+        appList.push(app);
       } else {
-        appList = [{ name, description }];
+        appList = [app];
       }
       localStorage.setItem(DB, JSON.stringify(appList));
 

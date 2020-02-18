@@ -24,9 +24,11 @@ function UserSessionNavbar() {
   return (
     <div className="h-full w-full flex justify-end items-center">
       <div className="px-2">
-        <Button type="primary" icon="edit" href="/manage">
-          管理
-        </Button>
+        <Link to="/manage">
+          <Button type="primary" icon="edit">
+            管理
+          </Button>
+        </Link>
       </div>
       <div className="px-2">
         <Dropdown overlay={avatarMenu} placement="bottomRight">

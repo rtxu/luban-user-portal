@@ -6,7 +6,8 @@ export const SWRConst = Object.freeze({
 });
 
 export const SWRKey = Object.freeze({
-  CURRENT_USER: "/currentUser"
+  CURRENT_USER: "/currentUser",
+  CURRENT_USER_ENTRY: "/currentUser/entry"
 });
 
 /**
@@ -25,6 +26,18 @@ function extractServerData(json) {
   throw new Error(
     `server response error data, code: ${json.code}, msg: ${json.msg}`
   );
+}
+
+function needExtractServerData(fetchOptions) {
+  // 写操作不带回数据，需要调用者自行判断服务端状态码
+  if (
+    // no 'method' means 'GET'
+    !("method" in fetchOptions) ||
+    fetchOptions.method in ["POST", "PUT", "DELETE"]
+  ) {
+    return true;
+  }
+  return false;
 }
 
 // 1. 大多数 GET 请求需要填写 auth header
@@ -46,7 +59,7 @@ export async function lubanApiRequest(...args) {
     options = args[1];
   }
 
-  options = Object.assign(defaultOptions, options);
+  options = Object.assign({}, defaultOptions, options);
 
   const { lbAuth, lbExtractServerData, ...fetchOptions } = options;
   let myFetchOptions = Object.assign(fetchOptions);
@@ -60,5 +73,7 @@ export async function lubanApiRequest(...args) {
   }
 
   const json = await request(url, myFetchOptions);
-  return lbExtractServerData ? extractServerData(json) : json;
+  return needExtractServerData(myFetchOptions) && lbExtractServerData
+    ? extractServerData(json)
+    : json;
 }
