@@ -124,13 +124,13 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
       className: styles.appColumn,
       render: (text, record, index) => {
         if (record.type === EntryType.App) {
-          return <Icon type="file-text" className="text-gray-500 text-4xl" />;
+          return <Icon type="file-text" className="text-gray-500 text-3xl" />;
         } else {
           return (
             <Icon
               type="folder"
               theme="filled"
-              className="text-blue-400 text-4xl"
+              className="text-blue-400 text-3xl"
             />
           );
         }
