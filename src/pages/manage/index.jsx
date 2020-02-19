@@ -9,14 +9,15 @@ import {
   Icon,
   Breadcrumb,
   Radio,
-  Drawer,
   Spin,
   message
 } from "antd";
 import React, { useContext } from "react";
 import Link from "umi/link";
 import { useState, useRef } from "react";
+import { trigger } from "swr";
 
+import IconSelectDrawer from "../../components/IconSelectDrawer";
 // @ts-ignore
 import styles from "./index.less";
 import useApps from "../../hooks/useApps";
@@ -25,7 +26,6 @@ import withCurrentUserContext, {
   CurrentUserContext
 } from "../../components/containers/withCurrentUserContext";
 import { SWRKey, lubanApiRequest } from "../../hooks/common";
-import { trigger } from "swr";
 
 const EntryType = Object.freeze({
   App: "app",
@@ -74,207 +74,6 @@ const AppOperation = ({ text, record, index, onDeleteApp }) => {
   );
 };
 
-const ALL_ICONS = {
-  WEB_COMMON: [
-    "account-book",
-    "alert",
-    "api",
-    "appstore",
-    "audio",
-    "bank",
-    "bell",
-    "book",
-    "bug",
-    "bulb",
-    "calculator",
-    "build",
-    "calendar",
-    "camera",
-    "car",
-    "carry-out",
-    "cloud",
-    "code",
-    "compass",
-    "contacts",
-    "container",
-    "control",
-    "credit-card",
-    "crown",
-    "customer-service",
-    "dashboard",
-    "database",
-    "dislike",
-    "environment",
-    "experiment",
-    "eye-invisible",
-    "eye",
-    "file-add",
-    "file-excel",
-    "file-exclamation",
-    "file-image",
-    "file-markdown",
-    "file-pdf",
-    "file-ppt",
-    "file-text",
-    "file-unknown",
-    "file-word",
-    "file-zip",
-    "file",
-    "filter",
-    "fire",
-    "flag",
-    "folder-add",
-    "folder",
-    "folder-open",
-    "frown",
-    "funnel-plot",
-    "gift",
-    "hdd",
-    "heart",
-    "home",
-    "hourglass",
-    "idcard",
-    "insurance",
-    "interaction",
-    "layout",
-    "like",
-    "lock",
-    "mail",
-    "medicine-box",
-    "meh",
-    "message",
-    "mobile",
-    "money-collect",
-    "pay-circle",
-    "notification",
-    "phone",
-    "picture",
-    "play-square",
-    "printer",
-    "profile",
-    "project",
-    "pushpin",
-    "property-safety",
-    "read",
-    "reconciliation",
-    "red-envelope",
-    "rest",
-    "rocket",
-    "safety-certificate",
-    "save",
-    "schedule",
-    "security-scan",
-    "setting",
-    "shop",
-    "shopping",
-    "skin",
-    "smile",
-    "sound",
-    "star",
-    "switcher",
-    "tablet",
-    "tag",
-    "tags",
-    "tool",
-    "thunderbolt",
-    "trophy",
-    "unlock",
-    "usb",
-    "video-camera",
-    "wallet",
-    "apartment",
-    "audit",
-    "barcode",
-    "bars",
-    "block",
-    "border",
-    "branches",
-    "ci",
-    "cloud-download",
-    "cloud-server",
-    "cloud-sync",
-    "cloud-upload",
-    "cluster",
-    "coffee",
-    "copyright",
-    "deployment-unit",
-    "desktop",
-    "disconnect",
-    "dollar",
-    "download",
-    "ellipsis",
-    "euro",
-    "exception",
-    "export",
-    "file-done",
-    "file-jpg",
-    "file-protect",
-    "file-sync",
-    "file-search",
-    "fork",
-    "gateway",
-    "global",
-    "gold",
-    "history",
-    "import",
-    "inbox",
-    "key",
-    "laptop",
-    "link",
-    "line",
-    "loading-3-quarters",
-    "loading",
-    "man",
-    "menu",
-    "monitor",
-    "more",
-    "number",
-    "percentage",
-    "paper-clip",
-    "pound",
-    "poweroff",
-    "pull-request",
-    "qrcode",
-    "reload",
-    "safety",
-    "robot",
-    "scan",
-    "search",
-    "select",
-    "shake",
-    "share-alt",
-    "shopping-cart",
-    "solution",
-    "sync",
-    "table",
-    "team",
-    "to-top",
-    "trademark",
-    "transaction",
-    "upload",
-    "user-add",
-    "user-delete",
-    "usergroup-add",
-    "user",
-    "usergroup-delete",
-    "wifi",
-    "woman"
-  ]
-};
-function IconItem({ type, onClick }) {
-  return (
-    <div className="w-1/4 h-24" onClick={onClick}>
-      <div className="flex flex-col items-center justify-center">
-        <div className="mt-4 mb-2">
-          <Icon type={type} style={{ fontSize: 32 }} />
-        </div>
-        <span className=" block text-center whitespace-no-wrap font-mono">
-          {type}
-        </span>
-      </div>
-    </div>
-  );
-}
 function IconSelect({ value, onChange }) {
   const [visible, setVisible] = useState(false);
 
@@ -299,28 +98,17 @@ function IconSelect({ value, onChange }) {
           取消
         </Button>
       ) : null}
-      <Drawer
+      <IconSelectDrawer
         visible={visible}
-        closable={false}
         onClose={closeDrawer}
-        title="图标"
-        width={512}
-      >
-        <div className="flex flex-wrap">
-          {ALL_ICONS.WEB_COMMON.map(iconType => (
-            <IconItem
-              type={iconType}
-              key={iconType}
-              onClick={() => onSelectIcon(iconType)}
-            />
-          ))}
-        </div>
-      </Drawer>
+        onSelected={onSelectIcon}
+      />
     </>
   );
 }
 // Used to escape the following react warning:
 // index.js:1 Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+// 原因很可能是：antd Form 中 getFieldDecorator 的实现使用了 ref
 class IconSelectClassComponent extends React.Component {
   render() {
     return <IconSelect {...this.props} />;
