@@ -27,6 +27,11 @@ import withCurrentUserContext, {
 import { SWRKey, lubanApiRequest } from "../../hooks/common";
 import { trigger } from "swr";
 
+const EntryType = Object.freeze({
+  App: "app",
+  Directory: "directory"
+});
+
 const Sider = () => {
   return (
     <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
@@ -322,7 +327,7 @@ class IconSelectClassComponent extends React.Component {
   }
 }
 
-const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
+const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
   const columns = [
     {
       title: "类型",
@@ -330,7 +335,7 @@ const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
       key: "type",
       className: styles.appColumn,
       render: (text, record, index) => {
-        if (record.type === "app") {
+        if (record.type === EntryType.App) {
           return <Icon type="file-text" className="text-gray-500 text-4xl" />;
         } else {
           return (
@@ -349,8 +354,13 @@ const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
       key: "name",
       className: styles.appColumn,
       render: (text, record, index) => {
-        return (
-          <Link to={`/app/${encodeURIComponent(record.name)}`}>
+        return record.type === EntryType.Directory ? (
+          <Link to={`${linkPrefix}${encodeURIComponent(record.name)}`}>
+            {record.icon ? <Icon type={record.icon} className="pr-2" /> : null}
+            {record.name}
+          </Link>
+        ) : (
+          <Link to={`${linkPrefix}${encodeURIComponent(record.name)}`}>
             {record.icon ? <Icon type={record.icon} className="pr-2" /> : null}
             {record.name}
           </Link>
@@ -411,11 +421,11 @@ const AppList = ({ apps, onDeleteApp, onChangeDescription }) => {
   );
 };
 
-const NewAppForm = Form.create()(
+const NewEntryForm = Form.create()(
   // WARNING: Form 不能是函数组件，会报错，暂不清楚原因，与实现细节有关
   class extends React.Component {
     render() {
-      const { visible, onCancel, onCreate, form } = this.props;
+      const { visible, onCancel, onCreate, form, allowNewSubMenu } = this.props;
       const { getFieldDecorator } = form;
 
       const formItemLayout = {
@@ -435,11 +445,15 @@ const NewAppForm = Form.create()(
             <Form.Item label="类型">
               {getFieldDecorator("type", {
                 rules: [{ required: true, message: "请选择类型" }],
-                initialValue: "app"
+                initialValue: EntryType.App
               })(
                 <Radio.Group buttonStyle="solid">
-                  <Radio.Button value="app">应用</Radio.Button>
-                  <Radio.Button value="directory">子菜单</Radio.Button>
+                  <Radio.Button value={EntryType.App}>应用</Radio.Button>
+                  {allowNewSubMenu ? (
+                    <Radio.Button value={EntryType.Directory}>
+                      子菜单
+                    </Radio.Button>
+                  ) : null}
                 </Radio.Group>
               )}
             </Form.Item>
@@ -469,15 +483,15 @@ function listDir(currentDir, root) {
     const subDir = fields[1];
     const leftDir = ["", ...fields.slice(2)].join("/");
     for (const entry of root) {
-      if (entry.type === "directory" && entry.name === subDir) {
-        return listDir(leftDir, entry);
+      if (entry.type === EntryType.Directory && entry.name === subDir) {
+        return listDir(leftDir, entry.children);
       }
     }
   }
 }
 
-function makeJsonBody(json) {
-  return new Blob([JSON.stringify(json)], { type: "application/json" });
+function makeJsonBody(payload) {
+  return new Blob([JSON.stringify(payload)], { type: "application/json" });
 }
 
 async function addEntry(setMutating, dir, entry) {
@@ -493,10 +507,10 @@ async function addEntry(setMutating, dir, entry) {
     if (result.code === 0) {
       trigger(SWRKey.CURRENT_USER);
     } else {
-      message.error(`应用创建失败(错误码: ${result.code}): ${result.msg}`);
+      message.error(`创建失败(错误码: ${result.code}): ${result.msg}`);
     }
   } catch (e) {
-    message.error(`应用创建异常(${e.name}): ${e.message}`);
+    message.error(`创建异常(${e.name}): ${e.message}`);
   }
   setMutating(false);
 }
@@ -513,26 +527,31 @@ async function deleteEntry(setMutating, dir, entryName) {
     });
     if (result.code === 0) {
       trigger(SWRKey.CURRENT_USER);
+    } else if (result.code === 1) {
+      message.error(`文件夹非空，请先清空文件夹`);
     } else {
-      message.error(`删除创建失败(错误码: ${result.code}): ${result.msg}`);
+      message.error(`删除失败(错误码: ${result.code}): ${result.msg}`);
     }
   } catch (e) {
-    message.error(`删除创建异常(${e.name}): ${e.message}`);
+    message.error(`删除异常(${e.name}): ${e.message}`);
   }
   setMutating(false);
 }
 
 const Page = ({ match }) => {
   const { firstLevelDir, secondLevelDir } = match.params;
-  const currentDir = [firstLevelDir, secondLevelDir]
-    .filter(i => i) // remove undefined
-    .reduce((current, dir) => {
-      return dir + current + "/";
-    }, "/");
+  const dirCtx = [firstLevelDir, secondLevelDir].filter(i => i); // remove undefined
+  let currentDir = "/",
+    linkPrefix = "/manage/";
+  for (const dir of dirCtx) {
+    currentDir += dir + "/";
+    linkPrefix += encodeURIComponent(dir) + "/";
+  }
 
   const [currentUser] = useContext(CurrentUserContext);
   const { rootDir } = currentUser;
-  const entryList = listDir(currentDir, rootDir);
+  // when not found(in most cases due to data loading), set empty list as fallback
+  const entryList = listDir(currentDir, rootDir) || [];
   // used to detect whether to-add entry already exist
   let entryNameMap = {};
   for (const entry of entryList) {
@@ -584,36 +603,53 @@ const Page = ({ match }) => {
       <div className="m-16">
         <div className="my-4">
           <Breadcrumb>
-            <Breadcrumb.Item href="/manage/">
-              <Icon type="home" style={{ fontSize: "1.5rem" }} />
+            <Breadcrumb.Item>
+              <Link to="/manage/">
+                <Icon type="home" style={{ fontSize: "1.5rem" }} />
+              </Link>
             </Breadcrumb.Item>
             {firstLevelDir ? (
-              <Breadcrumb.Item href={`/manage/${firstLevelDir}`}>
-                {/* [PASS] 中文可以么 ? */}
-                <span className="text-lg">{firstLevelDir}</span>
+              <Breadcrumb.Item>
+                <Link to={"/manage/" + encodeURIComponent(firstLevelDir)}>
+                  {/* [PASS] 中文可以么 ? */}
+                  <span className="text-lg">{firstLevelDir}</span>
+                </Link>
               </Breadcrumb.Item>
             ) : null}
             {secondLevelDir ? (
-              <Breadcrumb.Item
-                href={`/manage/${firstLevelDir}/${secondLevelDir}`}
-              >
-                <span className="text-lg">{secondLevelDir}</span>
+              <Breadcrumb.Item>
+                <Link
+                  to={
+                    "/manage/" +
+                    encodeURIComponent(firstLevelDir) +
+                    "/" +
+                    encodeURIComponent(secondLevelDir)
+                  }
+                >
+                  <span className="text-lg">{secondLevelDir}</span>
+                </Link>
               </Breadcrumb.Item>
             ) : null}
           </Breadcrumb>
         </div>
         <Spin spinning={mutating}>
-          <AppList apps={entryList} onDeleteApp={myDeleteEntry} />
+          <AppList
+            linkPrefix={linkPrefix}
+            apps={entryList}
+            onDeleteApp={myDeleteEntry}
+          />
         </Spin>
         <div className={styles.appListOperationZone}>
           <Button type="primary" size="large" onClick={showModal}>
             新建
           </Button>
-          <NewAppForm
+          <NewEntryForm
             wrappedComponentRef={saveFormRef}
             visible={visible}
             onCancel={handleCancel}
             onCreate={handleCreate}
+            // max directory depth = 3
+            allowNewSubMenu={dirCtx.length < 2}
           />
         </div>
       </div>
