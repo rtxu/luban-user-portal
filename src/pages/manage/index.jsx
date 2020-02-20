@@ -19,8 +19,6 @@ import { trigger } from "swr";
 
 import IconSelectDrawer from "../../components/IconSelectDrawer";
 // @ts-ignore
-import styles from "./index.less";
-import useApps from "../../hooks/useApps";
 import UserPortalLayout from "../../layouts/UserPortalLayout";
 import withCurrentUserContext, {
   CurrentUserContext
@@ -194,19 +192,17 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
   }
 
   return (
-    <div className={styles.appList}>
-      <Table
-        columns={columns}
-        dataSource={data}
-        pagination={{
-          simple: true,
-          hideOnSinglePage: true,
-          pageSize: 5
-        }}
-        size="default"
-        rowClassName=""
-      />
-    </div>
+    <Table
+      columns={columns}
+      dataSource={data}
+      pagination={{
+        simple: true,
+        hideOnSinglePage: true,
+        pageSize: 5
+      }}
+      size="default"
+      rowClassName=""
+    />
   );
 };
 
