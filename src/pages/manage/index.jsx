@@ -116,12 +116,13 @@ class IconSelectClassComponent extends React.Component {
 }
 
 const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
+  const columnClassName = "text-base";
   const columns = [
     {
       title: "类型",
       dataIndex: "type",
       key: "type",
-      className: styles.appColumn,
+      className: columnClassName,
       render: (text, record, index) => {
         if (record.type === EntryType.App) {
           return <Icon type="file-text" className="text-gray-500 text-3xl" />;
@@ -140,7 +141,7 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
       title: "名称",
       dataIndex: "name",
       key: "name",
-      className: styles.appColumn,
+      className: columnClassName,
       render: (text, record, index) => {
         return record.type === EntryType.Directory ? (
           <Link to={`${linkPrefix}${encodeURIComponent(record.name)}`}>
@@ -159,7 +160,7 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
       title: "备注",
       dataIndex: "comment",
       key: "comment",
-      className: styles.appColumn,
+      className: columnClassName,
       render: (text, record, index) => (
         <Text
           editable={{
@@ -175,7 +176,7 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
     {
       title: "操作",
       key: "operation",
-      className: styles.appColumn,
+      className: columnClassName,
       render: (text, record, index) => (
         <AppOperation
           text={text}
@@ -203,7 +204,7 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
           pageSize: 5
         }}
         size="default"
-        //rowClassName={styles.appRow}
+        rowClassName=""
       />
     </div>
   );
@@ -427,7 +428,7 @@ const Page = ({ match }) => {
             onDeleteApp={myDeleteEntry}
           />
         </Spin>
-        <div className={styles.appListOperationZone}>
+        <div className="mt-4 flex justify-end">
           <Button type="primary" size="large" onClick={showModal}>
             新建
           </Button>
