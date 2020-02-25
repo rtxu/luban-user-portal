@@ -19,9 +19,9 @@ function newEntry() {
 function fetch(key, delay) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      log("delay fetch", entries);
+      log("fetch", key, delay);
       resolve(entries);
-    }, 3000);
+    }, delay);
   });
 }
 
@@ -47,15 +47,15 @@ function removeEntry(delay) {
 
 // 试验一下不同 swr 行为情况下的客户端体验
 function Page() {
-  const KEY = "key";
+  const KEY = ["key"];
   const { data, isValidating } = useSWR(KEY, fetch, {
-    revalidateOnFocus: false,
-    dedupingInterval: 0
+    revalidateOnFocus: false
+    // dedupingInterval: 0
   });
   const [mutating, setMutating] = useState(false);
   const onAdd = async () => {
     setMutating(true);
-    const { code } = await addEntry(newEntry(), 3000);
+    const { code } = await addEntry(newEntry());
     setMutating(false);
     if (code === 0) {
       log("trigger after add");
@@ -89,13 +89,16 @@ function Page() {
 
   return (
     <>
+      <div>
+        <p> isValidating: {isValidating ? "true" : "false"} </p>
+        <p> mutating: {mutating ? "true" : "false"} </p>
+      </div>
       <Button type="primary" onClick={onAdd}>
         新建
       </Button>
       <Button type="danger" onClick={onRemove}>
         删除
       </Button>
-      <Button disabled>{isValidating ? "Validating" : "None"}</Button>
       <Spin spinning={mutating || isValidating}>
         <Table
           columns={columns}
