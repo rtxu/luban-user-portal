@@ -30,7 +30,7 @@ export const EditorContext = React.createContext([
 EditorContext.displayName = "EditorContext";
 
 let EditorProvider = props => {
-  const { dispatch, WrappedComponent, ...restProps } = props;
+  const { dispatch, children } = props;
   const [activeWidgetId, setActiveWidgetId] = useState(null);
   const [activeOpId, setActiveOpId] = useState(null);
 
@@ -128,15 +128,15 @@ let EditorProvider = props => {
     [activeOpId, activeWidgetId]
   );
   return (
-    <EditorContext.Provider value={ctxValue}>
-      <WrappedComponent {...restProps} />
-    </EditorContext.Provider>
+    <EditorContext.Provider value={ctxValue}>{children}</EditorContext.Provider>
   );
 };
 EditorProvider = connect()(EditorProvider);
 
 export default function withEditorContext(WrappedComponent) {
   return props => (
-    <EditorProvider WrappedComponent={WrappedComponent} {...props} />
+    <EditorProvider>
+      <WrappedComponent {...props} />
+    </EditorProvider>
   );
 }

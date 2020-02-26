@@ -38,14 +38,7 @@ AppContext.displayName = "AppContext";
  *    2. execOperation
  */
 let AppContextProvider = props => {
-  const {
-    dispatch,
-    widgets,
-    operations,
-    appId,
-    WrappedComponent,
-    ...restProps
-  } = props;
+  const { dispatch, widgets, operations, appId, children } = props;
   useAppLifecycles(appId, dispatch);
   useEvalTemplates(widgets, operations, dispatch);
 
@@ -76,11 +69,7 @@ let AppContextProvider = props => {
     ],
     [widgets, operations, widgetDispatch]
   );
-  return (
-    <AppContext.Provider value={ctxValue}>
-      <WrappedComponent {...restProps} />
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={ctxValue}>{children}</AppContext.Provider>;
 };
 
 const mapStateToProps = state => {
@@ -96,11 +85,9 @@ export default function withAppContext(WrappedComponent) {
     const { match } = props;
     const { app } = match.params;
     return (
-      <AppContextProvider
-        appId={app}
-        WrappedComponent={WrappedComponent}
-        {...props}
-      />
+      <AppContextProvider appId={app}>
+        <WrappedComponent {...props} />
+      </AppContextProvider>
     );
   };
 }
