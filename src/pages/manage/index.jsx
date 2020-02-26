@@ -25,6 +25,7 @@ import withCurrentUserContext, {
   CurrentUserContext
 } from "../../components/containers/withCurrentUserContext";
 import { SWRKey, lubanApiRequest } from "../../hooks/common";
+import ServerErrCode from "../../util/serverErrCode";
 
 const EntryType = Object.freeze({
   App: "app",
@@ -313,7 +314,7 @@ async function deleteEntry(setMutating, dir, entryName) {
     });
     if (result.code === 0) {
       trigger(SWRKey.CURRENT_USER);
-    } else if (result.code === 1) {
+    } else if (result.code === ServerErrCode.DirNotEmpty) {
       message.error(`文件夹非空，请先清空文件夹`);
     } else {
       message.error(`删除失败(错误码: ${result.code}): ${result.msg}`);
