@@ -26,6 +26,7 @@ import withCurrentUserContext, {
 } from "../../components/containers/withCurrentUserContext";
 import { SWRKey, lubanApiRequest } from "../../hooks/common";
 import ServerErrCode from "../../util/serverErrCode";
+import { Redirect } from "react-router";
 
 const EntryType = Object.freeze({
   App: "app",
@@ -348,8 +349,12 @@ const Page = ({ match }) => {
   }
 
   const { rootDir } = currentUser;
-  // when not found(in most cases due to data loading), set empty list as fallback
-  const entryList = listDir(currentDir, rootDir) || [];
+  const entryList = listDir(currentDir, rootDir);
+  if (!entryList) {
+    // dir not found
+    message.error(`未找到目录: ${currentDir}`);
+    return <Redirect to="/manage" />;
+  }
   // used to detect whether to-add entry already exist
   let entryNameMap = {};
   for (const entry of entryList) {
