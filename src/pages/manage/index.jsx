@@ -18,6 +18,7 @@ import { useState, useRef } from "react";
 import { trigger } from "swr";
 
 import IconSelectDrawer from "../../components/IconSelectDrawer";
+import ServerError from "../../components/ServerError";
 // @ts-ignore
 import UserPortalLayout from "../../layouts/UserPortalLayout";
 import withCurrentUserContext, {
@@ -324,6 +325,18 @@ async function deleteEntry(setMutating, dir, entryName) {
 }
 
 const Page = ({ match }) => {
+  const { data: currentUser, error } = useContext(CurrentUserContext);
+  if (error) {
+    return <ServerError error={error} />;
+  }
+  if (!currentUser) {
+    return (
+      <div className="w-screen h-screen flex justify-center items-center bg-gray-200">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   const { firstLevelDir, secondLevelDir } = match.params;
   const dirCtx = [firstLevelDir, secondLevelDir].filter(i => i); // remove undefined
   let currentDir = "/",
@@ -333,7 +346,6 @@ const Page = ({ match }) => {
     linkPrefix += encodeURIComponent(dir) + "/";
   }
 
-  const [currentUser] = useContext(CurrentUserContext);
   const { rootDir } = currentUser;
   // when not found(in most cases due to data loading), set empty list as fallback
   const entryList = listDir(currentDir, rootDir) || [];

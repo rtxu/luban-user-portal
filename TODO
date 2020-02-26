@@ -4,3 +4,4 @@
 目前 `npm test` 仍会失败, 原因是 storybook 对 react-hooks 的支持不好, 见 [issue](https://github.com/storybookjs/storybook/issues/4691).  
 作者已经给出了 fix 的 prerelease 版本 5.2, 待 release 后升级
 
+* 升级 swr to fix https://github.com/zeit/swr/issues/271

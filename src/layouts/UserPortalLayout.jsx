@@ -6,7 +6,9 @@ import { useContext } from "react";
 import SiderLogo from "../components/SiderLogo";
 
 function UserSessionNavbar() {
-  const [{ avatarUrl }] = useContext(CurrentUserContext);
+  const {
+    data: { avatarUrl }
+  } = useContext(CurrentUserContext);
   const MyMenuItem = ({ children }) => {
     return (
       <Menu.Item>

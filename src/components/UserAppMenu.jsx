@@ -73,7 +73,9 @@ function renderDir(dir, prefix, targetAppId) {
 }
 
 function UserAppMenu({ selectedAppId }) {
-  const [{ rootDir }] = useContext(CurrentUserContext);
+  const {
+    data: { rootDir }
+  } = useContext(CurrentUserContext);
 
   /*
   const rootDir = [

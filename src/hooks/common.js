@@ -51,7 +51,9 @@ export async function lubanApiRequest(...args) {
 
   if (args.length >= 1) {
     url = args[0];
+    // eslint-disable-next-line no-undef
     if (!url.startsWith(API_ENDPOINT)) {
+      // eslint-disable-next-line no-undef
       url = API_ENDPOINT + url;
     }
   }
