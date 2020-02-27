@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useContext } from "react";
 import { connect } from "dva";
 
 import {
@@ -11,6 +11,8 @@ import {
 } from "../../models/operations";
 import useAppLifecycles from "../../hooks/useAppLifecycles";
 import useEvalTemplates from "../../hooks/useEvalTemplates";
+import { CurrentUserContext } from "./withCurrentUserContext";
+import { findApp } from "../../hooks/useSWRCurrentUser";
 
 export const AppContext = React.createContext([
   {
@@ -38,7 +40,7 @@ AppContext.displayName = "AppContext";
  *    2. execOperation
  */
 let AppContextProvider = props => {
-  const { dispatch, widgets, operations, appId, children } = props;
+  const { dispatch, widgets, operations, appName, appId, children } = props;
   useAppLifecycles(appId, dispatch);
   useEvalTemplates(widgets, operations, dispatch);
 
@@ -55,20 +57,20 @@ let AppContextProvider = props => {
     [dispatch]
   );
 
-  const ctxValue = useMemo(
-    () => [
-      {
-        appId,
-        widgets,
-        operations
-      },
-      {
-        widgetDispatch,
-        execOperation: onExecOperation
-      }
-    ],
-    [widgets, operations, widgetDispatch]
-  );
+  const ctxValue = [
+    // state
+    {
+      appName,
+      appId,
+      widgets,
+      operations
+    },
+    // action
+    {
+      widgetDispatch,
+      execOperation: onExecOperation
+    }
+  ];
   return <AppContext.Provider value={ctxValue}>{children}</AppContext.Provider>;
 };
 
@@ -82,10 +84,20 @@ AppContextProvider = connect(mapStateToProps)(AppContextProvider);
 
 export default function withAppContext(WrappedComponent) {
   return props => {
+    const { data: currentUser } = useContext(CurrentUserContext);
+
     const { match } = props;
-    const { app } = match.params;
+    let appName = "";
+    const { app1, app2, app3 } = match.params;
+    for (const name of [app1, app2, app3]) {
+      if (name) {
+        appName += "/" + name;
+      }
+    }
+    const appId = findApp(appName, currentUser.rootDir);
+
     return (
-      <AppContextProvider appId={app}>
+      <AppContextProvider appName={appName} appId={appId}>
         <WrappedComponent {...props} />
       </AppContextProvider>
     );

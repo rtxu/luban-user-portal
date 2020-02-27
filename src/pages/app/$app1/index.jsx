@@ -56,8 +56,9 @@ const AppView = () => {
   );
 };
 
-function Page() {
+function Page({ match }) {
   const [{ appId }] = useContext(AppContext);
+
   return (
     <UserPortalLayout sider={<UserAppMenu selectedAppId={appId} />}>
       <AppView />

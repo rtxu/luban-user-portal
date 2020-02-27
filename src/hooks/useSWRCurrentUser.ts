@@ -48,6 +48,22 @@ export function findDir(currentDir: string, root: Entry[]): Entry[] | null {
   }
 }
 
+export function findApp(app: string, root: Entry[]): AppEntry | null {
+  const fields = app.split("/");
+  const dirFields = fields.slice(0, fields.length - 1);
+  const dir = dirFields.join("/");
+  const appName = fields[fields.length - 1];
+  const dirEntryList = findDir(dir, root);
+  if (dirEntryList) {
+    for (const entry of dirEntryList) {
+      if (isApp(entry) && entry.name === appName) {
+        return entry;
+      }
+    }
+  }
+  return null;
+}
+
 export interface CurrentUserData {
   username: string;
   avatarUrl: string;

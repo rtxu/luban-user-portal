@@ -299,21 +299,10 @@ async function deleteEntry(setMutating, dir, entryName) {
 }
 
 const Page = ({ match }) => {
-  const { data: currentUser, error } = useContext(CurrentUserContext);
+  const { data: currentUser } = useContext(CurrentUserContext);
   const [mutating, setMutating] = useState(false);
   const [visible, setVisible] = useState(false);
   const formRef = useRef(null);
-
-  if (error) {
-    return <ServerError error={error} />;
-  }
-  if (!currentUser) {
-    return (
-      <div className="w-screen h-screen flex justify-center items-center bg-gray-200">
-        <Spin size="large" />
-      </div>
-    );
-  }
 
   const { firstLevelDir, secondLevelDir } = match.params;
   const dirCtx = [firstLevelDir, secondLevelDir].filter(i => i); // remove undefined
