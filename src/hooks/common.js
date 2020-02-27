@@ -75,7 +75,16 @@ export async function lubanApiRequest(...args) {
   }
 
   const json = await request(url, myFetchOptions);
-  return needExtractServerData(myFetchOptions) && lbExtractServerData
-    ? extractServerData(json)
-    : json;
+  const result =
+    needExtractServerData(myFetchOptions) && lbExtractServerData
+      ? extractServerData(json)
+      : json;
+
+  // console.log(result);
+
+  return result;
+}
+
+export function makeJsonBody(payload) {
+  return new Blob([JSON.stringify(payload)], { type: "application/json" });
 }

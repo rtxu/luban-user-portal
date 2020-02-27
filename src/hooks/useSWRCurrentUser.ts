@@ -2,21 +2,66 @@ import useSWR from "swr";
 
 import { SWRKey, lubanApiRequest } from "./common";
 
+export enum EntryType {
+  App = "app",
+  Directory = "directory"
+}
+
+interface EntryBase {
+  name: string;
+  type: EntryType;
+  comment?: string;
+  icon?: string;
+}
+
+interface AppEntry extends EntryBase {
+  appId: number;
+}
+
+interface DirEntry extends EntryBase {
+  children: Entry[];
+}
+
+type Entry = AppEntry | DirEntry;
+
+export function isApp(entry: Entry): entry is AppEntry {
+  return entry.type === EntryType.App;
+}
+export function isDir(entry: Entry): entry is DirEntry {
+  return entry.type === EntryType.Directory;
+}
+
+export function findDir(currentDir: string, root: Entry[]): Entry[] | null {
+  if (currentDir === "/") {
+    return root;
+  } else {
+    const fields = currentDir.split("/");
+    const subDir = fields[1];
+    const leftDir = ["", ...fields.slice(2)].join("/");
+    for (const entry of root) {
+      if (isDir(entry) && entry.name === subDir) {
+        return findDir(leftDir, entry.children);
+      }
+    }
+    // not found
+    return null;
+  }
+}
+
 export interface CurrentUserData {
   username: string;
   avatarUrl: string;
-  rootDir: any[];
+  rootDir: Entry[];
 }
 
-export const currentUserInitialValue: CurrentUserData = Object.freeze({
+export const currentUserInitialValue: Readonly<CurrentUserData> = {
   username: "",
   avatarUrl: "",
   rootDir: []
-});
+};
 
 function useSWRCurrentUser() {
   return useSWR<CurrentUserData>(SWRKey.CURRENT_USER, lubanApiRequest, {
-    // initialData: currentUserInitialValue,
     // 0.1.17 版本的 bug：https://github.com/zeit/swr/issues/271
     // fix 后可去除此配置
     dedupingInterval: 0

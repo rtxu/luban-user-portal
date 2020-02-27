@@ -17,8 +17,9 @@ CurrentUserContext.displayName = "CurrentUserContext";
 
 export default function withCurrentUserContext(WrappedComponent) {
   return props => {
+    const ctxValue = useSWRCurrentUser();
     return (
-      <CurrentUserContext.Provider value={useSWRCurrentUser()}>
+      <CurrentUserContext.Provider value={ctxValue}>
         <WrappedComponent {...props} />
       </CurrentUserContext.Provider>
     );

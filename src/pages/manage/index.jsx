@@ -12,9 +12,9 @@ import {
   Spin,
   message
 } from "antd";
-import React, { useContext } from "react";
+import React, { useContext, useState, useRef } from "react";
 import Link from "umi/link";
-import { useState, useRef } from "react";
+import { Redirect } from "react-router";
 import { trigger } from "swr";
 
 import IconSelectDrawer from "../../components/IconSelectDrawer";
@@ -24,14 +24,9 @@ import UserPortalLayout from "../../layouts/UserPortalLayout";
 import withCurrentUserContext, {
   CurrentUserContext
 } from "../../components/containers/withCurrentUserContext";
-import { SWRKey, lubanApiRequest } from "../../hooks/common";
+import { findDir, EntryType } from "../../hooks/useSWRCurrentUser";
+import { SWRKey, lubanApiRequest, makeJsonBody } from "../../hooks/common";
 import ServerErrCode from "../../util/serverErrCode";
-import { Redirect } from "react-router";
-
-const EntryType = Object.freeze({
-  App: "app",
-  Directory: "directory"
-});
 
 const Sider = () => {
   return (
@@ -189,15 +184,10 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
     }
   ];
 
-  let data = [];
-  for (const app of Object.values(apps)) {
-    data.push({ ...app, key: app.name });
-  }
-
   return (
     <Table
       columns={columns}
-      dataSource={data}
+      dataSource={apps}
       pagination={{
         simple: true,
         hideOnSinglePage: true,
@@ -205,6 +195,7 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
       }}
       size="default"
       rowClassName=""
+      rowKey={record => record.name}
     />
   );
 };
@@ -263,25 +254,6 @@ const NewEntryForm = Form.create()(
   }
 );
 
-function listDir(currentDir, root) {
-  if (currentDir === "/") {
-    return root;
-  } else {
-    const fields = currentDir.split("/");
-    const subDir = fields[1];
-    const leftDir = ["", ...fields.slice(2)].join("/");
-    for (const entry of root) {
-      if (entry.type === EntryType.Directory && entry.name === subDir) {
-        return listDir(leftDir, entry.children);
-      }
-    }
-  }
-}
-
-function makeJsonBody(payload) {
-  return new Blob([JSON.stringify(payload)], { type: "application/json" });
-}
-
 async function addEntry(setMutating, dir, entry) {
   setMutating(true);
   try {
@@ -316,7 +288,7 @@ async function deleteEntry(setMutating, dir, entryName) {
     if (result.code === 0) {
       trigger(SWRKey.CURRENT_USER);
     } else if (result.code === ServerErrCode.DirNotEmpty) {
-      message.error(`文件夹非空，请先清空文件夹`);
+      message.error(`请先清空文件夹`);
     } else {
       message.error(`删除失败(错误码: ${result.code}): ${result.msg}`);
     }
@@ -328,6 +300,10 @@ async function deleteEntry(setMutating, dir, entryName) {
 
 const Page = ({ match }) => {
   const { data: currentUser, error } = useContext(CurrentUserContext);
+  const [mutating, setMutating] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const formRef = useRef(null);
+
   if (error) {
     return <ServerError error={error} />;
   }
@@ -349,7 +325,7 @@ const Page = ({ match }) => {
   }
 
   const { rootDir } = currentUser;
-  const entryList = listDir(currentDir, rootDir);
+  const entryList = findDir(currentDir, rootDir);
   if (!entryList) {
     // dir not found
     message.error(`未找到目录: ${currentDir}`);
@@ -361,11 +337,9 @@ const Page = ({ match }) => {
     entryNameMap[entry.name] = entry;
   }
 
-  const [mutating, setMutating] = useState(false);
   const myAddEntry = addEntry.bind(null, setMutating, currentDir);
   const myDeleteEntry = deleteEntry.bind(null, setMutating, currentDir);
 
-  const [visible, setVisible] = useState(false);
   const showModal = () => {
     setVisible(true);
   };
@@ -373,7 +347,6 @@ const Page = ({ match }) => {
     setVisible(false);
   };
 
-  const formRef = useRef(null);
   const saveFormRef = form => {
     formRef.current = form;
   };

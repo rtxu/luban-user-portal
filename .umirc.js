@@ -41,6 +41,8 @@ export default {
     }
   },
 
+  // global variables which could be overwritten by .umirc.local.js
+  // see: https://umijs.org/guide/config.html#umirc-local-js
   define: {
     GITHUB_OAUTH_APP: {
       client_id: "1421764d694281e03269"
