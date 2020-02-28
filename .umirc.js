@@ -23,13 +23,16 @@ export default {
   // ref: https://tailwindcss.com/course/optimizing-for-production
   extraPostCSSPlugins: [require("tailwindcss"), require("autoprefixer")],
 
+  // ref: https://umijs.org/config/#chainwebpack
   chainWebpack(config, { webpack }) {
-    console.log("typeof rules", typeof config.module.rules);
+    // console.log("typeof rules", typeof config.module.rules);
     const store = config.module.rules.store;
     for (const [ruleName, rule] of store.entries()) {
+      /*
       console.log(`==== rule: ${ruleName} ====`);
       console.log("test: ", rule.uses.parent.store.get("test"));
       console.log("uses: ", rule.uses.store.keys());
+      */
       /*
       const iterKeys = ["uses", "test"];
       for (const key of iterKeys) {

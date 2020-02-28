@@ -14,15 +14,15 @@ interface EntryBase {
   icon?: string;
 }
 
-interface AppEntry extends EntryBase {
+export interface AppEntry extends EntryBase {
   appId: number;
 }
 
-interface DirEntry extends EntryBase {
+export interface DirEntry extends EntryBase {
   children: Entry[];
 }
 
-type Entry = AppEntry | DirEntry;
+export type Entry = AppEntry | DirEntry;
 
 export function isApp(entry: Entry): entry is AppEntry {
   return entry.type === EntryType.App;
@@ -40,7 +40,11 @@ export function findDir(currentDir: string, root: Entry[]): Entry[] | null {
     const leftDir = ["", ...fields.slice(2)].join("/");
     for (const entry of root) {
       if (isDir(entry) && entry.name === subDir) {
-        return findDir(leftDir, entry.children);
+        if (leftDir) {
+          return findDir(leftDir, entry.children);
+        } else {
+          return entry.children;
+        }
       }
     }
     // not found
@@ -51,7 +55,7 @@ export function findDir(currentDir: string, root: Entry[]): Entry[] | null {
 export function findApp(app: string, root: Entry[]): AppEntry | null {
   const fields = app.split("/");
   const dirFields = fields.slice(0, fields.length - 1);
-  const dir = dirFields.join("/");
+  const dir = dirFields.join("/") || "/";
   const appName = fields[fields.length - 1];
   const dirEntryList = findDir(dir, root);
   if (dirEntryList) {
