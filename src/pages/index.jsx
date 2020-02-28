@@ -6,6 +6,7 @@ import UserAppMenu from "../components/UserAppMenu";
 import DefaultBg from "../assets/default_bg.svg";
 import UserPortalLayout from "../layouts/UserPortalLayout";
 import withCurrentUserContext from "../components/containers/withCurrentUserContext";
+import { LS } from "../util";
 
 function IntroHeader() {
   return (
@@ -217,10 +218,18 @@ const UserPortalHomepage = withCurrentUserContext(() => {
   );
 });
 
-function Page() {
-  const accessToken = localStorage.getItem("access_token");
+function Authorized({ fallback, children }) {
+  const accessToken = localStorage.getItem(LS.ACCESS_TOKEN);
   const isLogin = accessToken ? true : false;
-  return isLogin ? <UserPortalHomepage /> : <OfficialSiteHomepage />;
+  return isLogin ? children : fallback;
+}
+
+function Page() {
+  return (
+    <Authorized fallback={<OfficialSiteHomepage />}>
+      <UserPortalHomepage />
+    </Authorized>
+  );
 }
 
 export default Page;

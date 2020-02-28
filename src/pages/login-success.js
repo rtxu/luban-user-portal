@@ -1,26 +1,33 @@
 import { useSearchParam } from "react-use";
-import router from "umi/router";
+import Redirect from "umi/redirect";
+
+import { LS } from "../util";
 
 function LoginSuccess() {
-  let accessToken = useSearchParam("access_token");
+  let accessToken = useSearchParam(LS.ACCESS_TOKEN);
   if (accessToken) {
     // login
-    localStorage.setItem("access_token", accessToken);
-    console.log("save access_token to localStorage");
+    localStorage.setItem(LS.ACCESS_TOKEN, accessToken);
   } else {
-    accessToken = localStorage.getItem("access_token");
-    console.log("empty access_token");
+    accessToken = localStorage.getItem(LS.ACCESS_TOKEN);
   }
   if (accessToken) {
-    router.replace("/");
+    const redirect = localStorage.getItem(LS.REDIRECT);
+    if (redirect) {
+      localStorage.removeItem(LS.REDIRECT);
+      return <Redirect to={redirect} />;
+    } else {
+      return <Redirect to="/" />;
+    }
+  } else {
+    // never reach here
+    return (
+      <div>
+        <h1>Login Successfully!</h1>
+        <p>AccessToken: {accessToken}</p>
+      </div>
+    );
   }
-
-  return (
-    <div>
-      <h1>Login Successfully!</h1>
-      <p>AccessToken: {accessToken}</p>
-    </div>
-  );
 }
 
 export default LoginSuccess;

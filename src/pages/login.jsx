@@ -1,9 +1,8 @@
 import { Icon, Typography } from "antd";
-import { useSearchParam } from "react-use";
 
 import styles from "./login.less";
 import Navbar from "../components/Navbar";
-import { makeQueryString } from "../util";
+import { makeQueryString, LS } from "../util";
 
 const { Title } = Typography;
 
@@ -21,8 +20,11 @@ function onClickGitHubLogin(event) {
   )}`;
 }
 
-function Page() {
-  const loginError = useSearchParam("loginError");
+function Page({ location }) {
+  const { loginError, redirect } = location.state ? location.state : {};
+  if (redirect) {
+    localStorage.setItem(LS.REDIRECT, redirect);
+  }
 
   return (
     <>

@@ -1,14 +1,10 @@
-import router from "umi/router";
+import Redirect from "umi/redirect";
+
+import { LS } from "../util";
 
 function Logout() {
-  localStorage.removeItem("access_token");
-  router.replace("/");
-
-  return (
-    <div>
-      <h1>Logout</h1>
-    </div>
-  );
+  localStorage.removeItem(LS.ACCESS_TOKEN);
+  return <Redirect to="/" />;
 }
 
 export default Logout;

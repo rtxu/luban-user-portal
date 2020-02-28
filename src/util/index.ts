@@ -1,5 +1,10 @@
 import debug from "debug";
 
+export enum LS {
+  ACCESS_TOKEN = "access_token",
+  REDIRECT = "redirect"
+}
+
 export function assert(condition, message) {
   if (!condition) {
     message = message || "Assertion failed";
