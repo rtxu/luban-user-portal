@@ -1,3 +1,4 @@
+import React from "react";
 import { useSearchParam } from "react-use";
 import Redirect from "umi/redirect";
 

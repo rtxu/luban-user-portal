@@ -56,7 +56,7 @@ const AppView = () => {
   );
 };
 
-function Page({ match }) {
+function Page() {
   const [{ appId }] = useContext(AppContext);
 
   return (

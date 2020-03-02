@@ -1,5 +1,8 @@
 import { Icon, Typography } from "antd";
+import React from "react";
+import { useSearchParam } from "react-use";
 
+// @ts-ignore
 import styles from "./login.less";
 import Navbar from "../components/Navbar";
 import { makeQueryString, LS } from "../util";
@@ -8,10 +11,10 @@ const { Title } = Typography;
 
 function onClickGitHubLogin(event) {
   const params = {
-    // eslint-disable-next-line no-undef
+    // @ts-ignore
     client_id: GITHUB_OAUTH_APP.client_id,
     scope: "user:read",
-    // eslint-disable-next-line no-undef
+    // @ts-ignore
     redirect_uri: API_ENDPOINT + "/callback/github/login"
   };
   // ref: https://stackoverflow.com/questions/503093/how-do-i-redirect-to-another-webpage
@@ -21,7 +24,8 @@ function onClickGitHubLogin(event) {
 }
 
 function Page({ location }) {
-  const { loginError, redirect } = location.state ? location.state : {};
+  const loginError = useSearchParam("loginError");
+  const redirect = useSearchParam("redirect");
   if (redirect) {
     localStorage.setItem(LS.REDIRECT, redirect);
   }
@@ -37,7 +41,7 @@ function Page({ location }) {
           <div className={styles.actionContainer}>
             <button
               role="button"
-              type="text"
+              type="button"
               className={styles["login-btn-github"]}
               onClick={onClickGitHubLogin}
             >

@@ -5,9 +5,9 @@ import Redirect from "umi/redirect";
 import useSWRCurrentUser, {
   currentUserInitialValue,
   CurrentUserData
-} from "../../hooks/useSWRCurrentUser";
+} from "@/hooks/useSWRCurrentUser";
 import ServerError from "../ServerError";
-import { LS } from "../../util";
+import { LS, makeQueryString } from "@/util";
 
 export interface CurrentUserContextValue {
   data: CurrentUserData;
@@ -39,14 +39,10 @@ export default function withCurrentUserContext(WrappedComponent) {
         let currentLocation: string = props.match ? props.match.url : "/";
         return (
           <Redirect
-            to={{
-              pathname: "/login",
-              state: {
-                // used by /login
-                loginError: errMsg,
-                redirect: currentLocation
-              }
-            }}
+            to={`/login?${makeQueryString({
+              loginError: errMsg,
+              redirect: currentLocation
+            })}`}
           />
         );
       } else {
