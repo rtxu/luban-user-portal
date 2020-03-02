@@ -1,9 +1,11 @@
 import { Icon, Menu, Button } from "antd";
+import React, { useContext } from "react";
 import Link from "umi/link";
 
-import { CurrentUserContext } from "../components/containers/withCurrentUserContext";
-import { useContext } from "react";
+import { CurrentUserContext } from "./containers/withCurrentUserContext";
+// @ts-ignore
 import { ReactComponent as EmptySvg } from "../assets/undraw_no_data_qbuo.svg";
+import { Entry, isApp } from "@/hooks/useSWRCurrentUser";
 
 function EmptyAppMenu() {
   return (
@@ -17,30 +19,34 @@ function EmptyAppMenu() {
   );
 }
 
-function renderDir(dir, prefix, targetAppId) {
-  let foundAppKey;
-  let foundAppOpenDirs = [];
+function renderDir(
+  dir: Entry[],
+  prefix: string,
+  targetAppId: string | undefined
+): [any, string | undefined, string[]] {
+  let foundAppKey: string | undefined;
+  let foundAppOpenDirs: string[] = [];
   const menuItems = dir.map((entry, index) => {
-    if (entry.type === "app") {
-      const myKey = `${prefix}${entry.appId}`;
+    if (isApp(entry)) {
+      const appFullName = `${prefix}${entry.name}`;
       if (!targetAppId) {
         // find the first app
         if (!foundAppKey) {
-          foundAppKey = myKey;
+          foundAppKey = appFullName;
         }
       } else if (targetAppId === `${entry.appId}`) {
-        foundAppKey = myKey;
+        foundAppKey = appFullName;
       }
       return (
-        <Menu.Item key={myKey}>
-          <Link to={`/app/${entry.appId}`}>
+        <Menu.Item key={appFullName}>
+          <Link to={`/app${appFullName}`}>
             <Icon type="mail" />
             {entry.name}
           </Link>
         </Menu.Item>
       );
     } else {
-      const myPrefix = `${prefix}${entry.name}_${index}/`;
+      const myPrefix = `${prefix}${entry.name}/`;
       const [subMenuItems, subFoundAppKey, subFoundAppOpenDirs] = renderDir(
         entry.children,
         myPrefix,
@@ -72,7 +78,9 @@ function renderDir(dir, prefix, targetAppId) {
   return [menuItems, foundAppKey, foundAppOpenDirs];
 }
 
-function UserAppMenu({ selectedAppId }) {
+const UserAppMenu: React.FC<{ selectedAppId?: string }> = ({
+  selectedAppId
+}) => {
   const {
     data: { rootDir }
   } = useContext(CurrentUserContext);
@@ -140,7 +148,7 @@ function UserAppMenu({ selectedAppId }) {
       <Menu
         theme="dark"
         mode="inline"
-        defaultSelectedKeys={[foundAppKey]}
+        defaultSelectedKeys={foundAppKey ? [foundAppKey] : undefined}
         defaultOpenKeys={foundAppOpenDirs}
       >
         {menuItems}
@@ -149,6 +157,6 @@ function UserAppMenu({ selectedAppId }) {
   } else {
     return <EmptyAppMenu />;
   }
-}
+};
 
 export default UserAppMenu;

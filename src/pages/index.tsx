@@ -1,12 +1,20 @@
-import { Icon, Result, Button } from "antd";
-import Link from "umi/link";
+import { Icon } from "antd";
+import { useContext } from "react";
+import React from "react";
 
-import Navbar from "../components/Navbar";
-import UserAppMenu from "../components/UserAppMenu";
+import Navbar from "@/components/Navbar";
+import UserAppMenu from "@/components/UserAppMenu";
+import EmptyApp from "@/components/EmptyApp";
+// @ts-ignore
 import DefaultBg from "../assets/default_bg.svg";
 import UserPortalLayout from "../layouts/UserPortalLayout";
-import withCurrentUserContext from "../components/containers/withCurrentUserContext";
+import withCurrentUserContext, {
+  CurrentUserContext
+} from "../components/containers/withCurrentUserContext";
 import { LS } from "../util";
+import { findDefaultApp, getAppFullNameById } from "@/hooks/useSWRCurrentUser";
+import AppViewContainer from "@/components/AppViewContainer";
+import Redirect from "umi/redirect";
 
 function IntroHeader() {
   return (
@@ -16,7 +24,7 @@ function IntroHeader() {
         minHeight: 620
       }}
     >
-      <div class="w-4/5 mb-32 text-center">
+      <div className="w-4/5 mb-32 text-center">
         {/* intro content container */}
         <div className="mb-12">
           <h1 className="mx-auto w-4/5 text-5xl sm:text-6xl text-white">
@@ -49,7 +57,13 @@ function Paragraph({ className, children }) {
   return <p className={className + " leading-tight text-black"}>{children}</p>;
 }
 
-function Text({ className, children }) {
+function Text({
+  className,
+  children
+}: {
+  className?: string;
+  children: string;
+}) {
   return (
     <span className={className + " leading-tight text-black"}>{children}</span>
   );
@@ -201,21 +215,23 @@ function OfficialSiteHomepage() {
   );
 }
 
+const EmptyUserPortalHomepage = () => (
+  <UserPortalLayout sider={<UserAppMenu />}>
+    <EmptyApp />
+  </UserPortalLayout>
+);
+
 const UserPortalHomepage = withCurrentUserContext(() => {
-  return (
-    <UserPortalLayout sider={<UserAppMenu />}>
-      {/* Empty App */}
-      <Result
-        status="404"
-        title="暂无应用"
-        extra={
-          <Link to="/manage">
-            <Button type="primary">创建</Button>
-          </Link>
-        }
-      />
-    </UserPortalLayout>
-  );
+  const { data: currentUser } = useContext(CurrentUserContext);
+  const app = findDefaultApp(currentUser.rootDir);
+  if (app) {
+    const appId = app.appId;
+    return (
+      <Redirect to={`/app${getAppFullNameById(appId, currentUser.rootDir)}`} />
+    );
+  } else {
+    return <EmptyUserPortalHomepage />;
+  }
 });
 
 function Authorized({ fallback, children }) {

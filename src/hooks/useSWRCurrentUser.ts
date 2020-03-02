@@ -68,6 +68,44 @@ export function findApp(app: string, root: Entry[]): AppEntry | null {
   return null;
 }
 
+// take the first app as the default one
+export function findDefaultApp(root: Entry[]): AppEntry | null {
+  for (const entry of root) {
+    if (isApp(entry)) {
+      return entry;
+    } else {
+      const result = findDefaultApp(entry.children);
+      if (result) {
+        return result;
+      }
+    }
+  }
+  return null;
+}
+
+export function getAppFullNameById(
+  appId: number,
+  root: Entry[]
+): string | null {
+  function _findApp(currentDir: string, dir: Entry[]): string | null {
+    for (const entry of dir) {
+      if (isApp(entry)) {
+        if (appId === entry.appId) {
+          return `${currentDir}${entry.name}`;
+        }
+      } else {
+        const result = _findApp(`${currentDir}${entry.name}/`, entry.children);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }
+
+  return _findApp("/", root);
+}
+
 export interface CurrentUserData {
   username: string;
   avatarUrl: string;

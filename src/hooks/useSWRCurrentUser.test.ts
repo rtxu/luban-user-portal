@@ -1,9 +1,11 @@
 import {
   findDir,
   findApp,
+  findDefaultApp,
   Entry,
   EntryType,
-  AppEntry
+  AppEntry,
+  getAppFullNameById
 } from "./useSWRCurrentUser";
 
 let rootDir: Entry[], dir1: Entry[], dir2: Entry[];
@@ -32,6 +34,11 @@ beforeAll(() => {
     }
   ];
   rootDir = [
+    {
+      name: "empty_dir",
+      type: EntryType.Directory,
+      children: []
+    },
     app1,
     {
       name: "dir1",
@@ -58,4 +65,20 @@ test("findApp", () => {
   expect(findApp("/dir1/dir2/dir1_dir2_entry1", rootDir)).toBe(app3);
   expect(findApp("/dir1", rootDir)).toBeNull();
   expect(findApp("/not_exist_app", rootDir)).toBeNull();
+});
+
+test("findDefaultApp", () => {
+  expect(findDefaultApp(rootDir)).toBe(app1);
+  expect(findDefaultApp(dir1)).toBe(app2);
+  expect(findDefaultApp(dir2)).toBe(app3);
+  expect(findDefaultApp([])).toBe(null);
+});
+
+test("getAppFullNameById", () => {
+  expect(getAppFullNameById(10000, rootDir)).toBe("/entry1");
+  expect(getAppFullNameById(10001, rootDir)).toBe("/dir1/dir1_entry1");
+  expect(getAppFullNameById(10002, rootDir)).toBe(
+    "/dir1/dir2/dir1_dir2_entry1"
+  );
+  expect(getAppFullNameById(9999, rootDir)).toBeNull();
 });
