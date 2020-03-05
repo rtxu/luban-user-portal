@@ -13,7 +13,6 @@ import withCurrentUserContext, {
 } from "../components/containers/withCurrentUserContext";
 import { LS } from "../util";
 import { findDefaultApp, getAppFullNameById } from "@/hooks/useSWRCurrentUser";
-import AppViewContainer from "@/components/AppViewContainer";
 import Redirect from "umi/redirect";
 
 function IntroHeader() {

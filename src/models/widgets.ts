@@ -23,12 +23,12 @@ interface IWidget {
 
 type PartialIWidget = Partial<IWidget>;
 
-interface IWdigetMap {
+export interface IWidgetMap {
   [id: string]: IWidget;
 }
 
 // initial state
-export const initialState: IWdigetMap = {};
+export const initialState: IWidgetMap = {};
 
 // Actions
 export const NS = "widgets";
@@ -50,8 +50,8 @@ export const updateWidgetContent = createAction<{
 }>(updateWidgetContentTypeNs);
 const initWidgetsType = `WIDGETS_INIT`;
 const initWidgetsTypeNS = `${NS}/${initWidgetsType}`;
-const initWidgetsLocal = createAction<IWdigetMap>(initWidgetsType);
-export const initWidgets = createAction<IWdigetMap>(initWidgetsTypeNS);
+const initWidgetsLocal = createAction<IWidgetMap>(initWidgetsType);
+export const initWidgets = createAction<IWidgetMap>(initWidgetsTypeNS);
 const changeWidgetIdType = `WIDGET_ID_CHANGE`;
 const changeWidgetIdTypeNs = `${NS}/${changeWidgetIdType}`;
 export const changeWidgetId = createAction<{
@@ -162,7 +162,7 @@ export default {
   },
   reducers: {
     [initWidgetsType]: (widgets, action) => {
-      return action.payload;
+      return action.payload || initialState;
     },
     [addOrUpdateWidgetType]: (widgets, action) => {
       const newWidget = action.payload;
@@ -237,7 +237,7 @@ export const getToEvalTemplates = widgets => {
   return widgetTemplates.flat();
 };
 
-export const getEvalContext = (widgets: IWdigetMap) => {
+export const getEvalContext = (widgets: IWidgetMap) => {
   const exported = {};
   for (const [widgetId, widget] of Object.entries(widgets)) {
     const getExported = WidgetFactory.getRawExportedState(widget.type);
@@ -246,7 +246,7 @@ export const getEvalContext = (widgets: IWdigetMap) => {
   return exported;
 };
 
-export const getExportedState = (widgets: IWdigetMap) => {
+export const getExportedState = (widgets: IWidgetMap) => {
   const exported = {};
   for (const [widgetId, widget] of Object.entries(widgets)) {
     const getExported = WidgetFactory.getExportedState(widget.type);

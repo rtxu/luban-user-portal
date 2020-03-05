@@ -5,10 +5,11 @@ export const SWRConst = Object.freeze({
   NO_REFETCH: false
 });
 
-export const SWRKey = Object.freeze({
-  CURRENT_USER: "/currentUser",
-  CURRENT_USER_ENTRY: "/currentUser/entry"
-});
+export enum SWRKey {
+  CURRENT_USER = "/currentUser",
+  CURRENT_USER_ENTRY = "/currentUser/entry",
+  CURRENT_USER_APP = "/currentUser/app"
+}
 
 /**
   server data pattern: 
@@ -51,9 +52,9 @@ export async function lubanApiRequest(...args) {
 
   if (args.length >= 1) {
     url = args[0];
-    // eslint-disable-next-line no-undef
+    // @ts-ignore
     if (!url.startsWith(API_ENDPOINT)) {
-      // eslint-disable-next-line no-undef
+      // @ts-ignore
       url = API_ENDPOINT + url;
     }
   }

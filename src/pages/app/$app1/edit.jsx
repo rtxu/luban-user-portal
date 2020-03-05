@@ -59,4 +59,4 @@ function EditorLayout() {
   );
 }
 
-export default withAppContext(withEditorContext(EditorLayout));
+export default withEditorContext(EditorLayout);

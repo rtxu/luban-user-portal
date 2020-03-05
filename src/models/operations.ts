@@ -19,6 +19,10 @@ interface IOperation {
   [propName: string]: any;
 }
 
+export interface IOperationMap {
+  [id: string]: IOperation;
+}
+
 // Actions
 const NS = "operations";
 const addOperationType = "OPERATION_ADD";
@@ -264,7 +268,7 @@ export default {
   },
   reducers: {
     [initOperationsType]: (state, action) => {
-      return action.payload;
+      return action.payload || initialState;
     },
     [addOperationType]: defaultActionHandler,
     [deleteOperationType]: (state, action: Action<string>) => {
