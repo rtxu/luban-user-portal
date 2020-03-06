@@ -2,7 +2,7 @@ import React from "react";
 import { message, Spin } from "antd";
 
 import { AppMeta } from "@/types/app";
-import { AppContextProviderRedux } from "./containers/withAppContext";
+import { AppContextProviderRedux } from "./AppContextProvider";
 import useSWRCurrentUserApp from "@/hooks/useSWRCurrentUserApp";
 
 export enum LoadType {

@@ -28,8 +28,9 @@ export default function withCurrentUserContext(WrappedComponent) {
     // 这样，context user 仅需处理 api 访问正常时的逻辑
     if (error) {
       if (
-        error.response.status === 401 ||
-        error.response.statusText === "Unauthorized"
+        error.response &&
+        (error.response.status === 401 ||
+          error.response.statusText === "Unauthorized")
       ) {
         // TODO(ruitao.xu): low priority
         // 当前方案存在的问题，考虑如下场景

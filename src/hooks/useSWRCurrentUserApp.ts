@@ -2,7 +2,7 @@ import useSWR from "swr";
 
 import { SWRKey, lubanApiRequest } from "./common";
 import { AppState } from "@/types/app";
-import { LoadType } from "@/components/AppLoader";
+import { LoadType } from "@/components/containers/AppLoader";
 import { makeQueryString } from "@/util";
 
 function useSWRCurrentUserApp(appId: number, loadType: LoadType) {

@@ -8,7 +8,7 @@ import withCurrentUserContext, {
 import UserPortalLayout from "@/layouts/UserPortalLayout";
 import UserAppMenu from "@/components/UserAppMenu";
 import { findApp } from "@/hooks/useSWRCurrentUser";
-import AppLoader, { LoadType } from "@/components/AppLoader";
+import AppLoader, { LoadType } from "@/components/containers/AppLoader";
 import AppView from "@/components/AppView";
 import NotFoundApp from "@/components/NotFoundApp";
 import { AppMeta, EmptyAppMeta } from "@/types/app";

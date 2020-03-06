@@ -5,7 +5,7 @@ import { CANVAS } from "@/components/editor/constant";
 
 import WidgetFactory from "@/components/WidgetFactory";
 import { getLayoutStyle } from "@/util/widget";
-import { AppContext } from "@/components/containers/withAppContext";
+import { AppContext } from "@/components/containers/AppContextProvider";
 // @ts-ignore
 import styles from "./AppView.less";
 
