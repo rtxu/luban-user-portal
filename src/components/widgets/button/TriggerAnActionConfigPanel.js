@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import Config from "../Config";
 import { TriggerAnAction } from "./reducer";
 
-import { AppContext } from "../../containers/withAppContext";
+import { AppContext } from "../../containers/AppContextProvider";
 import { EditorContext } from "../../containers/withEditorContext";
 
 function TriggerAnActionConfigPanel({ opId, dispatch }) {

@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from "react";
 import { Collapse } from "antd";
 import JSONTree from "react-json-tree";
 
-import { AppContext } from "../containers/withAppContext";
+import { AppContext } from "../containers/AppContextProvider";
 import { EditorContext } from "../containers/withEditorContext";
 import { getExportedState as opGetExportedState } from "../../models/operations";
 import { getExportedState } from "../../models/widgets";

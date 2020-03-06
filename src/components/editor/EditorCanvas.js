@@ -10,7 +10,7 @@ import { CSS, CANVAS } from "./constant";
 import styles from "./EditorCanvas.less";
 import DndItemTypes, { isResizeHandle } from "./DndItemTypes";
 import { createLogger } from "@/util";
-import { AppContext } from "../containers/withAppContext";
+import { AppContext } from "../containers/AppContextProvider";
 import { EditorContext } from "../containers/withEditorContext";
 
 const logger = createLogger("/components/editor/EditorCanvas");

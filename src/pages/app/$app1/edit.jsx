@@ -10,7 +10,6 @@ import OperationEditor from "../../../components/editor/OperationEditor";
 import WidgetPicker from "../../../components/editor/WidgetPicker";
 import WidgetConfigPanel from "../../../components/editor/WidgetConfigPanel";
 import styles from "./edit.less";
-import withAppContext from "../../../components/containers/withAppContext";
 import withEditorContext, {
   EditorContext
 } from "../../../components/containers/withEditorContext";

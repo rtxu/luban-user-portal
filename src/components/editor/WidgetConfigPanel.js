@@ -4,7 +4,7 @@ import { Typography, message } from "antd";
 
 import WidgetFactory from "../WidgetFactory";
 import styles from "./WidgetConfigPanel.less";
-import { AppContext } from "../containers/withAppContext";
+import { AppContext } from "../containers/AppContextProvider";
 import { EditorContext } from "../containers/withEditorContext";
 
 function Header(props) {

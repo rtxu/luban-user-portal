@@ -15,7 +15,7 @@ import myStyles from "./OperationEditor.less";
 alasql.options.errorlog = true;
 import { assert } from "../../util";
 import CmEvalInput from "../CmEvalInput";
-import { AppContext } from "../containers/withAppContext";
+import { AppContext } from "../containers/AppContextProvider";
 import { EditorContext } from "../containers/withEditorContext";
 
 function runSql(statement) {
