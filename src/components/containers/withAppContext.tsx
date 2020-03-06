@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { connect } from "dva";
 
 import {
@@ -20,6 +20,7 @@ import {
   EmptyAppMeta,
   AppAction
 } from "@/types/app";
+import useEvalTemplates from "@/hooks/useEvalTemplates";
 
 interface AppContextValue {
   meta: AppMeta;
@@ -78,7 +79,9 @@ const AppContextProvider: React.FC<AppContextProviderProps> = props => {
       dispatch(initWidgets(widgetsInitialState));
       dispatch(initOperations(operationsInitialState));
     };
-  }, [initialData, dispatch]);
+  }, [initialData, dispatch, widgetsInitialState, operationsInitialState]);
+
+  useEvalTemplates(widgets, operations, dispatch);
 
   const widgetDispatch = useCallback(
     (widgetId, widgetAction) => {
@@ -93,14 +96,17 @@ const AppContextProvider: React.FC<AppContextProviderProps> = props => {
     [dispatch]
   );
 
-  const ctxValue: AppContextValue = {
-    meta: appMeta,
-    state: { widgets, operations },
-    action: {
-      widgetDispatch,
-      execOperation: onExecOperation
-    }
-  };
+  const ctxValue: AppContextValue = useMemo(
+    () => ({
+      meta: appMeta,
+      state: { widgets, operations },
+      action: {
+        widgetDispatch,
+        execOperation: onExecOperation
+      }
+    }),
+    [appMeta, widgets, operations, widgetDispatch, onExecOperation]
+  );
   return <AppContext.Provider value={ctxValue}>{children}</AppContext.Provider>;
 };
 

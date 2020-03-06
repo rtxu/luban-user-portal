@@ -24,7 +24,11 @@ export interface AppAction {
   widgetDispatch: (widgetId: string, widgetAction: any) => void;
   execOperation: (opId: string) => void;
 }
+
+const NotImplementedFn = () => {
+  throw new Error("Not Implemented");
+};
 export const EmptyAppAction: AppAction = {
-  widgetDispatch: (widgetId: string, widgetAction: any) => void {},
-  execOperation: (opId: string) => void {}
+  widgetDispatch: NotImplementedFn,
+  execOperation: NotImplementedFn
 };
