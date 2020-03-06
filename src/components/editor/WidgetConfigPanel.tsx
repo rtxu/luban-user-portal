@@ -1,13 +1,18 @@
 import React, { useContext } from "react";
-import PropTypes from "prop-types";
 import { Typography, message } from "antd";
 
-import WidgetFactory from "../WidgetFactory";
+// @ts-ignore
 import styles from "./WidgetConfigPanel.less";
+
+import WidgetFactory from "../WidgetFactory";
 import { AppContext } from "../containers/AppContextProvider";
 import { EditorContext } from "../containers/withEditorContext";
 
-function Header(props) {
+interface HeaderProps {
+  widgetId: string;
+  onChange: (newWidgetId: string) => void;
+}
+const Header: React.FC<HeaderProps> = props => {
   const { widgetId } = props;
   const { Text } = Typography;
 
@@ -22,22 +27,18 @@ function Header(props) {
       </div>
     </div>
   );
-}
-
-Header.propTypes = {
-  widgetId: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired
 };
 
-Header.defaultProps = {};
-
-function WidgetConfigPanel({}) {
-  const [{ widgets }] = useContext(AppContext);
+function WidgetConfigPanel() {
+  const {
+    state: { widgets },
+    action: { widgetDispatch }
+  } = useContext(AppContext);
   const [
     { activeWidgetId },
     { changeWidgetId, setActiveWidgetId }
   ] = useContext(EditorContext);
-  const widget = widgets[activeWidgetId];
+  const widget = widgets[activeWidgetId as string];
   const widgetConfigPanel = WidgetFactory.createConfigPanelElement(
     widget.type,
     {

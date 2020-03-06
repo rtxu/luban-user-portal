@@ -5,7 +5,7 @@ export enum LS {
   REDIRECT = "redirect"
 }
 
-export function assert(condition, message) {
+export function assert(condition: boolean, message?: string) {
   if (!condition) {
     message = message || "Assertion failed";
     if (typeof Error !== "undefined") {

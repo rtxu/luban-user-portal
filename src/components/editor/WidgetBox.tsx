@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
-import PropTypes from "prop-types";
 import classNames from "classnames";
 import { Tag, Modal } from "antd";
 
+// @ts-ignore
+import styles from "./EditorCanvas.less";
+
 import { CSS, CANVAS } from "./constant";
 import DndItemTypes from "./DndItemTypes";
-import styles from "./EditorCanvas.less";
 import WidgetFactory from "../WidgetFactory";
 import { createLogger } from "../../util";
 import { getLayoutStyle } from "../../util/widget";
@@ -21,32 +22,58 @@ const rhType2StyleMap = {
   [DndItemTypes.RH_LEFT_BOTTOM]: styles.resizeLeftBottom
 };
 
-const ResizeHandle = React.memo(({ type, position, widget, setIsDragging }) => {
-  const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: type, widget: widget },
-    collect: monitor => ({
-      isDragging: monitor.isDragging()
-    })
-  });
+interface ResizeHandleProps {
+  type: string;
+  position: any;
+  widget: WidgetBoxProps;
+  setIsDragging: (toggle: boolean) => void;
+}
+const ResizeHandle: React.FC<ResizeHandleProps> = React.memo(
+  ({ type, position, widget, setIsDragging }) => {
+    const [{ isDragging }, drag, preview] = useDrag({
+      item: { type: type, widget: widget },
+      collect: monitor => ({
+        isDragging: monitor.isDragging()
+      })
+    });
 
-  useEffect(() => {
-    preview(getEmptyImage());
-  }, []);
+    useEffect(() => {
+      preview(getEmptyImage());
+    }, []);
 
-  useEffect(() => {
-    setIsDragging(isDragging);
-  }, [isDragging]);
+    useEffect(() => {
+      setIsDragging(isDragging);
+    }, [isDragging]);
 
-  return (
-    <div ref={drag} className={styles.resizeHandle} style={position}>
-      <div className={rhType2StyleMap[type]}>
-        <div className={styles.resizeIcon} />
+    return (
+      <div ref={drag} className={styles.resizeHandle} style={position}>
+        <div className={rhType2StyleMap[type]}>
+          <div className={styles.resizeIcon} />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
-const WidgetBox = React.memo(props => {
+interface WidgetBoxProps {
+  type: string; // widget type
+  instanceId: number; // widget instance id of the same type
+  id: string; // type+instanceId
+  gridLeft: number;
+  gridTop: number;
+  gridWidth: number;
+  gridHeight: number;
+  content?: object;
+
+  // from EditorCanvas
+  canvasColumnWidth: number;
+  showBorder?: boolean;
+  selected?: boolean;
+  onClick: (event: any) => void;
+  onDeleteOne: (id: string) => void;
+  onWidgetDispatch: (widgetId: string, widgetAction: any) => void;
+}
+const WidgetBox: React.FC<WidgetBoxProps> = React.memo(props => {
   const [isResizing, setIsResizing] = useState(false);
   const {
     gridTop,
@@ -136,7 +163,7 @@ const WidgetBox = React.memo(props => {
       onClick={props.onClick}
       // element can not be focused if no tabIndex attr
       // unable to focus => unable to recv keydown event
-      tabIndex="0"
+      tabIndex={0}
       onKeyDown={deleteSelectedWidgetIfAny}
     >
       <Tag>{props.id}</Tag>
@@ -175,25 +202,6 @@ const WidgetBox = React.memo(props => {
     </div>
   );
 });
-
-WidgetBox.propTypes = {
-  type: PropTypes.string.isRequired, // widget type
-  instanceId: PropTypes.number.isRequired, // widget instance id of the same type
-  id: PropTypes.string.isRequired, // type+instanceId
-  gridLeft: PropTypes.number.isRequired,
-  gridTop: PropTypes.number.isRequired,
-  gridWidth: PropTypes.number.isRequired,
-  gridHeight: PropTypes.number.isRequired,
-  content: PropTypes.object,
-
-  // from EditorCanvas
-  canvasColumnWidth: PropTypes.number.isRequired,
-  showBorder: PropTypes.bool,
-  selected: PropTypes.bool,
-  onClick: PropTypes.func,
-  onDeleteOne: PropTypes.func,
-  onWidgetDispatch: PropTypes.func.isRequired
-};
 
 WidgetBox.defaultProps = {
   showBorder: false

@@ -1,28 +1,33 @@
 import React, { useState, useContext, useLayoutEffect } from "react";
 import { useDrop } from "react-dnd";
-import PropTypes from "prop-types";
 import throttle from "lodash.throttle";
 import classNames from "classnames";
 import { useMeasure } from "react-use";
 
 import WidgetBox from "./WidgetBox";
 import { CSS, CANVAS } from "./constant";
-import styles from "./EditorCanvas.less";
 import DndItemTypes, { isResizeHandle } from "./DndItemTypes";
 import { createLogger } from "@/util";
 import { AppContext } from "../containers/AppContextProvider";
 import { EditorContext } from "../containers/withEditorContext";
 
+// @ts-ignore
+import styles from "./EditorCanvas.less";
+
 const logger = createLogger("/components/editor/EditorCanvas");
 
 const canvasId = "canvas";
 
-const Grid = ({ canvasHeight, canvasColumnWidth }) => {
+interface GridProps {
+  canvasHeight: number;
+  canvasColumnWidth: number;
+}
+const Grid: React.FC<GridProps> = ({ canvasHeight, canvasColumnWidth }) => {
   const height = canvasHeight + 2 * CANVAS.rowHeight;
   const { dotWidth } = CSS;
   const offsetToCenter = dotWidth / 2;
   let leftOffset = -offsetToCenter;
-  let columns = [];
+  let columns: any[] = [];
   for (let i = 0; i < CANVAS.columnCnt + 1; i++) {
     const style = {
       height: height,
@@ -34,12 +39,16 @@ const Grid = ({ canvasHeight, canvasColumnWidth }) => {
   return <div className={styles.grid}>{columns}</div>;
 };
 
-Grid.propTypes = {
-  canvasHeight: PropTypes.number.isRequired,
-  canvasColumnWidth: PropTypes.number.isRequired
-};
+interface HoverWidgetBoxProps {
+  gridLeft: number;
+  gridTop: number;
+  gridWidth: number;
+  gridHeight: number;
+  className: string;
+  canvasColumnWidth: number;
+}
 
-const HoverWidgetBox = React.memo(props => {
+const HoverWidgetBox: React.FC<HoverWidgetBoxProps> = React.memo(props => {
   const {
     gridTop,
     gridLeft,
@@ -58,19 +67,10 @@ const HoverWidgetBox = React.memo(props => {
   return <div className={className} style={style}></div>;
 });
 
-HoverWidgetBox.propTypes = {
-  gridLeft: PropTypes.number.isRequired,
-  gridTop: PropTypes.number.isRequired,
-  gridWidth: PropTypes.number.isRequired,
-  gridHeight: PropTypes.number.isRequired,
-  className: PropTypes.string.isRequired,
-  canvasColumnWidth: PropTypes.number.isRequired
-};
-
-function getCanvasOriginOffsetByDOM() {
+function getCanvasOriginOffsetByDOM(): [boolean, number, number] {
   const canvas = document.getElementById(canvasId);
   if (!canvas) {
-    return [false];
+    return [false, -9999, -9999];
   }
 
   const rect = canvas.getBoundingClientRect();
@@ -138,7 +138,7 @@ function checkBoundary(widget) {
   // rule#4: min-width = 1
   result.gridWidth = Math.max(1, result.gridWidth);
   // rule#5: right=left+width, (1, 12]
-  const gridRight = result.gridLeft + result.gridWidth;
+  let gridRight = result.gridLeft + result.gridWidth;
   if (gridRight < 1) {
     gridRight = 1;
   }
@@ -264,7 +264,10 @@ function updateCanvasHeight(hoverWidget, widgets, setter) {
 // BETTER(user experience) TODO(ruitao.xu): 当 overlap 时，实时调整 widget 位置，优先保证当前拖拽 item 的位置
 // 可以调研下 [react-grid-layout](https://github.com/STRML/react-grid-layout) 看是否满足需求
 function EditorCanvas() {
-  const [{ widgets }, { widgetDispatch }] = useContext(AppContext);
+  const {
+    state: { widgets },
+    action: { widgetDispatch }
+  } = useContext(AppContext);
   const [
     { activeWidgetId },
     { setActiveWidgetId, addOrUpdateWidget, deleteWidget }

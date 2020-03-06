@@ -11,6 +11,7 @@ import {
 } from "antd";
 import alasql from "alasql";
 
+// @ts-ignore
 import myStyles from "./OperationEditor.less";
 alasql.options.errorlog = true;
 import { assert } from "../../util";
@@ -375,12 +376,15 @@ function OpBody({ op, opNames, newOperationButton }) {
 }
 
 function OperationEditor({}) {
-  const [{ operations }] = useContext(AppContext);
-  const [{ activeOpId }, { addOperation, setActiveOpId }] = useContext(
-    EditorContext
-  );
+  const {
+    state: { operations }
+  } = useContext(AppContext);
+  const [
+    { activeOpId },
+    { addOperation, setActiveOpId, deleteOperation }
+  ] = useContext(EditorContext);
   const opNames = Object.keys(operations);
-  const activeOp = operations[activeOpId];
+  const activeOp = activeOpId ? operations[activeOpId] : null;
 
   function generateNewOpId(ops) {
     let instanceId = ops.length + 1;

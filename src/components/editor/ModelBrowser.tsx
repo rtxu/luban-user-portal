@@ -68,7 +68,9 @@ function ModelGroup({ json, activeKey }) {
 }
 
 function useModelGroups() {
-  const [{ widgets, operations }] = useContext(AppContext);
+  const {
+    state: { widgets, operations }
+  } = useContext(AppContext);
   const [{ activeWidgetId, activeOpId }] = useContext(EditorContext);
   const exportedWidgets = getExportedState(widgets);
   const exportedOps = opGetExportedState(operations);
@@ -135,7 +137,7 @@ function ModelBrowser({}) {
     "twilight"
   ];
   const modelGroups = useModelGroups();
-  const defaultActiveKey = [];
+  const defaultActiveKey: string[] = [];
   for (let i = 0; i < modelGroups.length; i++) {
     if (Object.keys(modelGroups[i].json).length === 0) {
       // ignore

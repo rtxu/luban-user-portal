@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { Card } from "antd";
-import myStyles from "./WidgetPicker.css";
-import DndItemTypes from "./DndItemTypes";
 import { useDrag } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
+
+// @ts-ignore
+import myStyles from "./WidgetPicker.css";
+import DndItemTypes from "./DndItemTypes";
 
 const { Meta } = Card;
 
