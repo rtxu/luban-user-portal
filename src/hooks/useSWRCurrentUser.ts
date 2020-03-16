@@ -7,7 +7,7 @@ export enum EntryType {
   Directory = "directory"
 }
 
-interface EntryBase {
+export interface EntryBase {
   name: string;
   type: EntryType;
   comment?: string;

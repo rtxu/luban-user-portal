@@ -23,7 +23,12 @@ import UserPortalLayout from "@/layouts/UserPortalLayout";
 import withCurrentUserContext, {
   CurrentUserContext
 } from "@/components/containers/withCurrentUserContext";
-import { findDir, EntryType } from "@/hooks/useSWRCurrentUser";
+import {
+  findDir,
+  EntryType,
+  EntryBase,
+  isDir
+} from "@/hooks/useSWRCurrentUser";
 import { SWRKey, lubanApiRequest, makeJsonBody } from "@/hooks/common";
 import ServerErrCode from "@/util/serverErrCode";
 
@@ -154,6 +159,7 @@ const AppList = ({ dir, apps, onDeleteApp, onChangeDescription }) => {
         );
       }
     },
+    /*
     {
       title: "备注",
       dataIndex: "comment",
@@ -171,6 +177,7 @@ const AppList = ({ dir, apps, onDeleteApp, onChangeDescription }) => {
         </Text>
       )
     },
+    */
     {
       title: "操作",
       key: "operation",
@@ -325,8 +332,17 @@ const Page = ({ match }) => {
   }
   // used to detect whether to-add entry already exist
   let entryNameMap = {};
+  /**
+   * 如果直接使用 entryList 的话，因为 entry.children 为 Entry[] 类型
+   * 发现在这种情况下, antd 的 Table 会默认显示「该行可展开」
+   */
+  let noChildrenEntryList: EntryBase[] = [];
   for (const entry of entryList) {
     entryNameMap[entry.name] = entry;
+    noChildrenEntryList.push({
+      name: entry.name,
+      type: entry.type
+    });
   }
 
   const myAddEntry = addEntry.bind(null, setMutating, currentDir);
@@ -401,7 +417,11 @@ const Page = ({ match }) => {
           </Breadcrumb>
         </div>
         <Spin spinning={mutating}>
-          <AppList dir={linkDir} apps={entryList} onDeleteApp={myDeleteEntry} />
+          <AppList
+            dir={linkDir}
+            apps={noChildrenEntryList}
+            onDeleteApp={myDeleteEntry}
+          />
         </Spin>
         <div className="mt-4 flex justify-end">
           <Button type="primary" size="large" onClick={showModal}>
