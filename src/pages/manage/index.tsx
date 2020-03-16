@@ -17,16 +17,15 @@ import Link from "umi/link";
 import { Redirect } from "react-router";
 import { trigger } from "swr";
 
-import IconSelectDrawer from "../../components/IconSelectDrawer";
-import ServerError from "../../components/ServerError";
+import IconSelectDrawer from "@/components/IconSelectDrawer";
 // @ts-ignore
-import UserPortalLayout from "../../layouts/UserPortalLayout";
+import UserPortalLayout from "@/layouts/UserPortalLayout";
 import withCurrentUserContext, {
   CurrentUserContext
-} from "../../components/containers/withCurrentUserContext";
-import { findDir, EntryType } from "../../hooks/useSWRCurrentUser";
-import { SWRKey, lubanApiRequest, makeJsonBody } from "../../hooks/common";
-import ServerErrCode from "../../util/serverErrCode";
+} from "@/components/containers/withCurrentUserContext";
+import { findDir, EntryType } from "@/hooks/useSWRCurrentUser";
+import { SWRKey, lubanApiRequest, makeJsonBody } from "@/hooks/common";
+import ServerErrCode from "@/util/serverErrCode";
 
 const Sider = () => {
   return (
@@ -43,7 +42,7 @@ const Sider = () => {
 
 const { Text } = Typography;
 
-const AppOperation = ({ text, record, index, onDeleteApp }) => {
+const AppOperation = ({ text, record, index, onDeleteApp, dir }) => {
   const handleDelete = () => {
     Modal.confirm({
       title: `确定要删除 ${record.name} 吗？`,
@@ -59,9 +58,11 @@ const AppOperation = ({ text, record, index, onDeleteApp }) => {
   return (
     <div className="flex justify-start">
       <div className="mr-4">
-        <Button type="primary" icon="edit" href="/">
-          编辑
-        </Button>
+        <Link to={`/edit${dir}${encodeURIComponent(record.name)}`}>
+          <Button type="primary" icon="edit">
+            编辑
+          </Button>
+        </Link>
       </div>
       <Button type="danger" icon="delete" onClick={handleDelete}>
         删除
@@ -106,12 +107,13 @@ function IconSelect({ value, onChange }) {
 // index.js:1 Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
 // 原因很可能是：antd Form 中 getFieldDecorator 的实现使用了 ref
 class IconSelectClassComponent extends React.Component {
-  render() {
+  public render() {
+    // @ts-ignore
     return <IconSelect {...this.props} />;
   }
 }
 
-const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
+const AppList = ({ dir, apps, onDeleteApp, onChangeDescription }) => {
   const columnClassName = "text-base";
   const columns = [
     {
@@ -140,12 +142,12 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
       className: columnClassName,
       render: (text, record, index) => {
         return record.type === EntryType.Directory ? (
-          <Link to={`${linkPrefix}${encodeURIComponent(record.name)}`}>
+          <Link to={`/manage${dir}${encodeURIComponent(record.name)}`}>
             {record.icon ? <Icon type={record.icon} className="pr-2" /> : null}
             {record.name}
           </Link>
         ) : (
-          <Link to={`${linkPrefix}${encodeURIComponent(record.name)}`}>
+          <Link to={`/edit${dir}${encodeURIComponent(record.name)}`}>
             {record.icon ? <Icon type={record.icon} className="pr-2" /> : null}
             {record.name}
           </Link>
@@ -179,6 +181,7 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
           record={record}
           index={index}
           onDeleteApp={onDeleteApp}
+          dir={dir}
         />
       )
     }
@@ -194,7 +197,6 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
         pageSize: 5
       }}
       size="default"
-      rowClassName=""
       rowKey={record => record.name}
     />
   );
@@ -203,7 +205,8 @@ const AppList = ({ linkPrefix, apps, onDeleteApp, onChangeDescription }) => {
 const NewEntryForm = Form.create()(
   // WARNING: Form 不能是函数组件，会报错，暂不清楚原因，与实现细节有关
   class extends React.Component {
-    render() {
+    public render() {
+      // @ts-ignore
       const { visible, onCancel, onCreate, form, allowNewSubMenu } = this.props;
       const { getFieldDecorator } = form;
 
@@ -307,10 +310,10 @@ const Page = ({ match }) => {
   const { firstLevelDir, secondLevelDir } = match.params;
   const dirCtx = [firstLevelDir, secondLevelDir].filter(i => i); // remove undefined
   let currentDir = "/",
-    linkPrefix = "/manage/";
+    linkDir = "/";
   for (const dir of dirCtx) {
     currentDir += dir + "/";
-    linkPrefix += encodeURIComponent(dir) + "/";
+    linkDir += encodeURIComponent(dir) + "/";
   }
 
   const { rootDir } = currentUser;
@@ -398,11 +401,7 @@ const Page = ({ match }) => {
           </Breadcrumb>
         </div>
         <Spin spinning={mutating}>
-          <AppList
-            linkPrefix={linkPrefix}
-            apps={entryList}
-            onDeleteApp={myDeleteEntry}
-          />
+          <AppList dir={linkDir} apps={entryList} onDeleteApp={myDeleteEntry} />
         </Spin>
         <div className="mt-4 flex justify-end">
           <Button type="primary" size="large" onClick={showModal}>
