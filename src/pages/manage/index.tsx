@@ -27,7 +27,8 @@ import {
   findDir,
   EntryType,
   EntryBase,
-  isDir
+  isDir,
+  isApp
 } from "@/hooks/useSWRCurrentUser";
 import { SWRKey, lubanApiRequest, makeJsonBody } from "@/hooks/common";
 import ServerErrCode from "@/util/serverErrCode";
@@ -64,7 +65,7 @@ const AppOperation = ({ text, record, index, onDeleteApp, dir }) => {
     <div className="flex justify-start">
       <div className="mr-4">
         <Link to={`/edit${dir}${encodeURIComponent(record.name)}`}>
-          <Button type="primary" icon="edit">
+          <Button type="primary" icon="edit" disabled={isDir(record)}>
             编辑
           </Button>
         </Link>
