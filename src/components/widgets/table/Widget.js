@@ -16,29 +16,51 @@ function genRowKey(record, index) {
   return index;
 }
 
-function display(data, columns) {
-  const displayColumns = columns
+function extractVisiable(data, columns) {
+  const visiableColumns = columns
     .filter(column => column.meta.visible)
     .map(column => column.config);
-  const displayData = data.map(record => {
-    return displayColumns.reduce((newRecord, column) => {
+  const visiableData = data.map(record => {
+    return visiableColumns.reduce((newRecord, column) => {
       newRecord[column.dataIndex] = record[column.dataIndex];
       return newRecord;
     }, {});
   });
-  return [displayData, displayColumns];
+  return [visiableData, visiableColumns];
 }
 
-function getCellStyle(width) {
-  let style = {};
+/**
+ * 功能：组件的整体大小由用户决定，对于表格组件来说，我们想实现的功能是：
+ * 1. 单列最小宽度：100px
+ * 2. 列宽自适应，当列数较少时，多余的空间在多个列中平均分配；当列数较多时，以 100px 为最小单位，横向排列
+ * 3. 用户可以手动调整列宽，手动调整的列宽不具有自适应功能
+ *
+ * 实现方式：
+ *  width: 100px;     // 指定宽度为 100px
+ *  flex: 100 0 auto; // 禁止 shrink，故实现最小列宽，支持 grow，按比例分配多余空间
+ * 用户手动调整宽度后:
+ *  width = max-width = <user-width>  // 用 max-width = width 的方式限制列宽，使其列宽固定
+ *  flex: <width> 0 auto;
+ */
+const defaultCellStyle = {
+  flex: "1 0 auto",
+  width: "100px"
+};
+function getCellWidthStyle(width) {
   if (width) {
-    style = {
-      flex: `${width} 0 auto`,
+    return {
+      flex: "1 0 auto",
       width: `${width}px`,
       maxWidth: `${width}px`
     };
+  } else {
+    return defaultCellStyle;
   }
-  return style;
+}
+
+function TableRow(props) {
+  const { style, ...restProps } = props;
+  return <tr {...restProps} style={{ ...style, display: "flex" }} />;
 }
 
 // TODO(ruitao.xu): consider to disable the last column's resize ability by default
@@ -71,7 +93,7 @@ function ResizableHeaderCell(props) {
       onResizeStart={handleResizeStart}
       draggableOpts={{ enableUserSelectHack: false }}
     >
-      <th ref={ref} {...restProps} style={getCellStyle(width)} />
+      <th ref={ref} {...restProps} style={getCellWidthStyle(width)} />
     </Resizable>
   );
 }
@@ -84,7 +106,7 @@ function OverflowBodyCell({
   ...restProps
 }) {
   const style = {
-    ...getCellStyle(width),
+    ...getCellWidthStyle(width),
     padding: `${verticalPadding}px 8px`
   };
   return (
@@ -114,6 +136,16 @@ function calcRowHeight(totalHeight, expectRowHeight, pageSize) {
   };
 }
 
+/**
+一个表格区域分为：
+-------------------
+|     header      |
+-------------------
+|      body       |
+-------------------
+|   pagination    |
+-------------------
+ */
 function calcAdaptivePageSize(height, isCompact) {
   const simplePaginationHeight = 24 + 2 * 16; /* vertical margin: 16px */
   // small: 8  middle: 12  default: 16
@@ -235,23 +267,13 @@ function Table({
   isCompact,
   selectedRowIndex
 }) {
-  const [displayData, displayColumns] = display(data, columns);
-  const {
-    pageSize,
-    rowHeight,
-    bodyCellVerticalPadding,
-    scrollY,
-    extraHeight
-  } = calcAdaptivePageSize(height, isCompact);
+  // 用户可以设置某些列不展示
+  const [visiableData, visiableColumns] = extractVisiable(data, columns);
 
-  const components = {
-    header: {
-      cell: ResizableHeaderCell
-    },
-    body: {
-      cell: OverflowBodyCell
-    }
-  };
+  const { pageSize, bodyCellVerticalPadding, scrollY } = calcAdaptivePageSize(
+    height,
+    isCompact
+  );
 
   const setIndexColumnWidth = index => newWidth => {
     dispatch(
@@ -261,8 +283,7 @@ function Table({
       })
     );
   };
-
-  const displayColumns2 = displayColumns.map((col, index) => {
+  const componentColumns = visiableColumns.map((col, index) => {
     return {
       ...col,
       onCell: record => ({
@@ -277,6 +298,16 @@ function Table({
       })
     };
   });
+  const components = {
+    header: {
+      row: TableRow,
+      cell: ResizableHeaderCell
+    },
+    body: {
+      row: TableRow,
+      cell: OverflowBodyCell
+    }
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [
@@ -288,11 +319,11 @@ function Table({
     <div className={styles.widgetTable}>
       <AntTable
         rowKey={genRowKey}
-        dataSource={displayData}
-        columns={displayColumns2}
+        dataSource={visiableData}
+        columns={componentColumns}
         bordered
         components={components}
-        // 将 y 设置成 100% 并不能达到限定宽高的目的，不知道 why
+        // 将 y 设置成 100% 并不能达到限定高度的目的，不知道 why
         scroll={{ x: "100%", y: scrollY }}
         pagination={{
           simple: true,

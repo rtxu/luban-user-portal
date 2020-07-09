@@ -7,27 +7,32 @@
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5), 0 1px 3px 0 rgba(0, 0, 0, 0.25);
   border-radius: 5px;
 
-  // 超长内容下，表格样式修复
-  // 问题一：th 与 td 不对齐
+  // FIXME(ruitao.xu): antd 的表格实现有缺陷，components 中提供了 override <table> 的方式，
+  //  但是实际中，antd 将 header 和 body 作为两个独立的 <table> 来实现，components 中的 override
+  //  方式，仅适用于 body table
+  /*
   :global(.ant-table) {
-    & table tr {
+    & table {
       display: flex;
+      flex-direction: column;
 
-      & th,
-      & td {
-        // flex 与 width 同值，可以达到 resize 的效果
-        // 如: flex: 100 0 auto; width: 100px;
-        // width: 0; 相当于全部听从 flex 的 layout
-        flex: 100 0 auto;
-        width: 100px;
+      & tr {
+        display: flex;
 
-        word-break: break-word;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        & th,
+        & td {
+          word-break: break-word;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
       }
     }
   }
+  */
+
+  /*
+    */
 }
 
 .selected {
@@ -38,16 +43,18 @@
   margin-bottom: -@collapse-content-padding;
 }
 
+// react-resizable 默认样式中的 handle 在右下角，重置为 col-resize 样式
+// ref: https://3x.ant.design/components/table-cn/#components-table-demo-resizable-column
 :global(.react-resizable) {
   position: relative;
   background-clip: padding-box;
 
   & :global(.react-resizable-handle) {
     position: absolute;
-    width: 50px;
+    width: 10px;
     height: 100%;
     bottom: 0;
-    right: -25px;
+    right: -5px;
     cursor: col-resize;
     z-index: 1;
   }
