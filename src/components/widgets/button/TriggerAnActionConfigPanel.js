@@ -8,7 +8,9 @@ import { AppContext } from "../../containers/AppContextProvider";
 import { EditorContext } from "../../containers/withEditorContext";
 
 function TriggerAnActionConfigPanel({ opId, dispatch }) {
-  const [{ operations }] = useContext(AppContext);
+  const {
+    state: { operations },
+  } = useContext(AppContext);
   const opNames = Object.keys(operations);
   const [{ activeWidgetId }, { setActiveOpId, addOperation }] = useContext(
     EditorContext
@@ -33,7 +35,7 @@ function TriggerAnActionConfigPanel({ opId, dispatch }) {
         placeholder: "选择<操作>",
         options: options,
         onChange: onChange,
-        value: opId
+        value: opId,
       }}
     />
   );
@@ -42,7 +44,7 @@ function TriggerAnActionConfigPanel({ opId, dispatch }) {
 TriggerAnActionConfigPanel.propTypes = {
   // ownProps
   opId: PropTypes.string,
-  dispatch: PropTypes.func
+  dispatch: PropTypes.func,
 };
 
 export default TriggerAnActionConfigPanel;
